@@ -109,6 +109,8 @@
         <form action="/admin/category/" method="get" class="mb-0">
           <div class="input-group">
             <input type="text" class="form-control" placeholder="Search categories" name="search"/>
+            <input type="number" class="form-control" placeholder="Min offer %" name="minOffer" min="0" max="99"/>
+            <input type="number" class="form-control" placeholder="Max offer %" name="maxOffer" min="0" max="99"/>
             <button class="btn btn-primary" type="submit">Search</button>
           </div>
         </form>
@@ -122,16 +124,14 @@
             <h4 class="card-title mb-0">Add New Category</h4>
           </div>
           <div class="card-body">
-            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
+            <form id="addCategoryForm">
               <div class="mb-3">
-                <label for="product_name" class="form-label">Name</label>
-                <input type="text" name="name" placeholder="Category name" class="form-control" id="product_name" required/>
-                <div id="name-error" class="error-message"></div>
+                <label for="category_name" class="form-label">Name</label>
+                <input type="text" name="name" placeholder="Category name" class="form-control" id="category_name" required/>
               </div>
               <div class="mb-3">
-                <label for="descriptionId" class="form-label">Description</label>
-                <textarea placeholder="Category description" name="description" class="form-control" id="descriptionId" required></textarea>
-                <div id="description-error" class="error-message"></div>
+                <label for="category_description" class="form-label">Description</label>
+                <textarea name="description" placeholder="Category description" class="form-control" id="category_description" required></textarea>
               </div>
               <button class="btn btn-primary w-100" type="submit">Create Category</button>
             </form>
@@ -157,7 +157,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% cat.reverse().forEach((category) => { %>
+                  <% categories.forEach((category) => { %>
                     <tr>
                       <td><%= category.name %></td>
                       <td><%= category.description %></td>
@@ -166,7 +166,8 @@
                         <% if (category.categoryOffer === 0) { %>
                           <button class="btn btn-sm btn-info" onclick="addOffer('<%= category._id %>')">Add Offer</button>
                         <% } else { %>
-                          <button class="btn btn-sm btn-warning" onclick="removeOffer('<%= category._id %>')">Remove Offer</button>
+                          <button class="btn btn-sm btn-warning" onclick="editOffer('<%= category._id %>', '<%= category.categoryOffer %>')">Edit Offer</button>
+                          <button class="btn btn-sm btn-danger" onclick="deleteOffer('<%= category._id %>')">Remove Offer</button>
                         <% } %>
                       </td>
                       <td>
@@ -177,11 +178,11 @@
                         <% } %>
                       </td>
                       <td>
-                        <a href="/admin/editCategory?id=<%= category._id %>" class="btn btn-sm btn-info">Edit</a>
+                        <button class="btn btn-sm btn-info" onclick="editCategory('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')">Edit</button>
                         <% if (category.isListed) { %>
-                          <a href="/admin/listCategory?id=<%= category._id %>" class="btn btn-sm btn-danger">Unlist</a>
+                          <button class="btn btn-sm btn-danger" onclick="unlistCategory('<%= category._id %>')">Unlist</button>
                         <% } else { %>
-                          <a href="/admin/unListCategory?id=<%= category._id %>" class="btn btn-sm btn-success">List</a>
+                          <button class="btn btn-sm btn-success" onclick="listCategory('<%= category._id %>')">List</button>
                         <% } %>
                       </td>
                     </tr>
@@ -225,8 +226,296 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
   <script>
-    // Your existing JavaScript code here
-    // (handleFormSubmit, validateForm, displayErrorMessage, clearErrorMessages, addOffer, removeOffer)
+    // Add Category Form Submission
+    document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+
+      fetch('/admin/addCategory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(Object.fromEntries(formData))
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: 'Success!',
+            text: data.message,
+            icon: 'success'
+          }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: data.message,
+            icon: 'error'
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'An error occurred while adding the category',
+          icon: 'error'
+        });
+      });
+    });
+
+    // Edit Category Function
+    function editCategory(id, name, description) {
+      Swal.fire({
+        title: 'Edit Category',
+        html:
+          `<input id="swal-input1" class="swal2-input" value="${name}" placeholder="Category Name">` +
+          `<textarea id="swal-input2" class="swal2-textarea" placeholder="Category Description">${description}</textarea>`,
+        focusConfirm: false,
+        preConfirm: () => {
+          return {
+            name: document.getElementById('swal-input1').value,
+            description: document.getElementById('swal-input2').value
+          }
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/editCategory/${id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(result.value)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Updated!', 'Category has been updated.', 'success').then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire('Error', data.message || 'Failed to update category', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while updating the category', 'error');
+          });
+        }
+      });
+    }
+
+    // Unlist Category Function
+    function unlistCategory(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to unlist this category?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, unlist it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/listCategory?id=${id}`, {
+            method: 'GET'
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Unlisted!', 'Category has been unlisted.', 'success').then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire('Error', data.message || 'Failed to unlist category', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while unlisting the category', 'error');
+          });
+        }
+      });
+    }
+
+    // List Category Function
+    function listCategory(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to list this category?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, list it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/admin/unListCategory?id=${id}`, {
+            method: 'GET'
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Listed!', 'Category has been listed.', 'success').then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire('Error', data.message || 'Failed to list category', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while listing the category', 'error');
+          });
+        }
+      });
+    }
+
+    function addOffer(categoryId) {
+      Swal.fire({
+        title: 'Add Offer',
+        input: 'number',
+        inputAttributes: {
+          min: 1,
+          max: 99,
+          step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        preConfirm: (percentage) => {
+          return fetch('/admin/addCategoryOffer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ categoryId, percentage: parseInt(percentage) })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (!data.status) {
+              throw new Error(data.message)
+            }
+            return data
+          })
+          .catch(error => {
+            Swal.showValidationMessage(`Request failed: ${error}`)
+          })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Success!',
+            text: result.value.message,
+            icon: 'success'
+          }).then(() => {
+            location.reload();
+          });
+        }
+      })
+    }
+
+    function editOffer(categoryId, currentOffer) {
+      Swal.fire({
+        title: 'Edit Offer',
+        input: 'number',
+        inputValue: currentOffer,
+        inputAttributes: {
+          min: 1,
+          max: 99,
+          step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Update',
+        showLoaderOnConfirm: true,
+        preConfirm: (percentage) => {
+          return fetch('/admin/editCategoryOffer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ categoryId, percentage: parseInt(percentage) })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (!data.status) {
+              throw new Error(data.message)
+            }
+            return data
+          })
+          .catch(error => {
+            Swal.showValidationMessage(`Request failed: ${error}`)
+          })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Success!',
+            text: result.value.message,
+            icon: 'success'
+          }).then(() => {
+            location.reload();
+          });
+        }
+      })
+    }
+
+    function deleteOffer(categoryId) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch('/admin/removeCategoryOffer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ categoryId })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status) {
+              Swal.fire(
+                'Deleted!',
+                'The offer has been deleted.',
+                'success'
+              ).then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire(
+                'Error!',
+                data.message,
+                'error'
+              );
+            }
+          })
+          .catch(error => {
+            Swal.fire(
+              'Error!',
+              'An error occurred while deleting the offer.',
+              'error'
+            );
+          });
+        }
+      })
+    }
+
+
+
+    
   </script>
+</body>
 
 <%- include("../../views/partials/admin/footer") %>
+
