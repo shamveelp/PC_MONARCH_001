@@ -3,6 +3,8 @@ const router = express.Router();
 const passport = require('passport');
 const userController = require('../controllers/user/userController');
 const profileController = require("../controllers/user/profileController")
+const productController = require("../controllers/user/productController")
+const { userAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser} = require("../middlewares/profileAuth")
 
 
@@ -29,6 +31,12 @@ router.post('/login', userController.login);
 
 router.get('/',checkBlockedUser, userController.loadHomePage);
 
+router.get("/shop",userController.loadShoppingPage);
+router.get("/filter",userAuth,userController.filterProduct);
+
+
+router.get("/productDetails",productController.productDetails)
+
 
 router.get('/logout', userController.logout);
 
@@ -41,6 +49,7 @@ router.post("/resend-forgot-otp",blockLoggedInUsers,profileController.resendOtp)
 router.post("/reset-password",resetPasswordMiddleware,profileController.postNewPassword);
 
 
+router.get("/userProfile",userAuth,profileController.userProfile)
 
 
 module.exports = router;
