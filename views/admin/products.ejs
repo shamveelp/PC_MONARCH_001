@@ -170,11 +170,12 @@
                 <tr>
                     <td>
                         <% if(data[i].productImage && data[i].productImage.length > 0) { %>
-                            <img src="<%= data[i].productImage[0] %>" alt="<%= data[i].productName %>" class="product-image">
+                            <% data[i].productImage.forEach(image => { %>
+                                <img src="/<%= image %>" alt="<%= data[i].productName %>" class="product-image" style="width: 50px; height: 50px; margin: 2px;">
+                            <% }); %>
                         <% } else { %>
-                            <img src="/placeholder.svg" alt="No image" class="product-image">
+                            <img src="/placeholder.svg" alt="No image" class="product-image" style="width: 50px; height: 50px;">
                         <% } %>
-                        
                     </td>
                     <td><%= data[i].productName %></td>
                     <td><%= data[i].brand %></td>

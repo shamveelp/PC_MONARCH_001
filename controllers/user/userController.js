@@ -1,4 +1,6 @@
 const User = require('../../models/userSchema');
+const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema")
 const env = require('dotenv').config();
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -20,6 +22,7 @@ const pageNotFound = async (req, res) => {
 const loadHomePage = async (req, res) => {
     try {
         const user = req.session.user;
+        // const categories = await Category.find({isListed:true})
         if(user){
             const userData = await User.findOne({_id:user});
             res.render('home',{user:userData})

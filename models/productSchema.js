@@ -14,8 +14,9 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
-    category:{
-        type: String,
+    category: {
+        type: mongoose.Schema.Types.ObjectId, // ✅ Store ObjectId instead of String
+        ref: 'Category', // ✅ Reference the Category collection
         required: true
     },
     regularPrice:{
