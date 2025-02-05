@@ -9,6 +9,7 @@ const userRouter = require('./routes/userRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const hbs = require('hbs');
 const MongoStore = require("connect-mongo")
+const checkBlockedUser = require("./middlewares/profileAuth");
 
 
 
@@ -53,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/',userRouter);
 
 app.use('/admin', adminRouter);
+
 
 
 const PORT = process.env.PORT || 3999;

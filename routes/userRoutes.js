@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const userController = require('../controllers/user/userController');
-
+const profileController = require("../controllers/user/profileController")
+const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser} = require("../middlewares/profileAuth")
 
 
 router.get('/pagenotfound', userController.pageNotFound);
@@ -26,9 +27,20 @@ router.get('/login', userController.loadLoginPage);
 
 router.post('/login', userController.login);
 
-router.get('/', userController.loadHomePage);
+router.get('/',checkBlockedUser, userController.loadHomePage);
+
 
 router.get('/logout', userController.logout);
+
+
+router.get("/forgot-password",blockLoggedInUsers,profileController.getForgotPassPage)
+router.post("/forgot-email-valid",blockLoggedInUsers,profileController.forgotEmailValid)
+router.post("/verify-passForgot-otp",blockLoggedInUsers,profileController.verifyForgotPassOtp)
+router.get("/reset-password",resetPasswordMiddleware,profileController.getResetPassPage)
+router.post("/resend-forgot-otp",blockLoggedInUsers,profileController.resendOtp);
+router.post("/reset-password",resetPasswordMiddleware,profileController.postNewPassword);
+
+
 
 
 module.exports = router;

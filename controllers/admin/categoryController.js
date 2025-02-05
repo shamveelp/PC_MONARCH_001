@@ -2,38 +2,39 @@ const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
 
 const addCategory = async (req, res) => {
-    try {
-      console.log("Received request to add category:", req.body)
-      const { name, description } = req.body
-  
-      // Improved name validation
-      const trimmedName = name.trim()
-      if (!trimmedName || trimmedName.length === 0) {
-        console.log("Invalid input: name is empty or contains only whitespace")
-        return res.status(400).json({ success: false, message: "Category name cannot be empty" })
-      }
-  
-      if (!description) {
-        console.log("Invalid input: description is missing")
-        return res.status(400).json({ success: false, message: "Description is required" })
-      }
-  
-      // Check if category with the same name already exists
-      const existingCategory = await Category.findOne({ name: new RegExp(`^${trimmedName}$`, "i") })
-      if (existingCategory) {
-        console.log("Category already exists:", trimmedName)
-        return res.status(400).json({ success: false, message: "Category with this name already exists" })
-      }
-  
-      const newCategory = new Category({ name: trimmedName, description })
-      const savedCategory = await newCategory.save()
-      console.log("New category added:", savedCategory)
-      res.status(201).json({ success: true, message: "Category added successfully", category: savedCategory })
-    } catch (error) {
-      console.error("Error in addCategory:", error)
-      res.status(500).json({ success: false, message: "Failed to add category", error: error.message })
+  try {
+    console.log("Received request to add category:", req.body)
+    const { name, description } = req.body
+
+    // Improved name validation
+    const trimmedName = name.trim()
+    if (!trimmedName || trimmedName.length === 0) {
+      console.log("Invalid input: name is empty or contains only whitespace")
+      return res.status(400).json({ success: false, message: "Category name cannot be empty" })
     }
+
+    if (!description) {
+      console.log("Invalid input: description is missing")
+      return res.status(400).json({ success: false, message: "Description is required" })
+    }
+
+    // Check if category with the same name already exists
+    const existingCategory = await Category.findOne({ name: new RegExp(`^${trimmedName}$`, "i") })
+    if (existingCategory) {
+      console.log("Category already exists:", trimmedName)
+      return res.status(400).json({ success: false, message: "Category with this name already exists" })
+    }
+
+    const newCategory = new Category({ name: trimmedName, description })
+    const savedCategory = await newCategory.save()
+    console.log("New category added:", savedCategory)
+    res.status(201).json({ success: true, message: "Category added successfully", category: savedCategory })
+  } catch (error) {
+    console.error("Error in addCategory:", error)
+    res.status(500).json({ success: false, message: "Failed to add category", error: error.message })
   }
+}
+
 const addCategoryOffer = async (req, res) => {
   try {
     const { categoryId, percentage } = req.body
@@ -60,7 +61,7 @@ const categoryInfo = async (req, res) => {
 
     const query = {}
     if (req.query.search) {
-      query.name = { $regex: req.query.search, $options: "i" }
+      query.name = { $regex: `^${req.query.search}`, $options: "i" }
     }
     if (req.query.minOffer || req.query.maxOffer) {
       query.categoryOffer = {}
@@ -72,15 +73,31 @@ const categoryInfo = async (req, res) => {
 
     const totalCategories = await Category.countDocuments(query)
     const totalPages = Math.ceil(totalCategories / limit)
-    res.render("category", {
-      categories: categories,
-      currentPage: page,
-      totalPages: totalPages,
-      totalCategories: totalCategories,
-    })
+
+    if (req.xhr || req.headers.accept.indexOf("json") > -1) {
+      // If it's an AJAX request, send JSON response
+      res.json({
+        categories: categories,
+        currentPage: page,
+        totalPages: totalPages,
+        totalCategories: totalCategories,
+      })
+    } else {
+      // If it's a regular request, render the page
+      res.render("category", {
+        categories: categories,
+        currentPage: page,
+        totalPages: totalPages,
+        totalCategories: totalCategories,
+      })
+    }
   } catch (error) {
     console.error(error)
-    res.redirect("/pageerror")
+    if (req.xhr || req.headers.accept.indexOf("json") > -1) {
+      res.status(500).json({ error: "An error occurred while fetching categories" })
+    } else {
+      res.redirect("/pageerror")
+    }
   }
 }
 
@@ -192,6 +209,21 @@ const editCategoryOffer = async (req, res) => {
   }
 }
 
+
+const deleteCategory = async (req, res) => {
+    try {
+      const categoryId = req.params.id
+      const deletedCategory = await Category.findByIdAndDelete(categoryId)
+      if (!deletedCategory) {
+        return res.status(404).json({ success: false, message: "Category not found" })
+      }
+      res.json({ success: true, message: "Category deleted successfully" })
+    } catch (error) {
+      console.error("Error in deleteCategory:", error)
+      res.status(500).json({ success: false, message: "Failed to delete category" })
+    }
+  }
+
 module.exports = {
   categoryInfo,
   addCategory,
@@ -202,5 +234,7 @@ module.exports = {
   getUnlistCategory,
   getEditCategory,
   editCategory,
+  deleteCategory,
+  
 }
 

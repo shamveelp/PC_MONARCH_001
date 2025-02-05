@@ -76,6 +76,7 @@ router.get('/unListCategory', adminAuth, categoryController.getUnlistCategory);
 router.get('/editCategory', adminAuth, categoryController.getEditCategory);
 router.post('/editCategory/:id', adminAuth, categoryController.editCategory);
 router.post("/editCategoryOffer", adminAuth, categoryController.editCategoryOffer)
+router.delete("/deleteCategory/:id", adminAuth, categoryController.deleteCategory)
 
 router.get("/addProducts", adminAuth, productController.getProductAddPage);
 router.post("/saveImage", adminAuth, upload.single('image'), productController.saveImage);
@@ -88,6 +89,14 @@ router.post("/addProducts", adminAuth, upload.fields([
 
 
 router.get("/products",adminAuth,productController.getAllProducts);
+router.post("/addProductOffer",adminAuth,productController.addProductOffer);
+router.post("/removeProductOffer",adminAuth,productController.removeProductOffer);
+
+router.get("/blockProduct",adminAuth,productController.blockProduct);
+router.get("/unblockProduct",adminAuth,productController.unblockProduct);
+
+router.get("/editProduct",adminAuth,productController.getEditProduct)
+
 
 
 module.exports = router;
