@@ -43,7 +43,7 @@ const saveImage = async (req, res) => {
 // 🟢 Add Product with Multiple Image Upload (using Sharp)
 const addProducts = async (req, res) => {
   try {
-    const { productName, description, brand, category, regularPrice, salePrice, quantity, color } = req.body;
+    const { productName, description,fullDescription , brand, category, regularPrice, salePrice, quantity, color,processor,graphicsCard,storages,display, operatingSystem, boxContains } = req.body;
     const files = req.files;
 
     // Check if at least one image is uploaded
@@ -90,12 +90,19 @@ const addProducts = async (req, res) => {
     const newProduct = new Product({
       productName,
       description,
+      fullDescription,
       brand,
       category: foundCategory._id, // Save category as ObjectId
       regularPrice,
       salePrice,
       quantity,
       color,
+      processor,
+      graphicsCard,
+      storages,
+      display,
+      operatingSystem,
+      boxContains,
       productImage: imageFilenames,
       status: "available",
     });
@@ -321,6 +328,29 @@ const deleteSingleImage = async (req, res) => {
 
 
 
+const deleteProduct = async (req, res) => {
+  const productId = req.query.id;
+  
+  if (!productId) {
+      return res.status(400).json({ status: false, message: 'Product ID is required' });
+  }
+  
+  try {
+      // Find and delete the product by its ID
+      const product = await Product.findByIdAndDelete(productId);
+
+      if (!product) {
+          return res.status(404).json({ status: false, message: 'Product not found' });
+      }
+
+      res.redirect('/admin/products'); // Redirect to the products management page or wherever you want
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ status: false, message: 'Server Error' });
+  }
+}
+
+
 module.exports = {
   getProductAddPage,
   saveImage,
@@ -333,6 +363,7 @@ module.exports = {
   getEditProduct,
   editProduct,
   deleteSingleImage,
+  deleteProduct
 
 
 

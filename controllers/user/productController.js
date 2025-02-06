@@ -18,9 +18,22 @@ const productDetails = async (req,res) => {
 
         const totalOffer = categoryOffer + productOffer;
 
+        const categories = await Category.find({ isListed: true });
+        const categoryIds = categories.map(category => category._id.toString());
+
+        const products = await Product.find({
+            isBlocked: false,
+            category: { $in: categoryIds },
+            quantity: { $gt: 0 },
+        })
+        .sort({ createdOn: -1 })
+        .skip(0)
+        .limit(9);
+
         res.render("product-details",{
             user:userData,
             product:product,
+            products: products,
             quantity:product.quantity,
             totalOffer:totalOffer,
             category:findCategory

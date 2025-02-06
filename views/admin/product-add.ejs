@@ -124,8 +124,14 @@
             </div>
             
             <div class="form-group">
-                <label for="descriptionid">Full Description</label>
-                <textarea id="descriptionid" name="description" rows="4" placeholder="Enter product description"></textarea>
+                <label for="descriptionid">Short Description</label>
+                <textarea id="descriptionid" name="description" rows="4" placeholder="Enter product short description"></textarea>
+                <div id="description-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="fulldescriptionid">Full Description</label>
+                <textarea id="fulldescriptionid" name="fullDescription" rows="4" placeholder="Enter product Full description"></textarea>
                 <div id="description-error" class="error-message"></div>
             </div>
 
@@ -133,6 +139,12 @@
                 <label for="brand">Brand</label>
                 <input type="text" name="brand" id="brand" placeholder="Enter brand">
                 <div id="brand-error" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="processor">Processor</label>
+                <input type="text" name="processor" id="processor" placeholder="Enter processor">
+                <div id="processor-error" class="error-message"></div>
             </div>
 
             <div class="form-group">
@@ -158,6 +170,37 @@
                 <input type="text" name="color" id="color" placeholder="Enter color">
                 <div id="color-error" class="error-message"></div>
             </div>
+
+            <div class="form-group">
+                <label for="graphicsCard">Graphics Card</label>
+                <input type="text" name="graphicsCard" id="graphicsCard" placeholder="Enter graphics card">
+                <div id="graphicsCard-error" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="storages">Storages</label>
+                <input type="text" name="storages" id="storages" placeholder="Enter storages">
+                <div id="storages-error" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="display">Display</label>
+                <input type="text" name="display" id="display" placeholder="Enter display">
+                <div id="display-error" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="operatingSystem">Operating System</label>
+                <input type="text" name="operatingSystem" id="operatingSystem" placeholder="Enter operating system">
+                <div id="operatingSystem-error" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="boxContains">Box Contains</label>
+                <input type="text" name="boxContains" id="boxContains" placeholder="Enter box contains details">
+                <div id="boxContains-error" class="error-message"></div>
+            </div>
+            
 
             <div class="form-group">
                 <label for="category">Category</label>

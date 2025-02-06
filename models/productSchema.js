@@ -10,6 +10,10 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    fullDescription:{
+        type: String,
+        required:true
+    },
     brand:{
         type: String,
         required: true
@@ -38,6 +42,24 @@ const productSchema = new Schema({
     color:{
         type: String,
         required: true
+    },
+    processor: {
+        type: String
+    },
+    graphicsCard: {
+        type: String
+    },
+    storages: {
+        type: String
+    },
+    display: {
+        type: String
+    },
+    operatingSystem: {
+        type: String
+    },
+    boxContains: {
+        type: String
     },
     productImage:{
         type: [String],

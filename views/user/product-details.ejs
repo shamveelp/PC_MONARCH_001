@@ -40,8 +40,8 @@
 				<div class="col-lg-5 offset-lg-1">
 					<div class="s_product_text">
 						<h3><%=product.productName%></h3>
-						<h2>$<%=product.salePrice%></h2>
-                        <h6 class="l-through">$<%=product.regularPrice%></h6>
+						<h2>₹ <%=product.salePrice%></h2>
+                        <h6 class="l-through">₹ <%=product.regularPrice%></h6>
 						<ul class="list">
 							<li><a class="active" href="#"><span>Category</span> : <%=product.category.name%></a></li>
 							<li><a href="#"><span>Availibility</span> : In Stock</a></li>
@@ -90,21 +90,8 @@
 			</ul>
 			<div class="tab-content" id="myTabContent">
 				<div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-					<p>Beryl Cook is one of Britain’s most talented and amusing artists .Beryl’s pictures feature women of all shapes
-						and sizes enjoying themselves .Born between the two world wars, Beryl Cook eventually left Kendrick School in
-						Reading at the age of 15, where she went to secretarial school and then into an insurance office. After moving to
-						London and then Hampton, she eventually married her next door neighbour from Reading, John Cook. He was an
-						officer in the Merchant Navy and after he left the sea in 1956, they bought a pub for a year before John took a
-						job in Southern Rhodesia with a motor company. Beryl bought their young son a box of watercolours, and when
-						showing him how to use it, she decided that she herself quite enjoyed painting. John subsequently bought her a
-						child’s painting set for her birthday and it was with this that she produced her first significant work, a
-						half-length portrait of a dark-skinned lady with a vacant expression and large drooping breasts. It was aptly
-						named ‘Hangover’ by Beryl’s husband and</p>
-					<p>It is often frustrating to attempt to plan meals that are designed for one. Despite this fact, we are seeing
-						more and more recipe books and Internet websites that are dedicated to the act of cooking for one. Divorce and
-						the death of spouses or grown children leaving for college are all reasons that someone accustomed to cooking for
-						more than one would suddenly need to learn how to adjust all the cooking practices utilized before into a
-						streamlined plan of cooking that is more efficient for one person creating less</p>
+					<p><%=product.fullDescription%></p>
+					
 				</div>
 				<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
 					<div class="table-responsive">
@@ -112,66 +99,66 @@
 							<tbody>
 								<tr>
 									<td>
-										<h5>Width</h5>
+										<h5>Warranty</h5>
 									</td>
 									<td>
-										<h5>128mm</h5>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<h5>Height</h5>
-									</td>
-									<td>
-										<h5>508mm</h5>
+										<h5>1 Year Brand Warranty</h5>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<h5>Depth</h5>
+										<h5>Processor</h5>
 									</td>
 									<td>
-										<h5>85mm</h5>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<h5>Weight</h5>
-									</td>
-									<td>
-										<h5>52gm</h5>
+										<h5><%=product.processor%></h5>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<h5>Quality checking</h5>
+										<h5>Graphics Card</h5>
 									</td>
 									<td>
-										<h5>yes</h5>
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<h5>Freshness Duration</h5>
-									</td>
-									<td>
-										<h5>03days</h5>
+										<h5><%=product.graphicsCard%></h5>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<h5>When packeting</h5>
+										<h5>Storages</h5>
 									</td>
 									<td>
-										<h5>Without touch of hand</h5>
+										<h5><%=product.storages%></h5>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<h5>Each Box contains</h5>
+										<h5>Display</h5>
 									</td>
 									<td>
-										<h5>60pcs</h5>
+										<h5><%=product.display%></h5>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<h5>Colour</h5>
+									</td>
+									<td>
+										<h5><%=product.color%></h5>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<h5>Operating System</h5>
+									</td>
+									<td>
+										<h5><%=product.operatingSystem%></h5>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<h5>Box Contains</h5>
+									</td>
+									<td>
+										<h5><%=product.boxContains%></h5>
 									</td>
 								</tr>
 							</tbody>
@@ -399,123 +386,29 @@
 			<div class="row justify-content-center">
 				<div class="col-lg-6 text-center">
 					<div class="section-title">
-						<h1>Deals of the Week</h1>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-							magna aliqua.</p>
+						<h1>Related Products</h1>
+						<p>Explore our range of related products that complement your purchase. Each item is carefully selected to ensure the highest quality and satisfaction.</p>
 					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-lg-9">
 					<div class="row">
+						<%for(let i=0;i< products.length; i++){%>
 						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
 							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r1.jpg" alt=""></a>
+								<a href="#"><img src="<%= products[i].productImage[0] %>" alt=""></a>
 								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
+									<a href="#" class="title"><%= products[i].productName.split('|')[0] %></a>
 									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
+										<h6>₹ <%=products[i].salePrice.toLocaleString('en-IN')%></h6>
+										<h6 class="l-through">₹ <%=products[i].regularPrice%></h6>
 									</div>
 								</div>
 							</div>
 						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r2.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r3.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r5.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r6.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r7.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r9.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r10.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r11.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
+						<%}%>
+						
 					</div>
 				</div>
 				<div class="col-lg-3">
@@ -545,7 +438,7 @@
     const yPercent = y / height * 100;
 
     zoomImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-    zoomImage.style.transform = `scale(1.5)`;
+    zoomImage.style.transform = `scale(1.8)`;
   });
 
   container.addEventListener('mouseleave', function() {

@@ -34,7 +34,7 @@
 				</div>
 				<div class="sidebar-filter mt-50">
 					<div class="top-filter-head">Product Filters</div>
-					<div class="common-filter">
+					<!-- <div class="common-filter">
 						<div class="head">Brands</div>
 						<form action="#">
 							<ul>
@@ -59,18 +59,18 @@
 								<li class="filter-list"><input class="pixel-radio" type="radio" id="spacegrey" name="color"><label for="spacegrey">Spacegrey<span>(19)</span></label></li>
 							</ul>
 						</form>
-					</div>
+					</div> -->
 					<div class="common-filter">
 						<div class="head">Price</div>
 						<div class="price-range-area">
 							<div id="price-range"></div>
 							<div class="value-wrapper d-flex">
 								<div class="price">Price:</div>
-								<span>$</span>
-								<div id="lower-value"></div>
+								<span>₹</span>
+								<div id="lower-value">100</div>
 								<div class="to">to</div>
-								<span>$</span>
-								<div id="upper-value"></div>
+								<span>₹</span>
+								<div id="upper-value">500000</div>
 							</div>
 						</div>
 					</div>
@@ -146,8 +146,8 @@
                                     <div class="product-details">
                                         <h6><%=products[i].productName%></h6>
                                         <div class="price">
-                                            <h6>$<%=products[i].salePrice.toLocaleString('en-IN')%>.</h6>
-                                            <h6 class="l-through">$<%=products[i].regularPrice%></h6>
+                                            <h6>₹ <%=products[i].salePrice.toLocaleString('en-IN')%>.</h6>
+                                            <h6 class="l-through">₹ <%=products[i].regularPrice%></h6>
                                         </div>
                                       </a>
                                         <div class="prd-bottom">
@@ -232,123 +232,29 @@
 			<div class="row justify-content-center">
 				<div class="col-lg-6 text-center">
 					<div class="section-title">
-						<h1>Deals of the Week</h1>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-							magna aliqua.</p>
+						<h1>Related Products</h1>
+						<p>Explore our range of related products that complement your purchase. Each item is carefully selected to ensure the highest quality and satisfaction.</p>
 					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-lg-9">
 					<div class="row">
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r1.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
+						<%for(let i=0;i< products.length; i++){%>
+							<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
+								<div class="single-related-product d-flex">
+									<a href="#"><img src="<%= products[i].productImage[0] %>" alt=""></a>
+									<div class="desc">
+										<a href="#" class="title"><%= products[i].productName.split('|')[0] %></a>
+										<div class="price">
+											<h6>₹ <%=products[i].salePrice.toLocaleString('en-IN')%></h6>
+											<h6 class="l-through">₹ <%=products[i].regularPrice%></h6>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r2.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r3.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r5.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r6.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r7.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r9.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r10.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-lg-4 col-md-4 col-sm-6">
-							<div class="single-related-product d-flex">
-								<a href="#"><img src="img/r11.jpg" alt=""></a>
-								<div class="desc">
-									<a href="#" class="title">Black lace Heels</a>
-									<div class="price">
-										<h6>$189.00</h6>
-										<h6 class="l-through">$210.00</h6>
-									</div>
-								</div>
-							</div>
-						</div>
+							<%}%>
+						
 					</div>
 				</div>
 				<div class="col-lg-3">

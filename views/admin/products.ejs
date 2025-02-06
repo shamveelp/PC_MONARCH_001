@@ -2,141 +2,209 @@
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --info-color: #3498db;
-            --light-gray: #ecf0f1;
-            --dark-gray: #34495e;
-        }
+        /* Content Header Styles */
+.content-header {
+    padding: 2rem 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-            color: var(--dark-gray);
-        }
+.content-title {
+    font-size: 1.75rem;
+    color: #2c3e50;
+    margin: 0;
+    text-align: center;
+}
 
-        .content-header {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
 
-        .content-title {
-            margin: 0;
-            font-size: 24px;
-        }
+.table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+}
 
-        .search-form {
-            margin-bottom: 30px;
-        }
+.table thead th {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border: 1px solid #dddddd;
+    white-space: nowrap;
+    font-size: 16px;
+}
 
-        .search-input {
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+.table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
 
-        .search-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+.table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
 
-        .search-button:hover {
-            background-color: #2980b9;
-        }
+.table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
 
-        .table {
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+.table tbody td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #dddddd;
+    vertical-align: middle;
+}
 
-        .table thead th {
-            background-color: var(--secondary-color);
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 15px;
-        }
+/* Search Form Styles */
+.search-form {
+    margin: 20px auto;
+    max-width: 600px;
+}
 
-        .table tbody td {
-            padding: 15px;
-            vertical-align: middle;
-        }
+.input-group {
+    display: flex;
+    justify-content: center;
+}
 
-        .table tbody tr:nth-child(even) {
-            background-color: var(--light-gray);
-        }
+.search-input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    width: 70%;
+}
 
-        .btn {
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-        }
+.search-button {
+    padding: 10px 20px;
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
 
-        .btn-info {
-            background-color: var(--info-color);
-            border-color: var(--info-color);
-        }
+.search-button:hover {
+    background-color: #007f67;
+}
 
-        .btn-danger {
-            background-color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
+/* Button Styles */
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    margin: 2px;
+}
 
-        .btn-success {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-        }
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.875rem;
+}
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
 
-        .pagination {
-            margin-top: 30px;
-        }
+.btn-warning {
+    background-color: #ffc107;
+    color: black;
+}
 
-        .page-link {
-            color: var(--secondary-color);
-            border-radius: 20px;
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
 
-        .page-item.active .page-link {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
 
-        .page-link:hover {
-            background-color: var(--light-gray);
-            transform: translateY(-2px);
-        }
+/* Image Styles */
+.product-image {
+    border-radius: 4px;
+    object-fit: cover;
+    margin: 2px;
+}
 
-        .product-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.page-item {
+    margin: 0 2px;
+}
+
+.page-link {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    color: #009879;
+    text-decoration: none;
+    background-color: white;
+}
+
+.page-item.active .page-link {
+    background-color: #009879;
+    color: white;
+    border-color: #009879;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        min-width: 120px;
+    }
+    
+    .search-input {
+        width: 60%;
+    }
+}
+
+/* Action Icons */
+.bi-trash-fill {
+    color: #dc3545;
+    transition: color 0.2s;
+}
+
+.bi-trash-fill:hover {
+    color: #bb2d3b;
+}
+
+/* Text Colors */
+.text-white {
+    color: white !important;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+}
     </style>
 </head>
 <div class="content-header">
@@ -158,7 +226,7 @@
                     <th>Brand</th>
                     <th>Category</th>
                     <th>Sale Price</th>
-                    <th>Offer Price</th>
+                    <th>Regular Price</th>
                     <th>Offer</th>
                     <th>Quantity</th>
                     <th>Action</th>
@@ -182,11 +250,7 @@
                     <td><%= data[i].category ? data[i].category.name : 'N/A' %></td>
                     <td><%= data[i].salePrice %></td>
                     <td>
-                        <% if(locals.data[i].productOffer) { %>
-                            <%= data[i].productOffer %>
-                        <% } else { %>
-                            0%
-                        <% } %>
+                        <%= data[i].regularPrice %>
                     </td>
                     <td>
                         <% if(data[i].productOffer) { %>
@@ -216,7 +280,11 @@
                             <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
                         </button>
                         <%}%>
+                        <a href="#" onclick="confirmDelete('<%=data[i]._id%>')" class="text-white" style="text-decoration: none;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                          </svg></a>
                     </td>
+                    
                     <td>
                         <button class="btn btn-info">
                             <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
@@ -349,6 +417,27 @@ function removeOffer(productId) {
         }
     });
 }
+
+
+
+function confirmDelete(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You will not be able to undo this action!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Proceed with the deletion
+            window.location.href = `/admin/deleteProduct?id=${productId}`;
+        }
+    });
+}
+
+
 </script>
 
 <%- include("../../views/partials/admin/footer") %>
