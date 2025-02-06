@@ -275,17 +275,17 @@ a {
                                 Add Offer
                             </button>
                         <% } %>
-                    </td>>
+                    </td>
                     <td><%= data[i].quantity %></td>
                     <td>
 
                         <%if(data[i].isBlocked === false){%>
                         <button class="btn btn-danger">
-                            <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
+                            <a href="#" onclick="confirmBlockProduct(event, '<%= data[i]._id %>')" class="text-white" style="text-decoration: none;">Block</a>
                         </button>
                         <%} else{%>
                         <button class="btn btn-success">
-                            <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
+                            <a href="#" onclick="confirmUnblockProduct(event, '<%= data[i]._id %>')" class="text-white" style="text-decoration: none;">Unblock</a>
                         </button>
                         <%}%>
                         <a href="#" onclick="confirmDelete('<%=data[i]._id%>')" class="text-white" style="text-decoration: none;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
@@ -425,6 +425,40 @@ function removeOffer(productId) {
         }
     });
 }
+
+function confirmBlockProduct(event, productId) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to block this product!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Block!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/blockProduct?id=" + productId;
+      }
+    });
+  }
+
+  function confirmUnblockProduct(event, productId) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to unblock this product!",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Unblock!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/unblockProduct?id=" + productId;
+      }
+    });
+  }
 
 
 

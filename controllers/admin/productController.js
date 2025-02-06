@@ -321,12 +321,16 @@ const editProduct = async (req, res) => {
     Object.assign(product, updateFields);
     await product.save();
 
-    res.status(200).json({ success: true, message: "Product updated successfully" });
+    // res.json({ success: true, message: "Product updated successfully" });
+    res.redirect("/admin/products")
+
   } catch (error) {
     console.error("Error in editProduct:", error);
     res.status(500).json({ success: false, message: "An error occurred while updating the product" });
   }
 };
+
+
 const deleteSingleImage = async (req, res) => {
   try {
     const { imageNameToServer, productIdToServer, imageIndex } = req.body;

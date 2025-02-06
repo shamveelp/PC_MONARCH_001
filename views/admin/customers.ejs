@@ -125,9 +125,9 @@
                 <td><%= data[i].phone %></td>
                 <td>
                   <% if(data[i].isBlocked == false) { %>
-                    <a href="/admin/blockCustomer?id=<%= data[i]._id %>" class="btn btn-sm btn-danger">Block</a>
+                    <a href="#" onclick="confirmBlock(event, '<%= data[i]._id %>')" class="btn btn-sm btn-danger">Block</a>
                   <% } else { %>
-                    <a href="/admin/unblockCustomer?id=<%= data[i]._id %>" class="btn btn-sm btn-success">Unblock</a>
+                    <a href="#" onclick="confirmUnblock(event, '<%= data[i]._id %>')" class="btn btn-sm btn-success">Unblock</a>
                   <% } %>
                 </td>
               </tr>
@@ -148,5 +148,42 @@
     </ul>
   </nav>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function confirmBlock(event, userId) {
+    event.preventDefault(); // Prevent default link action
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to block this user!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Block!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/blockCustomer?id=" + userId;
+      }
+    });
+  }
+
+  function confirmUnblock(event, userId) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to unblock this user!",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Unblock!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/unblockCustomer?id=" + userId;
+      }
+    });
+  }
+</script>
 
 <%- include("../../views/partials/admin/footer") %>

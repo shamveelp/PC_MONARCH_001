@@ -138,7 +138,7 @@
                                     <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                                   </svg> Profile
                             </a>
-                            <a class="dropdown-item text-danger" href="/admin/logout">
+                            <a class="dropdown-item text-danger" href="#" onclick="confirmAdminLogout(event)">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
                         </div>
@@ -146,3 +146,23 @@
                 </ul>
             </div>
         </header>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function confirmAdminLogout(event) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out of the admin panel!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Logout!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/logout";
+      }
+    });
+  }
+</script>

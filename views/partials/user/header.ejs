@@ -50,9 +50,9 @@
 					<!-- Collect the nav links, forms, and other content for toggling -->
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
-							<li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+							<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
 							<li class="nav-item submenu dropdown">
-								<a href="/shop" class="nav-link dropdown-toggle" role="button" aria-haspopup="true"
+								<a href="/shop" class="nav-link active" role="button" aria-haspopup="true"
 								 aria-expanded="false">Shop</a>
 							</li>
 							<li class="nav-item submenu dropdown">
@@ -108,7 +108,7 @@
 		</div>
 		<div class="search_input" id="search_input_box">
 			<div class="container">
-				<form class="d-flex justify-content-between">
+				<form class="d-flex justify-content-between" id="searchForm">
 					<input type="text" class="form-control" id="search_input" placeholder="Search Here">
 					<button type="submit" class="btn"></button>
 					<span class="lnr lnr-cross" id="close_search" title="Close Search"></span>
@@ -138,4 +138,22 @@
             }
         });
     }
+
+
+	document.getElementById('searchForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const query = document.getElementById('search_input').value.trim();
+
+    if (query) {
+        console.log("Search query:", query); // Log the search query for debugging
+        const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        // Render the products based on the search response
+        renderProducts(data.products, data.totalPages, data.currentPage, data.selectedCategory);
+    }
+});
+
+
 	</script>
