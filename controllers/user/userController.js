@@ -40,7 +40,7 @@ const loadHomePage = async (req, res) => {
             
             
         } else{
-            return res.render('home',{products:productData})
+            return res.render('home',{products:productData,req:req})
         }
             
         
@@ -383,6 +383,7 @@ const loadShoppingPage = async (req, res) => {
             totalProducts: totalProducts,
             currentPage: page,
             totalPages: totalPages,
+            req:req
             // totalProductCount
         });
 
@@ -413,6 +414,15 @@ const filterProduct = async (req,res) => {
 
         const categories = await Category.find({isListed:true});
 
+        const categoriesWithCounts = await Promise.all(categories.map(async (category) => {
+            const count = await Product.countDocuments({ 
+                category: category._id, 
+                isBlocked: false, 
+                quantity: { $gt: 0 } 
+            });
+            return { _id: category._id, name: category.name, productCount: count };
+        }));
+
         let itemsPerPage = 6;
 
         let currentPage = parseInt(req.query.page) || 1;
@@ -441,7 +451,7 @@ const filterProduct = async (req,res) => {
 
             user:userData,
             products:currentProduct,
-            category:categories,
+            category:categoriesWithCounts,
             totalPages,
             currentPage,
             selectedCategory: category || null,

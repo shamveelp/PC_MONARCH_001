@@ -1,6 +1,30 @@
 <%- include('../partials/user/header') %>
 
+<style>
+	.single-product {
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
 
+.single-product:hover img {
+    transform: scale(1.1);
+}
+
+.single-product img {
+    transition: transform 0.3s ease-in-out;
+    width: 100%;
+}
+
+.single-product .product-details h6,
+.single-product .social-info p {
+    transition: color 0.3s ease-in-out;
+}
+
+.single-product:hover .product-details h6,
+.single-product:hover .social-info p {
+    color: #ffbb00;
+}
+</style>
 
 	<!-- Start Banner Area -->
 	<section class="banner-area organic-breadcrumb">
@@ -141,13 +165,13 @@
 
                             <div class="col-lg-4 col-md-6">
                                 <div class="single-product">
-                                    <a href="/productDetails?id=<%=products[i]._id%>">
+                                    <a class="hover-light" href="/productDetails?id=<%=products[i]._id%>">
                                     <img class="img-fluid" src="<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
                                     <div class="product-details">
                                         <h6><%=products[i].productName%></h6>
                                         <div class="price">
-                                            <h6>₹ <%=products[i].salePrice.toLocaleString('en-IN')%>.</h6>
-                                            <h6 class="l-through">₹ <%=products[i].regularPrice%></h6>
+                                            <h6>₹ <%=products[i].salePrice.toLocaleString('en-IN')%>.00</h6>
+                                            <h6 class="l-through">₹ <%=products[i].regularPrice%>.00</h6>
                                         </div>
                                       </a>
                                         <div class="prd-bottom">
@@ -160,7 +184,7 @@
                                                 <span class="lnr lnr-heart"></span>
                                                 <p class="hover-text">Wishlist</p>
                                             </a>
-                                            <a href="/productDetails?id=<%=products._id%>" class="social-info">
+                                            <a href="/productDetails?id=<%=products[i]._id%>" class="social-info">
                                                 <span class="lnr lnr-move"></span>
                                                 <p class="hover-text">view more</p>
                                             </a>

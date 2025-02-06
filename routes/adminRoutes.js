@@ -96,7 +96,12 @@ router.get("/blockProduct",adminAuth,productController.blockProduct);
 router.get("/unblockProduct",adminAuth,productController.unblockProduct);
 
 router.get("/editProduct",adminAuth,productController.getEditProduct)
-router.post("/editProduct/:id",adminAuth,upload.array("images",4),productController.editProduct);
+router.post("/editProduct/:id", adminAuth, upload.fields([
+    { name: 'image1', maxCount: 1 },
+    { name: 'image2', maxCount: 1 },
+    { name: 'image3', maxCount: 1 },
+    { name: 'image4', maxCount: 1 }
+]), productController.editProduct);
 router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
 router.get('/deleteProduct',adminAuth,productController.deleteProduct);

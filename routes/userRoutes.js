@@ -31,11 +31,11 @@ router.post('/login', userController.login);
 
 router.get('/',checkBlockedUser, userController.loadHomePage);
 
-router.get("/shop",userController.loadShoppingPage);
+router.get("/shop",blockLoggedInUsers,userController.loadShoppingPage);
 router.get("/filter",userAuth,userController.filterProduct);
 
 
-router.get("/productDetails",productController.productDetails)
+router.get("/productDetails",blockLoggedInUsers,productController.productDetails)
 
 
 router.get('/logout', userController.logout);

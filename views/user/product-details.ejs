@@ -40,8 +40,14 @@
 				<div class="col-lg-5 offset-lg-1">
 					<div class="s_product_text">
 						<h3><%=product.productName%></h3>
-						<h2>₹ <%=product.salePrice%></h2>
-                        <h6 class="l-through">₹ <%=product.regularPrice%></h6>
+						<h2>₹ <%=product.salePrice%>.00</h2>
+						<div style="display: flex; align-items: center;">
+                        	<h6 style="text-decoration: line-through;
+								color: #cccccc;
+								margin-bottom: 0;" class="l-through">₹ <%=product.regularPrice%>.00</h6>
+						
+							<h4 style="margin-left: 10px;"> <%=product.productOffer%> % Off</h4>
+						</div>
 						<ul class="list">
 							<li><a class="active" href="#"><span>Category</span> : <%=product.category.name%></a></li>
 							<li><a href="#"><span>Availibility</span> : In Stock</a></li>

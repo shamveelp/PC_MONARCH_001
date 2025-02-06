@@ -257,74 +257,104 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    const id = req.params.id
-    const { productName, description, regularPrice, salePrice, quantity, color, category } = req.body
+    const id = req.params.id;
+    const { 
+      productName, description, fullDescription, regularPrice, salePrice, 
+      quantity, color, brand, processor, graphicsCard, storages, display, 
+      operatingSystem, boxContains, category 
+    } = req.body;
 
     const existingProduct = await Product.findOne({
       productName: productName,
       _id: { $ne: id },
-    })
+    });
 
     if (existingProduct) {
-      return res.status(400).json({ error: "Product with this name already exists. Please try another name." })
+      return res.status(400).json({ success: false, message: "Product with this name already exists. Please try another name." });
     }
 
     const updateFields = {
       productName,
       description,
+      fullDescription,
       regularPrice,
       salePrice,
       quantity,
       color,
+      brand,
+      processor,
+      graphicsCard,
+      storages,
+      display,
+      operatingSystem,
+      boxContains,
       category,
+    };
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map((file) => file.path.replace("public/", ""))
-      updateFields.$push = { productImage: { $each: newImages } }
+    // Handle image updates
+    for (let i = 1; i <= 4; i++) {
+      if (req.files[`image${i}`]) {
+        const file = req.files[`image${i}`][0];
+        const filename = Date.now() + '-' + file.originalname.replace(/\s/g, "");
+        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
+
+        await sharp(file.buffer)
+          .resize(800, 800, { fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toFile(filepath);
+
+        const imagePath = `uploads/product-images/${filename}`;
+        
+        if (product.productImage[i-1]) {
+          product.productImage[i-1] = imagePath;
+        } else {
+          product.productImage.push(imagePath);
+        }
+      }
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true })
+    Object.assign(product, updateFields);
+    await product.save();
 
-    if (!updatedProduct) {
-      return res.status(404).json({ error: "Product not found" })
-    }
-
-    res.redirect("/admin/products")
+    res.status(200).json({ success: true, message: "Product updated successfully" });
   } catch (error) {
-    console.error("Error in editProduct:", error)
-    res.status(500).json({ error: "An error occurred while updating the product" })
+    console.error("Error in editProduct:", error);
+    res.status(500).json({ success: false, message: "An error occurred while updating the product" });
   }
-}
-
+};
 const deleteSingleImage = async (req, res) => {
   try {
-    const { imageNameToServer, productIdToServer } = req.body
-    const product = await Product.findByIdAndUpdate(
-      productIdToServer,
-      { $pull: { productImage: imageNameToServer } },
-      { new: true },
-    )
+    const { imageNameToServer, productIdToServer, imageIndex } = req.body;
+    const product = await Product.findById(productIdToServer);
 
     if (!product) {
-      return res.status(404).json({ status: false, message: "Product not found" })
+      return res.status(404).json({ status: false, message: "Product not found" });
     }
 
-    const imagePath = path.join(__dirname, "../../public", imageNameToServer)
+    // Remove the image from the array
+    product.productImage.splice(imageIndex, 1);
+    await product.save();
+
+    const imagePath = path.join(__dirname, "../../public", imageNameToServer);
 
     if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath)
-      console.log(`Image ${imageNameToServer} deleted successfully`)
+      fs.unlinkSync(imagePath);
+      console.log(`Image ${imageNameToServer} deleted successfully`);
     } else {
-      console.log(`Image ${imageNameToServer} not found`)
+      console.log(`Image ${imageNameToServer} not found`);
     }
 
-    res.json({ status: true, message: "Image deleted successfully" })
+    res.json({ status: true, message: "Image deleted successfully" });
   } catch (error) {
-    console.error("Error in deleteSingleImage:", error)
-    res.status(500).json({ status: false, message: "An error occurred while deleting the image" })
+    console.error("Error in deleteSingleImage:", error);
+    res.status(500).json({ status: false, message: "An error occurred while deleting the image" });
   }
-}
+};
 
 
 
