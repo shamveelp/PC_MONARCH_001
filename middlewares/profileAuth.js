@@ -39,6 +39,14 @@ const checkBlockedUser = async (req, res, next) => {
     }
 };
 
+
+function checkLoggedIn(req, res, next) {
+    if (req.session.user) {
+        return res.redirect('/'); // Redirect to the home page or dashboard
+    }
+    next();
+}
+
 // const loggedinblock = async (req,res,next) => {
 //     try {
 
@@ -57,6 +65,7 @@ module.exports = {
     resetPasswordMiddleware,
     blockLoggedInUsers,
     checkBlockedUser,
+    checkLoggedIn,
     // loggedinblock,
 
 
