@@ -201,6 +201,9 @@ const userProfile = async (req,res) => {
 
         })
 
+        console.log(userData.email);
+        
+
     } catch (error) {
 
         console.error('Error:',error)
@@ -211,6 +214,9 @@ const userProfile = async (req,res) => {
 
 
 
+
+
+
 module.exports = {
     getForgotPassPage,
     forgotEmailValid,
@@ -218,7 +224,7 @@ module.exports = {
     getResetPassPage,
     resendOtp,
     postNewPassword,
-    userProfile
+    userProfile,
 
 
 

@@ -4,6 +4,9 @@ const passport = require('passport');
 const userController = require('../controllers/user/userController');
 const profileController = require("../controllers/user/profileController")
 const productController = require("../controllers/user/productController")
+const cartController = require("../controllers/user/cartController")
+const wishlistController = require("../controllers/user/wishlistController")
+
 const { userAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn} = require("../middlewares/profileAuth")
 
@@ -50,7 +53,22 @@ router.post("/resend-forgot-otp",blockLoggedInUsers,profileController.resendOtp)
 router.post("/reset-password",resetPasswordMiddleware,profileController.postNewPassword);
 
 
-router.get("/userProfile",userAuth,profileController.userProfile)
+router.get("/userProfile",userAuth,profileController.userProfile);
+router.get("/cart",userAuth,cartController.getCartPage)
+
+
+// wishlist management
+
+router.get("/wishlist",userAuth,wishlistController.loadWishlist)
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.get("/removeFromWishList",userAuth,wishlistController.removeProduct)
+
+
+// Cart Management
+router.get("/cart", userAuth, cartController.getCartPage)
+router.post("/addToCart",userAuth, cartController.addToCart)
+router.post("/changeQuantity", userAuth,cartController.changeQuantity)
+router.get("/deleteItem", userAuth, cartController.deleteProduct)
 
 
 module.exports = router;
