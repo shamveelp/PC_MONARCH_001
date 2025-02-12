@@ -214,7 +214,7 @@ const blockProduct = async (req,res) => {
 
     let id = req.query.id;
     await Product.updateOne({_id:id},{$set:{isBlocked:true}});
-    res.redirect("/admin/products")
+    res.redirect("/admin/products?page=")
     
   } catch (error) {
     res.redirect("/pageerror")

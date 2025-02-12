@@ -6,6 +6,7 @@ const profileController = require("../controllers/user/profileController")
 const productController = require("../controllers/user/productController")
 const cartController = require("../controllers/user/cartController")
 const wishlistController = require("../controllers/user/wishlistController")
+const checkoutController = require("../controllers/user/checkoutController")
 
 const { userAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn} = require("../middlewares/profileAuth")
@@ -65,10 +66,29 @@ router.get("/removeFromWishList",userAuth,wishlistController.removeProduct)
 
 
 // Cart Management
-router.get("/cart", userAuth, cartController.getCartPage)
-router.post("/addToCart",userAuth, cartController.addToCart)
-router.post("/changeQuantity", userAuth,cartController.changeQuantity)
-router.get("/deleteItem", userAuth, cartController.deleteProduct)
+router.get("/cart", userAuth, cartController.getCartPage);
+router.post("/addToCart", userAuth, cartController.addToCart);
+router.post("/changeQuantity", userAuth, cartController.changeQuantity);
+router.get("/deleteItem", userAuth, cartController.deleteProduct);
+
+
+// Checkout Management
+router.get("/checkout",userAuth,checkoutController.loadCheckoutPage)
+
+
+
+// Profile Management
+router.get("/loggedinResetPassword",userAuth,profileController.loadResetPassword)
+
+
+
+//Address Management
+router.get("/address",userAuth,profileController.loadAddressPage)
+router.get("/addAddress",userAuth,profileController.addAddress)
+router.post("/addAddress",userAuth,profileController.postAddAddress)
+router.get("/editAddress",userAuth,profileController.editAddress);
+router.post("/editAddress",userAuth,profileController.postEditAddress)
+router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
 
 module.exports = router;

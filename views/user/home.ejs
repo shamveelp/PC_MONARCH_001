@@ -450,35 +450,29 @@ function addToWishlist(productId) {
 }
 
 function addToCart(productId) {
-    console.log("Adding to Cart:", productId); // Debugging
-
     $.ajax({
         url: '/addToCart',
         method: "POST",
         data: { productId: productId },
         success: (response) => {
-            console.log("Server Response:", response); // Debugging
-
             if (response.status) {
                 Swal.fire({
                     title: "Added to Cart",
-                    text: "The product has been added to your cart",
+                    text: response.message,
                     icon: "success",
                     timer: 2000
                 });
             } else {
                 Swal.fire({
-                    title: "Already in Cart",
+                    title: "Error",
                     text: response.message,
-                    icon: "info",
+                    icon: "error",
                     timer: 2000
                 });
             }
         },
         error: (error) => {
-            console.error("AJAX Error:", error); // Debugging
-            console.log(productId);
-
+            console.error("AJAX Error:", error);
             Swal.fire({
                 title: "Error",
                 text: "There was an error adding the product to your cart",
