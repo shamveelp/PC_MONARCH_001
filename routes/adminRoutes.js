@@ -1,14 +1,11 @@
-
-
-
-
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin/adminController');
 const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
-const bannerController = require("../controllers/admin/bannerController")
+const bannerController = require("../controllers/admin/bannerController");
+const orderController = require("../controllers/admin/orderController");
 const { adminAuth } = require('../middlewares/auth');
 const multer = require("multer");
 const upload = multer();
@@ -62,11 +59,17 @@ router.post("/deleteImage",adminAuth,productController.deleteSingleImage)
 
 router.get('/deleteProduct',adminAuth,productController.deleteProduct);
 
+// Order Management Routes
+router.get('/orders', adminAuth, orderController.getOrders);
+router.get('/orders/:id', adminAuth, orderController.getOrderDetails);
+router.post('/orders/update-status', adminAuth, orderController.updateOrderStatus);
 
+// New routes for handling cancel and return requests
+router.post('/orders/handle-cancel-request', adminAuth, orderController.handleCancelRequest);
+router.post('/orders/handle-return-request', adminAuth, orderController.handleReturnRequest);
+router.post('/orders/confirm-return', adminAuth, orderController.confirmReturn);
 
 // Banner Management  
-
 router.get("/banner",adminAuth,bannerController.getBannerPage)
-
 
 module.exports = router;

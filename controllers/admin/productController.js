@@ -257,20 +257,34 @@ const getEditProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { 
-      productName, description, fullDescription, regularPrice, salePrice, 
-      quantity, color, brand, processor, graphicsCard, storages, display, 
-      operatingSystem, boxContains, category 
-    } = req.body;
+    const id = req.params.id
+    const {
+      productName,
+      description,
+      fullDescription,
+      regularPrice,
+      salePrice,
+      quantity,
+      color,
+      brand,
+      processor,
+      graphicsCard,
+      storages,
+      display,
+      operatingSystem,
+      boxContains,
+      category,
+    } = req.body
 
     const existingProduct = await Product.findOne({
       productName: productName,
       _id: { $ne: id },
-    });
+    })
 
     if (existingProduct) {
-      return res.status(400).json({ success: false, message: "Product with this name already exists. Please try another name." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Product with this name already exists. Please try another name." })
     }
 
     const updateFields = {
@@ -289,46 +303,48 @@ const editProduct = async (req, res) => {
       operatingSystem,
       boxContains,
       category,
-    };
+    }
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(id)
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res.status(404).json({ success: false, message: "Product not found" })
     }
 
     // Handle image updates
     for (let i = 1; i <= 4; i++) {
       if (req.files[`image${i}`]) {
-        const file = req.files[`image${i}`][0];
-        const filename = Date.now() + '-' + file.originalname.replace(/\s/g, "");
-        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
+        const file = req.files[`image${i}`][0]
+        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp"
+        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename)
 
-        await sharp(file.buffer)
+        // Process the cropped image data
+        const croppedImageBuffer = Buffer.from(file.buffer, "base64")
+
+        await sharp(croppedImageBuffer)
           .resize(800, 800, { fit: "inside", withoutEnlargement: true })
           .webp({ quality: 80 })
-          .toFile(filepath);
+          .toFile(filepath)
 
-        const imagePath = `uploads/product-images/${filename}`;
-        
-        if (product.productImage[i-1]) {
-          product.productImage[i-1] = imagePath;
+        const imagePath = `uploads/product-images/${filename}`
+
+        if (product.productImage[i - 1]) {
+          product.productImage[i - 1] = imagePath
         } else {
-          product.productImage.push(imagePath);
+          product.productImage.push(imagePath)
         }
       }
     }
 
-    Object.assign(product, updateFields);
-    await product.save();
+    Object.assign(product, updateFields)
+    await product.save()
 
-    // res.json({ success: true, message: "Product updated successfully" });
-    res.redirect("/admin/products")
-
+    res.json({ success: true, message: "Product updated successfully" })
   } catch (error) {
-    console.error("Error in editProduct:", error);
-    res.status(500).json({ success: false, message: "An error occurred while updating the product" });
+    console.error("Error in editProduct:", error)
+    res.status(500).json({ success: false, message: "An error occurred while updating the product" })
   }
-};
+}
+
 
 
 const deleteSingleImage = async (req, res) => {

@@ -149,21 +149,11 @@
     <div class="container">
         <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-between">
             <div class="col-left d-flex align-items-center">
-                <div class="profile-image-container">
-                    <% if (user.profilePicture) { %>
-                        <img id="profileImage" src="<%= user.profilePicture %>" alt="Profile Image" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                    <% } else { %>
-                        <img id="profileImage" src="path/to/default/image.jpg" alt="Default Profile Image" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                    <% } %>
-                </div>
+                
                 <div class="ml-3">
                     <h5 id="fullName" style="color: #121311;"><%= user.name || 'John Doe' %></h5>
                     <p id="email" style="color: #121311;"><%= user.email || 'johndoe@example.com' %></p>
-                    <% if (user.profilePicture) { %>
-                        <button class="btn btn-sm btn-success" onclick="document.getElementById('imageUpload').click();">Change Profile Image</button>
-                    <% } else { %>
-                        <button class="btn btn-sm btn-success" onclick="document.getElementById('imageUpload').click();">Upload Profile Image</button>
-                    <% } %>
+                   
                 </div>
             </div>
             <div class="col-first">

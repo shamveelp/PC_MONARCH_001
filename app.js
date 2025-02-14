@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
-    session({
+  session({
       secret: "keyboard cat",
       resave: false,
       saveUninitialized: false,
@@ -29,9 +29,10 @@ app.use(
       cookie: { secure: false, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 },
     }),
   )
+  
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use((req, res, next) => {
     res.locals.user = req.user

@@ -26,6 +26,10 @@ const userSchema = new Schema({
         type: String,
         required: false,
     },
+    username: {
+        type:String,
+        required:false
+    },
     isBlocked:{
         type: Boolean,
         default: false     
@@ -33,6 +37,10 @@ const userSchema = new Schema({
     isAdmin:{
         type: Boolean,
         default: false     
+    },
+    profilePicture:{
+        type:String,
+        required:false
     },
     cart:[{
         productId: {

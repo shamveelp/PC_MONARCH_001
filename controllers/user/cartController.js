@@ -2,6 +2,22 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema")
 
+
+
+const removeBlockedOrUnlistedItems = async (user) => {
+  const updatedCart = [];
+  for (const item of user.cart) {
+    const product = await Product.findById(item.productId).populate('category');
+    if (product && product.isActive && product.category.isListed) {
+      updatedCart.push(item);
+    }
+  }
+  user.cart = updatedCart;
+  await user.save();
+};
+
+
+
 const getCartPage = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -17,6 +33,8 @@ const getCartPage = async (req, res) => {
     if (!user) {
       return res.status(404).send('User not found');
     }
+
+    // await removeBlockedOrUnlistedItems(user);
 
     const cartItems = user.cart.map(item => ({
       product: item.productId,

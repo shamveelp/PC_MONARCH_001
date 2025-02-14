@@ -7,6 +7,9 @@ const productController = require("../controllers/user/productController")
 const cartController = require("../controllers/user/cartController")
 const wishlistController = require("../controllers/user/wishlistController")
 const checkoutController = require("../controllers/user/checkoutController")
+const orderController = require("../controllers/user/orderController")
+const multer = require("multer")
+const upload = multer({ storage: multer.memoryStorage() })
 
 const { userAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn} = require("../middlewares/profileAuth")
@@ -74,12 +77,18 @@ router.get("/deleteItem", userAuth, cartController.deleteProduct);
 
 // Checkout Management
 router.get("/checkout",userAuth,checkoutController.loadCheckoutPage)
-
+router.get("/addAddressCheckout",userAuth,checkoutController.addAddressCheckout)
+router.post("/addAddressCheckout",userAuth,checkoutController.postAddAddressCheckout)
 
 
 // Profile Management
-router.get("/loggedinResetPassword",userAuth,profileController.loadResetPassword)
+router.post("/update-profile",userAuth,profileController.updateProfile)
+router.get("/change-email",userAuth,profileController.changeEmail)
+router.post("/change-email",userAuth,profileController.changeEmailValid)
+router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp)
+router.post("/update-email",userAuth,profileController.updateEmail)
 
+router.post("/change-password", userAuth, profileController.changePassword)
 
 
 //Address Management
@@ -90,5 +99,14 @@ router.get("/editAddress",userAuth,profileController.editAddress);
 router.post("/editAddress",userAuth,profileController.postEditAddress)
 router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
+
+// Order Management
+router.post("/placeOrder", userAuth, orderController.placeOrder);
+router.get("/orders", userAuth, orderController.getOrders);
+router.get("/order-details", userAuth, orderController.loadOrderDetails);
+
+// New routes for order cancellation and returns
+router.post("/orders/cancel", userAuth, orderController.cancelOrder);
+router.post("/orders/return", userAuth, orderController.returnOrder);
 
 module.exports = router;

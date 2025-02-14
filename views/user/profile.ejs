@@ -149,21 +149,11 @@
     <div class="container">
         <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-between">
             <div class="col-left d-flex align-items-center">
-                <div class="profile-image-container">
-                    <% if (user.profilePicture) { %>
-                        <img id="profileImage" src="<%= user.profilePicture %>" alt="Profile Image" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                    <% } else { %>
-                        <img id="profileImage" src="path/to/default/image.jpg" alt="Default Profile Image" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                    <% } %>
-                </div>
+                
                 <div class="ml-3">
                     <h5 id="fullName" style="color: #121311;"><%= user.name || 'John Doe' %></h5>
                     <p id="email" style="color: #121311;"><%= user.email || 'johndoe@example.com' %></p>
-                    <% if (user.profilePicture) { %>
-                        <button class="btn btn-sm btn-success" onclick="document.getElementById('imageUpload').click();">Change Profile Image</button>
-                    <% } else { %>
-                        <button class="btn btn-sm btn-success" onclick="document.getElementById('imageUpload').click();">Upload Profile Image</button>
-                    <% } %>
+                    
                 </div>
             </div>
             <div class="col-first">
@@ -273,52 +263,62 @@
             <!-- Main Content -->
             <div class="col-md-9 main-content">
                 <h2>Personal Information</h2>
-                <form>
+                <form id="profileForm">
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label>First Name <span>*</span></label>
-                            <input type="text" class="form-control">
+                            <label>Full Name <span class="text-danger">*</span></label>
+                            <input name="name" type="text" value="<%= user.name %>" class="form-control" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label>Last Name <span>*</span></label>
-                            <input type="text" class="form-control">
+                            <label>Username <span class="text-danger">*</span></label>
+                            <input name="username" type="text" value="<%= user.username %>" placeholder="Set your Username" class="form-control" required>
+                            <small class="text-muted">Choose a unique username</small>
                         </div>
                         <div class="form-group col-md-6">
-                            <label>Email address <span>*</span></label>
-                            <input type="email" class="form-control">
+                            <label>Email address</label>
+                            <input type="email" value="<%= user.email %>" class="form-control" disabled>
+                            <small class="text-muted">Email cannot be changed here</small>
                         </div>
                         <div class="form-group col-md-6">
-                            <label>Phone Number <span>*</span></label>
+                            <label>Phone Number <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <select  class="form-control" id="countryCode">
-                                        <option value="+91">+91 </option>
-                                        
-                                        <!-- Add other country codes as needed -->
+                                    <select class="form-control" id="countryCode" disabled>
+                                        <option value="+91">+91</option>
                                     </select>
                                 </div>
-                                <input type="text" class="form-control" id="phoneNumber" placeholder="Enter phone number">
+                                <input type="text" name="phone" class="form-control" value="<%= user.phone %>" 
+                                       pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number"
+                                       placeholder="Enter phone number" required>
                             </div>
                         </div>
                         
-                        
                         <div class="form-group col-md-6">
-                            <label>Username <span>*</span></label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label>Photo</label>
-                            <div class="d-flex align-items-center">
-                                <img src="https://placehold.co/40x40" alt="User photo placeholder">
-                                <button type="button" class="btn btn-orange ml-2">Change</button>
-                                <button type="button" class="btn btn-secondary ml-2">Remove</button>
-                            </div>
+                            <a class="btn btn-primary" href="/change-email">Change Your Email</a>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-orange">Save Change</button>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
                 </form>
-                <a href="/loggedinResetPassword"><button type="button" class="btn btn-blue mt-3">Reset Password</button></a>
-                
+                <hr class="mt-4 mb-4">
+<h3>Change Password</h3>
+<form id="changePasswordForm">
+    <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+        <small id="currentPasswordError" class="text-danger"></small>
+    </div>
+    <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+        <small id="newPasswordError" class="text-danger"></small>
+    </div>
+    <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+        <small id="confirmPasswordError" class="text-danger"></small>
+    </div>
+    <button type="submit" class="btn btn-primary">Change Password</button>
+</form>
             </div>
         </div>
     </div>
@@ -326,45 +326,119 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 
 
-<script>
-    // function previewImage(event) {
-    //     const imagePreview = document.getElementById('imagePreview');
-    //     const file = event.target.files[0];
-    //     const reader = new FileReader();
-
-    //     reader.onload = function(e) {
-    //         imagePreview.src = e.target.result;
-    //         imagePreview.style.display = 'block';
-    //     }
-
-    //     if (file) {
-    //         reader.readAsDataURL(file);
-    //     } else {
-    //         imagePreview.src = '';
-    //         imagePreview.style.display = 'none';
-    //     }
-    // }
-
-    function previewImage(event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            document.getElementById('profileImage').src = e.target.result;
-        }
-
-        if (file) {
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function resetPassword() {
-        // Logic for resetting the password
-        alert("Password reset functionality to be implemented.");
-    }
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
     
-</script>
+        try {
+            const response = await fetch('/update-profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+    
+            const result = await response.json();
+    
+            if (result.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Profile updated successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                window.location.href = '/userProfile';
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: result.message,
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'An unexpected error occurred. Please try again.',
+            });
+        }
+    });
+
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Reset error messages
+    document.getElementById('currentPasswordError').textContent = '';
+    document.getElementById('newPasswordError').textContent = '';
+    document.getElementById('confirmPasswordError').textContent = '';
+
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Client-side validation
+    let isValid = true;
+
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+        document.getElementById('newPasswordError').textContent = 'Password must be at least 8 characters long and contain both letters and numbers.';
+        isValid = false;
+    }
+
+    if (newPassword !== confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match.';
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+        const response = await fetch('/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Password changed successfully',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            window.location.href = '/userProfile';
+        } else {
+            if (result.error === 'current_password_incorrect') {
+                document.getElementById('currentPasswordError').textContent = 'Current password is incorrect.';
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: result.message,
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'An unexpected error occurred. Please try again.',
+        });
+    }
+});
+    </script>
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

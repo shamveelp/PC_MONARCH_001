@@ -19,156 +19,292 @@
 </section>
 <!-- End Banner Area -->
 
-<!--================Checkout Area =================-->
-<section class="checkout_area section_gap">
-    <div class="container">
-        <div class="returning_customer">
-            <div class="check_title">
-                <h2>Returning Customer? <a href="#">Click here to login</a></h2>
-            </div>
-            <p>If you have shopped with us before, please enter your details in the boxes below. If you are a new
-                customer, please proceed to the Billing & Shipping section.</p>
-            <form class="row contact_form" action="#" method="post" novalidate="novalidate">
-                <div class="col-md-6 form-group p_star">
-                    <input type="text" class="form-control" id="name" name="name">
-                    <span class="placeholder" data-placeholder="Username or Email"></span>
-                </div>
-                <div class="col-md-6 form-group p_star">
-                    <input type="password" class="form-control" id="password" name="password">
-                    <span class="placeholder" data-placeholder="Password"></span>
-                </div>
-                <div class="col-md-12 form-group">
-                    <button type="submit" value="submit" class="primary-btn">login</button>
-                    <div class="creat_account">
-                        <input type="checkbox" id="f-option" name="selector">
-                        <label for="f-option">Remember me</label>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .order-summary {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .order-summary img {
+            width: 50px;
+            height: 50px;
+        }
+        .order-summary .product-name {
+            font-size: 14px;
+        }
+        .order-summary .product-mn {
+            font-size: 12px;
+            color: gray;
+        }
+        .order-summary .product-price {
+            color: blue;
+            font-weight: bold;
+        }
+        .order-summary .total-price {
+            color: blue;
+            font-weight: bold;
+        }
+        .order-summary .apply-btn {
+            background-color: #ffc107;
+            color: white;
+        }
+        .order-summary .place-order-btn {
+            background-color: #ffc107;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Billing Address -->
+            <div class="col-lg-8 mb-4">
+                <div class="bg-white p-4 rounded shadow-sm">
+                    <h2 class="h4 mb-4">Billing Address</h2>
+                    
+                    <!-- Address Selection Area -->
+                    <div class="form-group">
+                        <label for="existingAddress">Select Existing Address</label>
+                        <select id="existingAddress" class="form-control">
+                            <option selected>Select an address</option>
+                            <% if (userAddress && userAddress.address.length > 0) { %>
+                                <% userAddress.address.forEach((address) => { %>
+                                    <option value="<%= address._id %>">
+                                        <%= address.addressType %> - <%= address.name %>,
+                                        <%= address.streetAddress %>, <%= address.city %>, <%= address.state %>, <%= address.country %>,
+                                        &#10;
+                                        <%= address.phone %>
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option disabled>No addresses available</option>
+                            <% } %>
+                        </select>
                     </div>
-                    <a class="lost_pass" href="#">Lost your password?</a>
-                </div>
-            </form>
-        </div>
-        <div class="cupon_area">
-            <div class="check_title">
-                <h2>Have a coupon? <a href="#">Click here to enter your code</a></h2>
-            </div>
-            <input type="text" placeholder="Enter coupon code">
-            <a class="tp_btn" href="#">Apply Coupon</a>
-        </div>
-        <div class="billing_details">
-            <div class="row">
-                <div class="col-lg-8">
-                    <h3>Billing Details</h3>
-                    <form class="row contact_form" action="#" method="post" novalidate="novalidate">
-                        <div class="col-md-6 form-group p_star">
-                            <input type="text" class="form-control" id="first" name="name">
-                            <span class="placeholder" data-placeholder="First name"></span>
-                        </div>
-                        <div class="col-md-6 form-group p_star">
-                            <input type="text" class="form-control" id="last" name="name">
-                            <span class="placeholder" data-placeholder="Last name"></span>
-                        </div>
-                        <div class="col-md-12 form-group">
-                            <input type="text" class="form-control" id="company" name="company" placeholder="Company name">
-                        </div>
-                        <div class="col-md-6 form-group p_star">
-                            <input type="text" class="form-control" id="number" name="number">
-                            <span class="placeholder" data-placeholder="Phone number"></span>
-                        </div>
-                        <div class="col-md-6 form-group p_star">
-                            <input type="text" class="form-control" id="email" name="compemailany">
-                            <span class="placeholder" data-placeholder="Email Address"></span>
-                        </div>
-                        <div class="col-md-12 form-group p_star">
-                            <select class="country_select">
-                                <option value="1">Country</option>
-                                <option value="2">Country</option>
-                                <option value="4">Country</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12 form-group p_star">
-                            <input type="text" class="form-control" id="add1" name="add1">
-                            <span class="placeholder" data-placeholder="Address line 01"></span>
-                        </div>
-                        <div class="col-md-12 form-group p_star">
-                            <input type="text" class="form-control" id="add2" name="add2">
-                            <span class="placeholder" data-placeholder="Address line 02"></span>
-                        </div>
-                        <div class="col-md-12 form-group p_star">
-                            <input type="text" class="form-control" id="city" name="city">
-                            <span class="placeholder" data-placeholder="Town/City"></span>
-                        </div>
-                        <div class="col-md-12 form-group p_star">
-                            <select class="country_select">
-                                <option value="1">District</option>
-                                <option value="2">District</option>
-                                <option value="4">District</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12 form-group">
-                            <input type="text" class="form-control" id="zip" name="zip" placeholder="Postcode/ZIP">
-                        </div>
-                        <div class="col-md-12 form-group">
-                            <div class="creat_account">
-                                <input type="checkbox" id="f-option2" name="selector">
-                                <label for="f-option2">Create an account?</label>
-                            </div>
-                        </div>
-                        <div class="col-md-12 form-group">
-                            <div class="creat_account">
-                                <h3>Shipping Details</h3>
-                                <input type="checkbox" id="f-option3" name="selector">
-                                <label for="f-option3">Ship to a different address?</label>
-                            </div>
-                            <textarea class="form-control" name="message" id="message" rows="1" placeholder="Order Notes"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-lg-4">
-                    <div class="order_box">
-                        <h2>Your Order</h2>
-                        <ul class="list">
-                            <li><a href="#">Product <span>Total</span></a></li>
-                            <li><a href="#">Fresh Blackberry <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                            <li><a href="#">Fresh Tomatoes <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                            <li><a href="#">Fresh Brocoli <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                        </ul>
-                        <ul class="list list_2">
-                            <li><a href="#">Subtotal <span>$2160.00</span></a></li>
-                            <li><a href="#">Shipping <span>Flat rate: $50.00</span></a></li>
-                            <li><a href="#">Total <span>$2210.00</span></a></li>
-                        </ul>
-                        <div class="payment_item">
-                            <div class="radion_btn">
-                                <input type="radio" id="f-option5" name="selector">
-                                <label for="f-option5">Check payments</label>
-                                <div class="check"></div>
-                            </div>
-                            <p>Please send a check to Store Name, Store Street, Store Town, Store State / County,
-                                Store Postcode.</p>
-                        </div>
-                        <div class="payment_item active">
-                            <div class="radion_btn">
-                                <input type="radio" id="f-option6" name="selector">
-                                <label for="f-option6">Paypal </label>
-                                <img src="img/product/card.jpg" alt="">
-                                <div class="check"></div>
-                            </div>
-                            <p>Pay via PayPal; you can pay with your credit card if you don’t have a PayPal
-                                account.</p>
-                        </div>
-                        <div class="creat_account">
-                            <input type="checkbox" id="f-option4" name="selector">
-                            <label for="f-option4">I’ve read and accept the </label>
-                            <a href="#">terms & conditions*</a>
-                        </div>
-                        <a class="primary-btn" href="#">Proceed to Paypal</a>
+                    <a href="/addAddressCheckout"><button type="button" class="btn btn-primary mt-5" id="addNewAddressBtn">Add New Address</button></a>
+                    
+            
+                    <!-- Add New Address Button -->
+                    <% if (!userAddress || userAddress.address.length === 0) { %>
+                        <button type="button" class="btn btn-primary" id="addNewAddressBtn">Add New Address</button>
+                    <% } %>
+            
+                    <!-- New Address Form (hidden by default) -->
+                    <div id="newAddressForm" style="display: none;">
+                        <h3 class="h5 mt-4">New Address</h3>
+                        <!-- Include the new address form fields here -->
+                        <!-- Similar to the form structure you provided earlier -->
                     </div>
+                </div>
+            </div>
+            
+            <script>
+                // JavaScript to handle the "Add New Address" button click
+                document.getElementById('addNewAddressBtn').addEventListener('click', function() {
+                    document.getElementById('newAddressForm').style.display = 'block';
+                });
+            </script>
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="order-summary">
+                    <h2 class="h4 mb-4">Your Order</h2>
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="font-weight-bold">Products</span>
+                            <span class="font-weight-bold">Subtotal</span>
+                        </div>
+                        <% if (cartItems && cartItems.length > 0) { %>
+                            <% let subtotal = 0; %>
+                            <% cartItems.forEach(function(item) { %>
+                                <% subtotal += item.totalPrice; %>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <a style="all: unset; display: contents;" href="/productDetails?id=<%=item.product._id%>">
+                                        <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>">
+                                        <div class="ml-2">
+                                            <p class="product-name mb-0"><%= item.product.productName.split('|')[0].trim() %> (x<%= item.quantity %>)</p>
+                                            <p class="product-mn mb-0"><%= item.product.category.name %></p>
+                                        </div>
+                                    </a>
+                                    </div>
+                                    <span class="product-price">₹ <%= item.totalPrice.toFixed(2) %></span>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    <p class="lead mb-4">No item found in Cart</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </div>
+                    
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>₹ <%= subtotal.toFixed(2) %></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Coupon Discount</span>
+                            <span>(-) ₹ 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span>₹ 0.00</span>
+                        </div>
+                        <div class="text-right text-primary mb-2">
+                            <a href="#" onclick="showShippingCharge(); return false;">View shipping charge</a>
+                        </div>
+                        <div class="d-flex justify-content-between font-weight-bold">
+                            <span>Total</span>
+                            <span class="total-price">₹ <%= subtotal.toFixed(2) %></span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Payment Method</h3>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Enter coupon code here...">
+                            <button class="btn apply-btn btn-block mt-2">Apply</button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="d-flex align-items-center">
+                                <input type="radio" name="payment" class="mr-2">
+                                <img src="https://placehold.co/100x20" alt="PayPal, Visa, MasterCard, American Express">
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="d-flex align-items-center">
+                                <input type="radio" name="payment" class="mr-2">
+                                <span>Direct bank transfer</span>
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="d-flex align-items-center">
+                                <input type="radio" name="payment" class="mr-2">
+                                <span>Cash on delivery</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn place-order-btn btn-block">Place Order</button>
                 </div>
             </div>
         </div>
     </div>
-</section>
-<!--================End Checkout Area =================-->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
 
+<script>
+    function placeOrder() {
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        if (!selectedAddress) {
+            Swal.fire('Error', 'Please select a shipping address', 'error');
+            return;
+        }
+
+        const orderData = {
+            addressId: selectedAddress.value,
+            paymentMethod: 'cod'
+        };
+
+        fetch('/placeOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Order Placed Successfully!',
+                    text: `Order ID: ${data.orderId}`,
+                    icon: 'success',
+                    confirmButtonText: 'View Orders'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/orders';
+                    }
+                });
+            } else {
+                Swal.fire('Error', data.message || 'An error occurred while placing the order', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while placing the order', 'error');
+        });
+    }
+
+    function showShippingCharge() {
+        Swal.fire({
+            title: 'Free Shipping',
+            text: 'Shipping charge is free at the current moment!',
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    function placeOrder() {
+        const selectedAddress = document.getElementById('existingAddress');
+        const paymentMethod = document.querySelector('input[name="payment"]:checked');
+        
+        if (!selectedAddress || selectedAddress.value === 'Select an address') {
+            Swal.fire('Error', 'Please select a shipping address', 'error');
+            return;
+        }
+
+        if (!paymentMethod) {
+            Swal.fire('Error', 'Please select a payment method', 'error');
+            return;
+        }
+
+        if (paymentMethod.nextElementSibling.textContent.trim() !== 'Cash on delivery') {
+            Swal.fire('Error', 'Only Cash on Delivery is available at the moment', 'error');
+            return;
+        }
+
+        const orderData = {
+            addressId: selectedAddress.value
+        };
+
+        fetch('/placeOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Order Placed Successfully!',
+                    text: `Order ID: ${data.orderId}`,
+                    icon: 'success',
+                    confirmButtonText: 'View Orders'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/orders';
+                    }
+                });
+            } else {
+                Swal.fire('Error', data.message || 'An error occurred while placing the order', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while placing the order', 'error');
+        });
+    }
+
+    // Update the place order button onclick handler
+    document.querySelector('.place-order-btn').onclick = placeOrder;
+</script>
 
 <%- include('../partials/user/footer') %>

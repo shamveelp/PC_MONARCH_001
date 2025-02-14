@@ -3,61 +3,99 @@ const {Schema} = mongoose;
 const {v4: uuidv4} = require('uuid');
 
 const orderSchema = new Schema({
-    orderId:{
+    orderId: {
         type: String,
-        default: () =>uuidv4(),
+        default: () => uuidv4(),
         unique: true
     },
-    orderedItems:[{
-        product:{
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    orderedItems: [{
+        product: {
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true
         },
-        quantity:{
+        quantity: {
             type: Number,
             required: true
         },
-        price:{
+        price: {
             type: Number,
             default: 0
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returning', 'returned'],
+            default: 'pending'
+        },
+        cancelReason: {
+            type: String
+        },
+        returnReason: {
+            type: String
+        },
+        requestStatus: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending'
+        },
+        adminMessage: {
+            type: String
         }
     }],
-    totalPrice:{
+    totalPrice: {
         type: Number,
         required: true
     },
-    discount:{
+    discount: {
         type: Number,
         default: 0
     },
-    finalAmount:{
+    finalAmount: {
         type: Number,
         required: true
     },
-    address:{
-        type: Schema.Types.ObjectId,
-        ref:'User',
-        required:true
+    address: {
+        type: Schema.Types.Mixed,
+        required: true
     },
-    invoiceDate:{
+    invoiceDate: {
         type: Date
     },
-    status:{
+    status: {
         type: String,
         required: true,
-        enum:['pending','confirmed','shipped','delivered','cancelled','return request','returned']
+        enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returning', 'returned'],
+        default: 'pending'
     },
-    createdOn:{
+    cancelReason: {
+        type: String
+    },
+    returnReason: {
+        type: String
+    },
+    requestStatus: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    adminMessage: {
+        type: String
+    },
+    createdOn: {
         type: Date,
         default: Date.now,
         required: true
     },
-    couponApplied:{
-        type: true,
+    couponApplied: {
+        type: Boolean,
         default: false
     }
-})
+});
 
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;

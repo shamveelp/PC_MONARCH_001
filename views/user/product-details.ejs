@@ -63,21 +63,25 @@
 						</div>
 						<ul class="list">
 							<li><a class="active" href="#"><span>Category</span> : <%=product.category.name%></a></li>
-							<li><a href="#"><span>Availibility</span> : In Stock</a></li>
+							<%if(product.quantity >=1){%>
+							<li><a href="#" ><span>Availibility</span> : <span style="color: green;">In Stock</span></a></li>
+							<%} else{%>
+								<li><a href="#"><span>Availibility</span> : <span style="color: red;">No Stock</span></a></li>
+								<%}%>
                             <li><a href="#"><span>Colour</span> : <%=product.color%></a></li>
 						</ul>
 						<p><%=product.description%></p>
-						<div class="product_count">
+						<!-- <div class="product_count">
 							<label for="qty">Quantity: </label>
 							<input type="text" name="qty" id="sst" maxlength="12" value="1" title="Quantity:" class="input-text qty">
 							<button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )) result.value++;return false;"
 							 class="increase items-count" type="button"><i class="lnr lnr-chevron-up"></i></button>
 							<button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) &amp;&amp; sst > 0 ) result.value--;return false;"
 							 class="reduced items-count" type="button"><i class="lnr lnr-chevron-down"></i></button>
-						</div>
+						</div> -->
 						<div class="card_area d-flex align-items-center">
-							<a class="primary-btn" href="#">Add to Cart</a>
-							<a class="icon_btn" href="#"><i class="lnr lnr lnr-diamond"></i></a>
+							<a class="primary-btn" href="#" onclick="addToCart('<%=product._id%>')">Add to Cart</a>
+							
 							<a class="icon_btn d-inline-block" onclick="addToWishlist('<%=product._id%>')"  href="#">
 								<i class="lnr lnr-heart"></i>
 							</a>
@@ -509,6 +513,40 @@ function addToWishlist(productId) {
             Swal.fire({
                 title: "Error",
                 text: "There was an error adding the product to your wishlist",
+                icon: "error",
+                timer: 2000
+            });
+        }
+    });
+}
+
+function addToCart(productId) {
+    $.ajax({
+        url: '/addToCart',
+        method: "POST",
+        data: { productId: productId },
+        success: (response) => {
+            if (response.status) {
+                Swal.fire({
+                    title: "Added to Cart",
+                    text: response.message,
+                    icon: "success",
+                    timer: 2000
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: response.message,
+                    icon: "error",
+                    timer: 2000
+                });
+            }
+        },
+        error: (error) => {
+            console.error("AJAX Error:", error);
+            Swal.fire({
+                title: "Error",
+                text: "There was an error adding the product to your cart",
                 icon: "error",
                 timer: 2000
             });

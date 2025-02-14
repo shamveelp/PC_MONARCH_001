@@ -1,0 +1,287 @@
+<%- include('../partials/user/header') %>
+
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Order Details</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="/">Home<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="/orders">Orders<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Order Details</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Order #<%= order.orderId %></h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Order Status</h5>
+                    <div class="tracking-status mt-3">
+                        <% const statuses = ['pending', 'confirmed', 'shipped', 'delivered']; %>
+                        <% statuses.forEach((status, index) => { %>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="tracking-dot <%= order.status === status || statuses.indexOf(order.status) > index ? 'bg-success' : 'bg-secondary' %>"></span>
+                                <span class="ms-2"><%= status.toUpperCase() %></span>
+                            </div>
+                            <% if (index < statuses.length - 1) { %>
+                                <div class="tracking-line <%= order.status === status || statuses.indexOf(order.status) > index ? 'bg-success' : 'bg-secondary' %>"></div>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>Shipping Address</h5>
+                    <address class="mt-3">
+                        <strong><%= order.address.name %></strong><br>
+                        <%= order.address.streetAddress %><br>
+                        <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %><br>
+                        Phone: <%= order.address.phone %><br>
+                        Email: <%= order.address.email %>
+                    </address>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5>Order Items</h5>
+            <div class="table-responsive mt-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% order.orderedItems.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <div class="d-flex <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-thumbnail" style="width: 80px;">
+                                        <div class="ms-3">
+                                            <h6 class="mb-0"><%= item.product.productName %></h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>₹<%= item.price %></td>
+                                <td><%= item.quantity %></td>
+                                <td>
+                                    <span class="badge rounded-pill <%= 
+                                        item.status === 'delivered' ? 'bg-success' :
+                                        item.status === 'cancelled' ? 'bg-danger' :
+                                        item.status === 'shipped' ? 'bg-info' :
+                                        item.status === 'pending' ? 'bg-warning' :
+                                        item.status === 'return_requested' ? 'bg-secondary' :
+                                        item.status === 'returning' ? 'bg-info' :
+                                        item.status === 'returned' ? 'bg-dark' :
+                                        'bg-secondary'
+                                    %>">
+                                        <%= item.status.replace('_', ' ').charAt(0).toUpperCase() + item.status.slice(1) %>
+                                    </span>
+                                    <% if (item.requestStatus === 'rejected') { %>
+                                        <div class="text-danger small mt-1">
+                                            Request rejected: <%= item.adminMessage %>
+                                        </div>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (item.status === 'delivered' && !['return_requested', 'returning', 'returned'].includes(item.status)) { %>
+                                        <button class="btn btn-warning btn-sm" onclick="initiateReturn('<%= order._id %>', '<%= item._id %>')">
+                                            Return
+                                        </button>
+                                    <% } else if (!['delivered', 'cancelled', 'returned', 'return_requested'].includes(item.status)) { %>
+                                        <button class="btn btn-danger btn-sm" onclick="cancelItem('<%= order._id %>', '<%= item._id %>')">
+                                            Cancel
+                                        </button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5>Order Summary</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td>Subtotal:</td>
+                            <td class="text-end">₹<%= order.totalPrice %></td>
+                        </tr>
+                        <tr>
+                            <td>Discount:</td>
+                            <td class="text-end">₹<%= order.discount %></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total:</strong></td>
+                            <td class="text-end"><strong>₹<%= order.finalAmount %></strong></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Order Actions</h5>
+                    <% if (order.status === 'delivered' && !['return_requested', 'returning', 'returned'].includes(order.status)) { %>
+                        <button class="btn btn-warning" onclick="initiateReturn('<%= order._id %>')">
+                            Return Entire Order
+                        </button>
+                    <% } else if (!['delivered', 'cancelled', 'returned', 'return_requested'].includes(order.status)) { %>
+                        <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
+                            Cancel Entire Order
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function initiateReturn(orderId, itemId = null) {
+    const { value: reason } = await Swal.fire({
+        title: 'Return Reason',
+        input: 'textarea',
+        inputLabel: 'Please provide a reason for return',
+        inputPlaceholder: 'Type your reason here...',
+        inputAttributes: {
+            'aria-label': 'Type your reason here'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Submit Return Request',
+        cancelButtonText: 'Cancel',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'You need to provide a reason!';
+            }
+        }
+    });
+
+    if (reason) {
+        try {
+            const response = await fetch('/orders/return', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderId, itemId, reason }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Return request submitted successfully',
+                    timer: 1500
+                });
+                location.reload();
+            } else {
+                throw new Error(data.message || 'Failed to submit return request');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to submit return request'
+            });
+        }
+    }
+}
+
+async function cancelOrder(orderId, itemId = null) {
+    const { value: reason } = await Swal.fire({
+        title: 'Cancellation Reason',
+        input: 'textarea',
+        inputLabel: 'Please provide a reason for cancellation',
+        inputPlaceholder: 'Type your reason here...',
+        inputAttributes: {
+            'aria-label': 'Type your reason here'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Cancel Order',
+        cancelButtonText: 'Go Back',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'You need to provide a reason!';
+            }
+        }
+    });
+
+    if (reason) {
+        try {
+            const response = await fetch('/orders/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderId, itemId, reason }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Order cancelled successfully',
+                    timer: 1500
+                });
+                location.reload();
+            } else {
+                throw new Error(data.message || 'Failed to cancel order');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Failed to cancel order'
+            });
+        }
+    }
+}
+
+const cancelItem = cancelOrder; // Use same function for both order and item cancellation
+</script>
+
+<style>
+.tracking-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.tracking-line {
+    width: 2px;
+    height: 30px;
+    margin-left: 9px;
+    margin-bottom: -5px;
+}
+
+.badge {
+    font-size: 0.9em;
+    padding: 0.5em 1em;
+}
+
+.table img {
+    object-fit: cover;
+}
+</style>
+
+<%- include('../partials/user/footer') %>
