@@ -1,5 +1,59 @@
 <%- include('../partials/user/header') %>
 
+<style>
+    .order-details-card {
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    .status-timeline {
+        display: flex;
+        justify-content: space-between;
+        margin: 30px 0;
+        position: relative;
+    }
+    .status-point {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+    }
+    .status-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+    .status-line {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #e0e0e0;
+        z-index: 0;
+    }
+    .status-active {
+        background-color: #28a745;
+    }
+    .status-inactive {
+        background-color: #e0e0e0;
+    }
+    .address-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .product-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+</style>
+
+
 <section class="banner-area organic-breadcrumb">
     <div class="container">
         <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
@@ -7,7 +61,8 @@
                 <h1>Order Details</h1>
                 <nav class="d-flex align-items-center">
                     <a href="/">Home<span class="lnr lnr-arrow-right"></span></a>
-                    <a href="/orders">Orders<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="/userProfile">Profile<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="/address">Orders<span class="lnr lnr-arrow-right"></span></a>
                     <a href="#">Order Details</a>
                 </nav>
             </div>
@@ -16,272 +71,168 @@
 </section>
 
 <div class="container my-5">
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Order #<%= order.orderId %></h4>
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/orders">Orders</a></li>
+                    <li class="breadcrumb-item active">Order #<%= order.orderId %></li>
+                </ol>
+            </nav>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Order Status</h5>
-                    <div class="tracking-status mt-3">
-                        <% const statuses = ['pending', 'confirmed', 'shipped', 'delivered']; %>
-                        <% statuses.forEach((status, index) => { %>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="tracking-dot <%= order.status === status || statuses.indexOf(order.status) > index ? 'bg-success' : 'bg-secondary' %>"></span>
-                                <span class="ms-2"><%= status.toUpperCase() %></span>
+    </div>
+
+    <div class="order-details-card">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Order #<%= order.orderId %></h5>
+                    <span class="badge bg-light text-dark">
+                        <%= new Date(order.createdOn).toLocaleDateString() %>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Order Status Timeline -->
+                <div class="status-timeline">
+                    <div class="status-line"></div>
+                    <% const statuses = ['pending', 'confirmed', 'shipped', 'delivered']; %>
+                    <% statuses.forEach(status => { %>
+                        <div class="status-point">
+                            <div class="status-dot <%= order.status === status || statuses.indexOf(order.status) > statuses.indexOf(status) ? 'status-active' : 'status-inactive' %>"></div>
+                            <small><%= status.toUpperCase() %></small>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <!-- Product Details -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h5 class="mb-3">Product Details</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <img src="<%= order.orderedItems[0].product.productImage[0] %>" 
+                                         alt="<%= order.orderedItems[0].product.productName %>"
+                                         class="product-image me-3">
+                                    <div>
+                                        <h6><%= order.orderedItems[0].product.productName %></h6>
+                                        <p class="mb-1">Quantity: <%= order.orderedItems[0].quantity %></p>
+                                        <p class="mb-1">Price: ₹<%= order.orderedItems[0].price %></p>
+                                        <p class="mb-0">Status: 
+                                            <span class="badge <%= 
+                                                order.status === 'delivered' ? 'bg-success' :
+                                                order.status === 'cancelled' ? 'bg-danger' :
+                                                order.status === 'shipped' ? 'bg-info' :
+                                                'bg-warning'
+                                            %>">
+                                                <%= order.status.toUpperCase() %>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <% if (index < statuses.length - 1) { %>
-                                <div class="tracking-line <%= order.status === status || statuses.indexOf(order.status) > index ? 'bg-success' : 'bg-secondary' %>"></div>
-                            <% } %>
-                        <% }); %>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Order Summary -->
+                        <h5 class="mb-3">Order Summary</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span>₹<%= order.totalPrice %></span>
+                                </div>
+                                <% if (order.discount > 0) { %>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Discount:</span>
+                                        <span>-₹<%= order.discount %></span>
+                                    </div>
+                                <% } %>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total:</span>
+                                    <span>₹<%= order.finalAmount %></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Order Button -->
+                        <% if (order.status !== 'cancelled' && order.status !== 'delivered') { %>
+                            <button onclick="cancelOrder('<%= order._id %>')" 
+                                    class="btn btn-danger w-100 mt-3">
+                                Cancel Order
+                            </button>
+                        <% } %>
                     </div>
                 </div>
-                
-                <div class="col-md-6">
-                    <h5>Shipping Address</h5>
-                    <address class="mt-3">
-                        <strong><%= order.address.name %></strong><br>
-                        <%= order.address.streetAddress %><br>
-                        <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %><br>
-                        Phone: <%= order.address.phone %><br>
-                        Email: <%= order.address.email %>
-                    </address>
-                </div>
-            </div>
 
-            <hr>
-
-            <h5>Order Items</h5>
-            <div class="table-responsive mt-3">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% order.orderedItems.forEach(item => { %>
-                            <tr>
-                                <td>
-                                    <div class="d-flex <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>" class="img-thumbnail" style="width: 80px;">
-                                        <div class="ms-3">
-                                            <h6 class="mb-0"><%= item.product.productName %></h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>₹<%= item.price %></td>
-                                <td><%= item.quantity %></td>
-                                <td>
-                                    <span class="badge rounded-pill <%= 
-                                        item.status === 'delivered' ? 'bg-success' :
-                                        item.status === 'cancelled' ? 'bg-danger' :
-                                        item.status === 'shipped' ? 'bg-info' :
-                                        item.status === 'pending' ? 'bg-warning' :
-                                        item.status === 'return_requested' ? 'bg-secondary' :
-                                        item.status === 'returning' ? 'bg-info' :
-                                        item.status === 'returned' ? 'bg-dark' :
-                                        'bg-secondary'
-                                    %>">
-                                        <%= item.status.replace('_', ' ').charAt(0).toUpperCase() + item.status.slice(1) %>
-                                    </span>
-                                    <% if (item.requestStatus === 'rejected') { %>
-                                        <div class="text-danger small mt-1">
-                                            Request rejected: <%= item.adminMessage %>
-                                        </div>
-                                    <% } %>
-                                </td>
-                                <td>
-                                    <% if (item.status === 'delivered' && !['return_requested', 'returning', 'returned'].includes(item.status)) { %>
-                                        <button class="btn btn-warning btn-sm" onclick="initiateReturn('<%= order._id %>', '<%= item._id %>')">
-                                            Return
-                                        </button>
-                                    <% } else if (!['delivered', 'cancelled', 'returned', 'return_requested'].includes(item.status)) { %>
-                                        <button class="btn btn-danger btn-sm" onclick="cancelItem('<%= order._id %>', '<%= item._id %>')">
-                                            Cancel
-                                        </button>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
-
-            <hr>
-
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <h5>Order Summary</h5>
-                    <table class="table table-borderless">
-                        <tr>
-                            <td>Subtotal:</td>
-                            <td class="text-end">₹<%= order.totalPrice %></td>
-                        </tr>
-                        <tr>
-                            <td>Discount:</td>
-                            <td class="text-end">₹<%= order.discount %></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Total:</strong></td>
-                            <td class="text-end"><strong>₹<%= order.finalAmount %></strong></td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h5>Order Actions</h5>
-                    <% if (order.status === 'delivered' && !['return_requested', 'returning', 'returned'].includes(order.status)) { %>
-                        <button class="btn btn-warning" onclick="initiateReturn('<%= order._id %>')">
-                            Return Entire Order
-                        </button>
-                    <% } else if (!['delivered', 'cancelled', 'returned', 'return_requested'].includes(order.status)) { %>
-                        <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">
-                            Cancel Entire Order
-                        </button>
-                    <% } %>
+                <!-- Shipping Address -->
+                <div class="address-card">
+                    <h5 class="mb-3">Shipping Address</h5>
+                    <p class="mb-1"><strong><%= order.address.name %></strong></p>
+                    <p class="mb-1"><%= order.address.streetAddress %></p>
+                    <p class="mb-1"><%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %></p>
+                    <p class="mb-1">Phone: <%= order.address.phone %></p>
+                    <p class="mb-0">Email: <%= order.address.email %></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-async function initiateReturn(orderId, itemId = null) {
-    const { value: reason } = await Swal.fire({
-        title: 'Return Reason',
-        input: 'textarea',
-        inputLabel: 'Please provide a reason for return',
-        inputPlaceholder: 'Type your reason here...',
-        inputAttributes: {
-            'aria-label': 'Type your reason here'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Submit Return Request',
-        cancelButtonText: 'Cancel',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to provide a reason!';
+    async function cancelOrder(orderId) {
+        const { value: reason } = await Swal.fire({
+            title: 'Cancel Order',
+            input: 'textarea',
+            inputLabel: 'Please provide a reason for cancellation',
+            inputPlaceholder: 'Type your reason here...',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to provide a reason!';
+                }
             }
-        }
-    });
+        });
 
-    if (reason) {
-        try {
-            const response = await fetch('/orders/return', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, itemId, reason }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Return request submitted successfully',
-                    timer: 1500
+        if (reason) {
+            try {
+                const response = await fetch('/orders/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId, reason }),
                 });
-                location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to submit return request');
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Order cancelled successfully',
+                        timer: 1500
+                    });
+                    location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to cancel order'
+                });
             }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to submit return request'
-            });
         }
     }
-}
-
-async function cancelOrder(orderId, itemId = null) {
-    const { value: reason } = await Swal.fire({
-        title: 'Cancellation Reason',
-        input: 'textarea',
-        inputLabel: 'Please provide a reason for cancellation',
-        inputPlaceholder: 'Type your reason here...',
-        inputAttributes: {
-            'aria-label': 'Type your reason here'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Cancel Order',
-        cancelButtonText: 'Go Back',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to provide a reason!';
-            }
-        }
-    });
-
-    if (reason) {
-        try {
-            const response = await fetch('/orders/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, itemId, reason }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order cancelled successfully',
-                    timer: 1500
-                });
-                location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to cancel order');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to cancel order'
-            });
-        }
-    }
-}
-
-const cancelItem = cancelOrder; // Use same function for both order and item cancellation
 </script>
-
-<style>
-.tracking-dot {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.tracking-line {
-    width: 2px;
-    height: 30px;
-    margin-left: 9px;
-    margin-bottom: -5px;
-}
-
-.badge {
-    font-size: 0.9em;
-    padding: 0.5em 1em;
-}
-
-.table img {
-    object-fit: cover;
-}
-</style>
 
 <%- include('../partials/user/footer') %>

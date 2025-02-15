@@ -62,7 +62,7 @@
             <!-- Billing Address -->
             <div class="col-lg-8 mb-4">
                 <div class="bg-white p-4 rounded shadow-sm">
-                    <h2 class="h4 mb-4">Billing Address</h2>
+                    <h2 class="h4 mb-4">Shipping Address</h2>
                     
                     <!-- Address Selection Area -->
                     <div class="form-group">
@@ -88,7 +88,7 @@
             
                     <!-- Add New Address Button -->
                     <% if (!userAddress || userAddress.address.length === 0) { %>
-                        <button type="button" class="btn btn-primary" id="addNewAddressBtn">Add New Address</button>
+                        <p  id="addNewAddressBtn">Add New Address</p>
                     <% } %>
             
                     <!-- New Address Form (hidden by default) -->
@@ -171,13 +171,13 @@
                         <div class="mb-3">
                             <label class="d-flex align-items-center">
                                 <input type="radio" name="payment" class="mr-2">
-                                <img src="https://placehold.co/100x20" alt="PayPal, Visa, MasterCard, American Express">
+                                <img src="./img/icon/razorpay.webp" alt="PayPal, Visa, MasterCard, American Express">
                             </label>
                         </div>
                         <div class="mb-3">
                             <label class="d-flex align-items-center">
                                 <input type="radio" name="payment" class="mr-2">
-                                <span>Direct bank transfer</span>
+                                <span>Other Methods</span>
                             </label>
                         </div>
                         <div class="mb-3">
@@ -285,7 +285,7 @@
             if (data.success) {
                 Swal.fire({
                     title: 'Order Placed Successfully!',
-                    text: `Order ID: ${data.orderId}`,
+                    text: `Order IDs: ${data.orderIds.join(", ")}`,
                     icon: 'success',
                     confirmButtonText: 'View Orders'
                 }).then((result) => {

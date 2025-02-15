@@ -1,120 +1,158 @@
-<%- include("../../views/partials/admin/header") %>
-<head>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
-</head>
-<style>
-   .error-message{
-       color: red;
-   }
-   .thumbnails-container {
-       display: flex;
-       overflow-x: auto;
-   }
-   .thumbnail {
-       margin-right: 10px;
-   }
-</style>
-   <section class="content-main">
-       <div class="row">
-           <div class="col-9">
-               <div class="content-header">
-                   <h2 class="content-title">Add New Product</h2>
-               </div>
-           </div>
-           <div class="col-lg-6">
-               <div class="card mb-4">
-                   <div class="card-body">
-                       <form method="post" action="/admin/addProducts" enctype="multipart/form-data" id="productForm">
-                           <!-- Existing form fields remain unchanged -->
-                           
-                           <div class="card mb-2">
-                               <div class="card-header">
-                                   <h4>Choose images</h4>
-                               </div>
-                               <div class="border row">
-                                   <div id="addedImagesContainer" class="thumbnails-container"></div>
-                               </div>
-                               <div class="row">
-                                   <% for(let i = 1; i <= 4; i++) { %>
-                                   <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                       <img src="/placeholder.svg" alt="" id="imgView<%= i %>">
-                                       <input class="form-control" type="file" name="images" id="input<%= i %>"
-                                           accept="image/png, image/jpeg, image/jpg"
-                                           onchange="viewImage(event, <%= i %>)">
-                                   </div>
-                                   <div class="image-cropper d-flex align-items-center"
-                                       style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                       <img src="/placeholder.svg" id="croppedImg<%= i %>" alt="">
-                                       <button type="button" id="saveButton<%= i %>" class="btn-sm btn-primary">Save</button>
-                                   </div>
-                                   <% } %>
-                               </div>
-                           </div>
-                           <div>
-                               <button class="btn btn-md rounded font-sm hover-up" type="submit">Publish</button>
-                           </div>
-                       </form>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </section>
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Byteverse | User-management</title>
+        <link rel="stylesheet" href="/css/admin/user-management.css" />
+                <!-- Include SweetAlert2 CSS -->
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
-<script>
-    // Existing JavaScript functions (validateForm, clearErrorMessages, displayErrorMessage) remain unchanged
+                <!-- Include SweetAlert2 JS -->
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    </head>
 
-    function viewImage(event, index) {
-        let input = event.target;
-        let reader = new FileReader();
-        reader.onload = function () {
-            let dataURL = reader.result;
-            let image = document.getElementById("imgView" + index);
-            image.src = dataURL;
-            let cropper = new Cropper(image, {
-                aspectRatio: 1,
-                viewMode: 1,
-                guides: true,
-                background: false,
-                autoCropArea: 1,
-                zoomable: true,
-            });
+    <body>
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <aside class="unique-sidebar">
+                <div class="unique-sidebar-header">
+                    <h2>Byteverse</h2>
+                </div>
+                <ul class="unique-sidebar-menu">
+                    <li><a href="/admin/dashboard">Dashboard</a></li>
+                    <li><a href="/admin/user-management">Users</a></li>
+                    <li><a href="/admin/product-management">Products</a></li>
+                    <li class="active"><a href="#">Orders</a></li>
+                    <li><a href="/admin/category-management">Categories</a></li>
+                    <li><a href="#">Coupon</a></li>
+                    <li><a href="#">Offers</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </aside>
+            <!-- Main Content -->
+            <div class="product-list-container">
+                <h1>Order-Management</h1>
 
-            let cropperContainer = document.querySelector("#croppedImg" + index).parentNode;
-            cropperContainer.style.display = 'block';
+                <!-- Breadcrumbs -->
+                <nav class="breadcrumbs">
+                    <a href="/admin/dashboard">Dashboard</a>
+                    <span>&gt;</span>
+                    <a href="#">Order-Management</a>
+                </nav>
 
-            let saveButton = document.querySelector('#saveButton' + index)
-            saveButton.addEventListener('click', async function() {
-                let croppedCanvas = cropper.getCroppedCanvas();
-                let croppedImage = document.getElementById("croppedImg" + index);
-                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
 
-                let timestamp = new Date().getTime();
-                let fileName = `cropped-img-${timestamp}-${index}.png`;
 
-                await croppedCanvas.toBlob(blob => {
-                    let input = document.getElementById('input' + index);
-                    let imgFile = new File([blob], fileName, { type: blob.type });
-                    const fileList = new DataTransfer();
-                    fileList.items.add(imgFile);
-                    input.files = fileList.files;
-                });
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>SI No</th>
+                            <th>Customer Name</th>
+                            <!-- <th>Email</th> -->
+                            <th>Orders</th>
+                            <th>Total</th>
+                            <th>Payment Method</th>
+                            <th>Delivery Status</th>
+                            <th>Order Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(function(order, index) { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= order.userId.username %></td>
+                            <td><%= order._id %></td>
+                            <td>$<%= order.total.toFixed(2) %></td>
+                            <td><%= order.paymentMethod %></td>
+                            <td>
+                                <select style="height: 30px; border-radius: 4px;" name="deliveryStatus" onchange="updateDeliveryStatus('<%= order._id %>', this.value)">
+                                    <option value="Pending" <%= order.deliveryStatus === "Pending" ? "selected" : "" %>>Pending</option>
+                                    <option value="Shipped" <%= order.deliveryStatus === "Shipped" ? "selected" : "" %>>Shipped</option>
+                                    <option value="Delivered" <%= order.deliveryStatus === "Delivered" ? "selected" : "" %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.deliveryStatus === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+                                </select>
+                            </td>
+                            
+                            <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+                            <td style="display: flex">
+                                <form action="/admin/order-management/order-details/<%= order._id %>" method="GET">
+                                    <button class="action-btn view-btn" type="submit">View</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                    
+                </table>
 
-                cropperContainer.style.display = 'none';
-                cropper.destroy();
-            });
-        };
+                <div class="pagination">
+                    <% if (currentPage> 1) { %>
+                    <a href="/admin/order-management?page=<%= currentPage - 1 %>&search=<%= search %>">Previous</a>
+                    <% } %> <% for (let i=1; i <=totalPages; i++) { %>
+                    <a href="/admin/order-management?page=<%= i %>&search=<%= search %>" class="<%= currentPage === i ? 'active' : '' %>"> <%= i %> </a>
+                    <% } %> <% if (currentPage < totalPages) { %>
+                    <a href="/admin/order-management?page=<%= currentPage + 1 %>&search=<%= search %>">Next</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+                function updateDeliveryStatus(orderId, status) {
+                    axios.post(`/admin/order-management/update-status/${orderId}`, {
+                        deliveryStatus: status
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        console.log(response.data);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Status updated successfully',
+                            customClass: {
+                                confirmButton: 'your-custom-class',
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error in Axios request:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to update status',
+                            customClass: {
+                                confirmButton: 'your-custom-class',
+                            }
+                        });
+                    });
+                }
 
-        reader.readAsDataURL(input.files[0]);
+                document.querySelectorAll("select[name='deliveryStatus']").forEach(selectElement => {
+    const status = selectElement.value;
+    switch (status) {
+        case "Pending":
+            selectElement.style.backgroundColor = "#f0ad4e"; // yellow for Pending
+            break;
+        case "Shipped":
+            selectElement.style.backgroundColor = "#5bc0de"; // blue for Shipped
+            break;
+        case "Delivered":
+            selectElement.style.backgroundColor = "#5cb85c"; // green for Delivered
+            break;
+        case "Cancelled":
+            selectElement.style.backgroundColor = "#d9534f"; // red for Cancelled
+            break;
+        default:
+            selectElement.style.backgroundColor = ""; // default color
+            break;
     }
+});
 
-    document.getElementById("productForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-        if (validateForm()) {
-            this.submit();
-        }
-    });
-</script>
-     
-<%- include("../../views/partials/admin/footer") %>
 
+        </script>
+
+    </body>
+</html>

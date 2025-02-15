@@ -56,7 +56,7 @@ const addCategoryOffer = async (req, res) => {
 const categoryInfo = async (req, res) => {
   try {
     const page = Number.parseInt(req.query.page) || 1
-    const limit = 4
+    const limit = 12
     const skip = (page - 1) * limit
 
     const query = {}

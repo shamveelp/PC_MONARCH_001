@@ -10,6 +10,7 @@ const adminRouter = require('./routes/adminRoutes');
 const hbs = require('hbs');
 const MongoStore = require("connect-mongo")
 const checkBlockedUser = require("./middlewares/profileAuth");
+const User = require("./models/userSchema")
 
 
 
@@ -55,6 +56,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/',userRouter);
 
 app.use('/admin', adminRouter);
+
+
+app.use(async (req, res, next) => {
+  try {
+      if (req.session.user) {
+          const user = await User.findById(req.session.user);
+          if (user && user.isBlocked) {
+              delete req.session.user;
+              return res.redirect('/login');
+          }
+      }
+      next();
+  } catch (error) {
+      console.error("Error checking blocked user:", error);
+      res.status(500).send('Server Error');
+  }
+});
 
 
 

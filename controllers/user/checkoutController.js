@@ -6,46 +6,55 @@ const Address = require("../../models/addressSchema"); // Assuming you have an A
 
 
 const loadCheckoutPage = async (req, res) => {
-    try {
-      const userId = req.session.user
+  try {
+      const userId = req.session.user;
       const user = await User.findById(userId).populate({
-        path: "cart.productId",
-        model: "Product",
-        populate: {
-          path: "category",
-          model: "Category",
-        },
-      })
-  
-      const addressData = await Address.findOne({ userId: userId })
-  
+          path: "cart.productId",
+          model: "Product",
+          populate: {
+              path: "category",
+              model: "Category",
+          },
+      });
+
+      const addressData = await Address.findOne({ userId: userId });
+
       if (!user) {
-        return res.status(404).send("User not found")
+          return res.status(404).send("User not found");
       }
-  
-      const cartItems = user.cart.map((item) => ({
-        product: item.productId,
-        quantity: item.quantity,
-        totalPrice: item.productId.salePrice * item.quantity,
-      }))
-  
-      const subtotal = cartItems.reduce((total, item) => total + item.totalPrice, 0)
-      const shippingCharge = 0 // Free shipping
-      const grandTotal = subtotal + shippingCharge
-  
+
+      // ✅ Filter out blocked products and unlisted categories
+      const cartItems = user.cart
+          .filter(item => 
+              item.productId && 
+              !item.productId.isBlocked && 
+              item.productId.category && 
+              item.productId.category.isListed
+          )
+          .map((item) => ({
+              product: item.productId,
+              quantity: item.quantity,
+              totalPrice: item.productId.salePrice * item.quantity,
+          }));
+
+      const subtotal = cartItems.reduce((total, item) => total + item.totalPrice, 0);
+      const shippingCharge = 0; // Free shipping
+      const grandTotal = subtotal + shippingCharge;
+
       res.render("checkout", {
-        user,
-        cartItems,
-        subtotal,
-        shippingCharge,
-        grandTotal,
-        userAddress: addressData,
-      })
-    } catch (error) {
-      console.error("Error in loadCheckoutPage:", error)
-      res.redirect("/pageNotFound")
-    }
+          user,
+          cartItems,
+          subtotal,
+          shippingCharge,
+          grandTotal,
+          userAddress: addressData,
+      });
+  } catch (error) {
+      console.error("Error in loadCheckoutPage:", error);
+      res.redirect("/pageNotFound");
   }
+};
+
 
 const addAddressCheckout = async (req,res) => {
     try {

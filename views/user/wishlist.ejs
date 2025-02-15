@@ -67,7 +67,7 @@
                                           
                                            </span></td>
                                            <td class="text-center" data-title="Add to Cart">
-                                               <a href="#" onclick="" class="btn btn-sm">Add to Cart</a>
+                                               <a href="#" onclick="addToCart('<%=product._id%>')" class="btn btn-sm">Add to Cart</a>
                                            </td>
                                            <td class="action" data-title="Remove">
                                                <a class="btn btn-sm" href="#" onclick="confirmRemove('<%=product._id%>')">
@@ -111,6 +111,40 @@
             }
         })
     }
+
+    function addToCart(productId) {
+    $.ajax({
+        url: '/addToCart',
+        method: "POST",
+        data: { productId: productId },
+        success: (response) => {
+            if (response.status) {
+                Swal.fire({
+                    title: "Added to Cart",
+                    text: response.message,
+                    icon: "success",
+                    timer: 2000
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: response.message,
+                    icon: "error",
+                    timer: 2000
+                });
+            }
+        },
+        error: (error) => {
+            console.error("AJAX Error:", error);
+            Swal.fire({
+                title: "Error",
+                text: "There was an error adding the product to your cart",
+                icon: "error",
+                timer: 2000
+            });
+        }
+    });
+}
 </script>
 
 

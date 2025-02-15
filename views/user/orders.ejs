@@ -208,198 +208,152 @@
                 <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
                 <path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2z"/>
             </svg> My Coupons</a>
-            <a href="#" class="text-danger mt-4"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="#" onclick="confirmLogout(event)" class="text-danger mt-4"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
 
         <!-- Main Content -->
-        <div class="col-md-9 main-content">
-          <h1 class="text-primary mb-4">Your Orders</h1>
-          <!-- Order 1 -->
-          <% if (orders && orders.length > 0) { %>
-            <% orders.forEach(order => { %>
-          <div class="order-card">
-              <div class="order-header d-flex justify-content-between align-items-center">
-                  <div>
-                      <strong>ORDER PLACED</strong><br>
-                      <%= new Date(order.createdOn).toLocaleDateString('en-IN', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    }) %>
-                  </div>
-                  <div>
-                      <strong>SUB TOTAL</strong><br>
-                      ₹<%= order.totalPrice %>
-                  </div>
-                  <div>
-                      <strong>SHIP TO</strong><br>
-                      <span class="order-ship-to"> Name</span>
-                  </div>
-                  <div>
-                      <strong>STATUS</strong><br>
-                      <span class="order-status <%= 
-                      order.orderedItems[0].status === 'delivered' ? 'bg-success' :
-                      order.orderedItems[0].status === 'cancelled' ? 'bg-danger' :
-                      order.orderedItems[0].status === 'shipped' ? 'bg-info' :
-                      order.orderedItems[0].status === 'pending' ? 'bg-warning' :
-                      'bg-secondary'
-                  %>"><%= order.orderedItems[0].status %></span>
-                  </div>
-                  <div>
-                      <strong>ORDER ID:</strong> #<%= order.orderId %><br>
-                      <button class="btn btn-light btn-sm">Invoice</button>
-                  </div>
-              </div>
-              <div class="order-body">
-                <% order.orderedItems.forEach((item, index) => { %>
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="<%= item.product?.productImage[0] || '/images/default-product.jpg' %>" alt="<%= item.product?.productName %>" class="img-thumbnail mr-4" width="100" height="100">
-                        <div>
-                            <a href="/productDetails?id=<%=item.product._id%>" class="order-link"><%= item.product?.productName %></a><br>
-                            <p class="text-muted">Quantity: <%= item.quantity %></p>
-                            <p class="text-muted">Price: ₹<%= item.price * item.quantity %></p>
-                            <p class="text-muted">Status: <%= item.status %></p>
-                            <% if (item.status === 'delivered') { %>
-                                <button onclick="initiateReturn('<%= order._id %>', '<%= item._id %>')" class="btn btn-warning btn-sm">Return</button>
-                            <% } else if (item.status !== 'cancelled' && item.status !== 'returned' && item.status !== 'return_requested') { %>
-                                <button onclick="cancelItem('<%= order._id %>', '<%= item._id %>')" class="btn btn-danger btn-sm">Cancel</button>
-                            <% } %>
+        <div class="col-md-9">
+            <h2 class="mb-4">Your Orders</h2>
+            
+            <% if (orders && orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <small class="text-muted">ORDER PLACED</small><br>
+                                    <%= new Date(order.createdOn).toLocaleDateString() %>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">TOTAL</small><br>
+                                    ₹<%= order.finalAmount %>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">ORDER ID</small><br>
+                                    #<%= order.orderId %>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="status-badge <%= 
+                                        order.status === 'delivered' ? 'bg-success' :
+                                        order.status === 'cancelled' ? 'bg-danger' :
+                                        order.status === 'shipped' ? 'bg-info' :
+                                        'bg-warning'
+                                    %>">
+                                        <%= order.status.toUpperCase() %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <img src="<%= order.orderedItems[0].product.productImage[0] %>" 
+                                         alt="<%= order.orderedItems[0].product.productName %>"
+                                         class="product-image">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><%= order.orderedItems[0].product.productName %></h5>
+                                    <p class="text-muted mb-0">Quantity: <%= order.orderedItems[0].quantity %></p>
+                                    <p class="text-muted">Price: ₹<%= order.orderedItems[0].price %></p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="/order-details?orderId=<%= order.orderId %>" 
+                                       class="btn btn-outline-primary btn-sm">View Details</a>
+                                    
+                                    <% if (order.status !== 'cancelled' && order.status !== 'delivered') { %>
+                                        <button onclick="cancelOrder('<%= order._id %>')" 
+                                                class="btn btn-outline-danger btn-sm mt-2">
+                                            Cancel Order
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <% }); %>
-            </div>
-            <div class="order-footer">
-                <p><strong>Total: ₹<%= order.finalAmount %></strong></p>
-                <a href="/order-details?orderId=<%= order.orderId %>" class="btn btn-primary btn-sm">View Details</a>
-            </div>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-shopping-bag fa-3x text-muted"></i>
+                    </div>
+                    <h3>No orders yet</h3>
+                    <p class="text-muted">When you place an order, it will appear here.</p>
+                    <a href="/shop" class="btn btn-primary mt-3">Start Shopping</a>
+                </div>
+            <% } %>
         </div>
-    <% }); %>
-<% } else { %>
-        <div class="text-center py-5 bg-white shadow rounded-lg">
-            <svg style="height: 50px;" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-            <p class="mt-1 text-sm text-gray-500">Get started by making your first purchase.</p>
-            <div class="mt-6">
-                <a href="/shop" class="btn btn-primary">Start Shopping</a>
-            </div>
-        </div>
-    <% } %>
-    </div>
     </div>
 </div>
 
 <!-- SweetAlert2 for dialogs -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-async function initiateReturn(orderId, itemId = null) {
-    const { value: reason } = await Swal.fire({
-        title: 'Return Reason',
-        input: 'textarea',
-        inputLabel: 'Please provide a reason for return',
-        inputPlaceholder: 'Type your reason here...',
-        inputAttributes: {
-            'aria-label': 'Type your reason here'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Submit Return Request',
-        cancelButtonText: 'Cancel',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to provide a reason!';
+    async function cancelOrder(orderId) {
+        const { value: reason } = await Swal.fire({
+            title: 'Cancel Order',
+            input: 'textarea',
+            inputLabel: 'Please provide a reason for cancellation',
+            inputPlaceholder: 'Type your reason here...',
+            showCancelButton: true,
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to provide a reason!';
+                }
             }
-        }
-    });
+        });
 
-    if (reason) {
-        try {
-            const response = await fetch('/orders/return', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, itemId, reason }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Return request submitted successfully',
-                    timer: 1500
+        if (reason) {
+            try {
+                const response = await fetch('/orders/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId, reason }),
                 });
-                location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to submit return request');
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Order cancelled successfully',
+                        timer: 1500
+                    });
+                    location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to cancel order'
+                });
             }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to submit return request'
-            });
         }
     }
-}
 
-async function cancelOrder(orderId, itemId = null) {
-    const { value: reason } = await Swal.fire({
-        title: 'Cancellation Reason',
-        input: 'textarea',
-        inputLabel: 'Please provide a reason for cancellation',
-        inputPlaceholder: 'Type your reason here...',
-        inputAttributes: {
-            'aria-label': 'Type your reason here'
-        },
-        showCancelButton: true,
-        confirmButtonText: 'Cancel Order',
-        cancelButtonText: 'Go Back',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to provide a reason!';
+    function confirmLogout(event) {
+        event.preventDefault(); // Prevent default link behavior
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You will be logged out!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Logout"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/logout"; // Redirect only if confirmed
             }
-        }
-    });
-
-    if (reason) {
-        try {
-            const response = await fetch('/orders/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, itemId, reason }),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order cancelled successfully',
-                    timer: 1500
-                });
-                location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to cancel order');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to cancel order'
-            });
-        }
+        });
     }
-}
-
-const cancelItem = cancelOrder; // Use same function for both order and item cancellation
 </script>
 
 <%- include('../partials/user/footer') %>

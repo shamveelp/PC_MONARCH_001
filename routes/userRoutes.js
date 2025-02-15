@@ -107,6 +107,6 @@ router.get("/order-details", userAuth, orderController.loadOrderDetails);
 
 // New routes for order cancellation and returns
 router.post("/orders/cancel", userAuth, orderController.cancelOrder);
-router.post("/orders/return", userAuth, orderController.returnOrder);
+
 
 module.exports = router;

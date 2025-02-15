@@ -25,7 +25,7 @@ const getCartPage = async (req, res) => {
       path: 'cart.productId',
       model: 'Product',
       populate: {
-        path: 'category', // Populate the category inside the product
+        path: 'category',
         model: 'Category'
       }
     });
@@ -34,24 +34,26 @@ const getCartPage = async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    // await removeBlockedOrUnlistedItems(user);
-
-    const cartItems = user.cart.map(item => ({
-      product: item.productId,
-      quantity: item.quantity,
-      totalPrice: item.productId.salePrice * item.quantity
-    }));
+    // Filter out blocked products or unlisted categories
+    const cartItems = user.cart
+      .filter(item => 
+        item.productId && !item.productId.isBlocked && 
+        item.productId.category && item.productId.category.isListed
+      )
+      .map(item => ({
+        product: item.productId,
+        quantity: item.quantity,
+        totalPrice: item.productId.salePrice * item.quantity
+      }));
 
     const grandTotal = cartItems.reduce((total, item) => total + item.totalPrice, 0);
-
-  
 
     res.render("cart", {
       user,
       cartItems,
-      grandTotal,
-      
+      grandTotal
     });
+
   } catch (error) {
     console.error('Error in getCartPage:', error);
     res.status(500).send('An error occurred while loading the cart');

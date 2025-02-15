@@ -64,10 +64,7 @@ router.get('/orders', adminAuth, orderController.getOrders);
 router.get('/orders/:id', adminAuth, orderController.getOrderDetails);
 router.post('/orders/update-status', adminAuth, orderController.updateOrderStatus);
 
-// New routes for handling cancel and return requests
-router.post('/orders/handle-cancel-request', adminAuth, orderController.handleCancelRequest);
-router.post('/orders/handle-return-request', adminAuth, orderController.handleReturnRequest);
-router.post('/orders/confirm-return', adminAuth, orderController.confirmReturn);
+
 
 // Banner Management  
 router.get("/banner",adminAuth,bannerController.getBannerPage)

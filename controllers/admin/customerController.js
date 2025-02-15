@@ -14,7 +14,7 @@ const customerInfo = async (req, res) => {
         if(req.query.page){
             page = req.query.page
         }
-        const limit = 3;
+        const limit = 9;
         const userData = await User.find({
             isAdmin:false,
              $or:[
@@ -47,12 +47,14 @@ const customerInfo = async (req, res) => {
 const customerBlocked = async (req, res) => {
     try {
       const id = req.query.id
+      const page = req.query.page || 1
+      const search = req.query.search || ""
       await User.updateOne({ _id: id }, { $set: { isBlocked: true } })
   
       // Emit an event when a user is blocked
       userBlockedEmitter.emit("userBlocked", id)
   
-      res.redirect("/admin/users")
+      res.redirect(`/admin/users?page=${page}&search=${search}`)
     } catch (error) {
       res.redirect("/pageerror")
     }

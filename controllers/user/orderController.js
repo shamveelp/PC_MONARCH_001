@@ -1,7 +1,7 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
-const Address = require("../../models/addressSchema")
+const Address = require("../../models/addressSchema");
 
 const placeOrder = async (req, res) => {
     try {
@@ -32,43 +32,38 @@ const placeOrder = async (req, res) => {
 
         const selectedAddress = address.address.find(addr => addr._id.toString() === addressId);
 
-        // Calculate totals
-        const orderedItems = user.cart.map(item => ({
-            product: item.productId._id,
-            quantity: item.quantity,
-            price: item.productId.salePrice,
-            status: 'pending'
+        // Create separate order for each cart item
+        const orders = await Promise.all(user.cart.map(async (item) => {
+            const order = new Order({
+                userId: userId,
+                orderedItems: [{
+                    product: item.productId._id,
+                    quantity: item.quantity,
+                    price: item.productId.salePrice,
+                    status: 'pending'
+                }],
+                totalPrice: item.productId.salePrice * item.quantity,
+                finalAmount: item.productId.salePrice * item.quantity,
+                address: selectedAddress,
+                status: 'pending',
+                createdOn: new Date()
+            });
+
+            // Update product quantity
+            await Product.findByIdAndUpdate(item.productId._id, {
+                $inc: { quantity: -item.quantity }
+            });
+
+            return order.save();
         }));
 
-        const totalPrice = user.cart.reduce((total, item) => 
-            total + (item.productId.salePrice * item.quantity), 0);
-
-        // Create new order
-        const newOrder = new Order({
-            userId: userId,
-            orderedItems,
-            totalPrice,
-            finalAmount: totalPrice,
-            address: selectedAddress,
-            status: 'pending',
-            createdOn: new Date()
-        });
-
-        // Update product quantities and save order
-        await Promise.all([
-            ...user.cart.map(item => 
-                Product.findByIdAndUpdate(item.productId._id, {
-                    $inc: { quantity: -item.quantity }
-                })
-            ),
-            newOrder.save(),
-            User.findByIdAndUpdate(userId, { $set: { cart: [] } })
-        ]);
+        // Clear cart
+        await User.findByIdAndUpdate(userId, { $set: { cart: [] } });
 
         res.json({
             success: true,
-            orderId: newOrder.orderId,
-            message: 'Order placed successfully'
+            orderIds: orders.map(order => order.orderId),
+            message: 'Orders placed successfully'
         });
 
     } catch (error) {
@@ -83,7 +78,6 @@ const placeOrder = async (req, res) => {
 const getOrders = async (req, res) => {
     try {
         const userId = req.session.user;
-        
         const orders = await Order.find({ userId })
             .populate({
                 path: 'orderedItems.product',
@@ -132,7 +126,7 @@ const loadOrderDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { orderId, itemId, reason } = req.body;
+        const { orderId, reason } = req.body;
         const userId = req.session.user;
 
         const order = await Order.findOne({ _id: orderId, userId });
@@ -140,128 +134,25 @@ const cancelOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        if (itemId) {
-            // Cancel specific item
-            const item = order.orderedItems.id(itemId);
-            if (!item) {
-                return res.status(404).json({ success: false, message: 'Item not found' });
-            }
-            if (item.status !== 'cancelled' && item.status !== 'returned') {
-                item.status = 'cancelled';
-                item.cancelReason = reason;
-                item.requestStatus = 'pending';
-            }
-        } else {
-            // Cancel entire order
+        if (order.status !== 'cancelled' && order.status !== 'delivered') {
             order.status = 'cancelled';
             order.cancelReason = reason;
-            order.requestStatus = 'pending';
-            order.orderedItems.forEach(item => {
-                if (item.status !== 'cancelled' && item.status !== 'returned') {
-                    item.status = 'cancelled';
-                    item.cancelReason = reason;
-                    item.requestStatus = 'pending';
-                }
-            });
-        }
+            order.orderedItems[0].status = 'cancelled';
+            order.orderedItems[0].cancelReason = reason;
 
-        await order.save();
-        res.json({ success: true, message: 'Cancellation request submitted successfully' });
+            // Return product quantity to stock
+            await Product.findByIdAndUpdate(order.orderedItems[0].product, {
+                $inc: { quantity: order.orderedItems[0].quantity }
+            });
+
+            await order.save();
+            res.json({ success: true, message: 'Order cancelled successfully' });
+        } else {
+            res.status(400).json({ success: false, message: 'Order cannot be cancelled' });
+        }
 
     } catch (error) {
         console.error('Error in cancelOrder:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-};
-
-const returnOrder = async (req, res) => {
-    try {
-        const { orderId, itemId, reason } = req.body;
-        const userId = req.session.user;
-
-        const order = await Order.findOne({ _id: orderId, userId });
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        if (itemId) {
-            // Return specific item
-            const item = order.orderedItems.id(itemId);
-            if (!item) {
-                return res.status(404).json({ success: false, message: 'Item not found' });
-            }
-            if (item.status === 'delivered') {
-                item.status = 'return_requested';
-                item.returnReason = reason;
-                item.requestStatus = 'pending';
-            }
-        } else {
-            // Return entire order
-            if (order.status === 'delivered') {
-                order.status = 'return_requested';
-                order.returnReason = reason;
-                order.requestStatus = 'pending';
-                order.orderedItems.forEach(item => {
-                    if (item.status === 'delivered') {
-                        item.status = 'return_requested';
-                        item.returnReason = reason;
-                        item.requestStatus = 'pending';
-                    }
-                });
-            }
-        }
-
-        await order.save();
-        res.json({ success: true, message: 'Return request submitted successfully' });
-
-    } catch (error) {
-        console.error('Error in returnOrder:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-};
-
-const cancelReturn = async (req, res) => {
-    try {
-        const { orderId, itemId } = req.body;
-        const userId = req.session.user;
-
-        const order = await Order.findOne({ _id: orderId, userId });
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        if (itemId) {
-            // Cancel return for specific item
-            const item = order.orderedItems.id(itemId);
-            if (!item) {
-                return res.status(404).json({ success: false, message: 'Item not found' });
-            }
-            if (item.status === 'return_requested') {
-                item.status = 'delivered';
-                item.returnReason = null;
-                item.requestStatus = null;
-            }
-        } else {
-            // Cancel return for entire order
-            if (order.status === 'return_requested') {
-                order.status = 'delivered';
-                order.returnReason = null;
-                order.requestStatus = null;
-                order.orderedItems.forEach(item => {
-                    if (item.status === 'return_requested') {
-                        item.status = 'delivered';
-                        item.returnReason = null;
-                        item.requestStatus = null;
-                    }
-                });
-            }
-        }
-
-        await order.save();
-        res.json({ success: true, message: 'Return request cancelled successfully' });
-
-    } catch (error) {
-        console.error('Error in cancelReturn:', error);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
@@ -270,7 +161,5 @@ module.exports = {
     placeOrder,
     getOrders,
     loadOrderDetails,
-    cancelOrder,
-    returnOrder,
-    cancelReturn
+    cancelOrder
 };
