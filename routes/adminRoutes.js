@@ -69,4 +69,8 @@ router.post('/orders/update-status', adminAuth, orderController.updateOrderStatu
 // Banner Management  
 router.get("/banner",adminAuth,bannerController.getBannerPage)
 
+
+
+// Coupon Management
+
 module.exports = router;

@@ -119,7 +119,7 @@ const getAllProducts = async (req, res) => {
   try {
     const search = req.query.search || "";
     const page = req.query.page || 1;
-    const limit = 4;
+    const limit = 9;
 
     const productData = await Product.find({
       $or: [
