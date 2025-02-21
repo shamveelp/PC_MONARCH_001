@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Address = require("../../models/addressSchema"); // Assuming you have an Address model
+const Coupon = require("../../models/couponSchema");
 
 
 
@@ -107,6 +108,35 @@ const postAddAddressCheckout = async (req,res) => {
     }
 }
 
+const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode, subtotal } = req.body;
+        const userId = req.session.user;
+
+        const coupon = await Coupon.findOne({ name: couponCode, isList: true });
+
+        if (!coupon) {
+            return res.json({ success: false, message: 'Invalid coupon code' });
+        }
+
+        if (new Date() > coupon.expireOn) {
+            return res.json({ success: false, message: 'Coupon has expired' });
+        }
+
+        if (subtotal < coupon.minimumPrice) {
+            return res.json({ success: false, message: `Minimum purchase amount should be ₹${coupon.minimumPrice}` });
+        }
+
+        if (coupon.userId.includes(userId)) {
+            return res.json({ success: false, message: 'You have already used this coupon' });
+        }
+
+        res.json({ success: true, coupon: coupon });
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        res.status(500).json({ success: false, message: 'An error occurred while applying the coupon' });
+    }
+};
 
 
 
@@ -114,6 +144,7 @@ module.exports = {
     loadCheckoutPage,
     postAddAddressCheckout,
     addAddressCheckout,
+    applyCoupon,
 
 
 }

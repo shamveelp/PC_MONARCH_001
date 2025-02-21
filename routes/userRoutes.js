@@ -8,6 +8,8 @@ const cartController = require("../controllers/user/cartController")
 const wishlistController = require("../controllers/user/wishlistController")
 const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
+const couponController = require("../controllers/user/couponController")
+const walletController = require("../controllers/user/walletController")
 const multer = require("multer")
 const upload = multer({ storage: multer.memoryStorage() })
 
@@ -81,6 +83,8 @@ router.get("/addAddressCheckout",userAuth,checkoutController.addAddressCheckout)
 router.post("/addAddressCheckout",userAuth,checkoutController.postAddAddressCheckout)
 
 
+
+
 // Profile Management
 router.post("/update-profile",userAuth,profileController.updateProfile)
 router.get("/change-email",userAuth,profileController.changeEmail)
@@ -105,8 +109,21 @@ router.post("/placeOrder", userAuth, orderController.placeOrder);
 router.get("/orders", userAuth, orderController.getOrders);
 router.get("/order-details", userAuth, orderController.loadOrderDetails);
 
+router.post('/create-razorpay-order', userAuth, orderController.createRazorpayOrder);
+router.post('/verify-payment', userAuth, orderController.verifyPayment);
+
 // New routes for order cancellation and returns
 router.post("/orders/cancel", userAuth, orderController.cancelOrder);
+
+
+
+// Coupons Management
+router.get("/mycoupons",userAuth,couponController.loadCoupons)
+router.post("/apply-coupon", userAuth, checkoutController.applyCoupon);
+
+
+// wallet Management
+router.get("/wallet",userAuth,walletController.loadWallet)
 
 
 module.exports = router;

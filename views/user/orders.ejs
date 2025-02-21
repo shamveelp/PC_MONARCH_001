@@ -220,19 +220,20 @@
                     <div class="order-card">
                         <div class="order-header">
                             <div class="row align-items-center">
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <small class="text-muted">ORDER PLACED</small><br>
                                     <%= new Date(order.createdOn).toLocaleDateString() %>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <small class="text-muted">TOTAL</small><br>
-                                    ₹<%= order.finalAmount %>
+                                    ₹<%= Math.round(order.finalAmount) %>
                                 </div>
                                 <div class="col-md-3">
                                     <small class="text-muted">ORDER ID</small><br>
                                     #<%= order.orderId %>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
+                                    <small class="text-muted">ORDER STATUS</small><br>
                                     <span class="status-badge <%= 
                                         order.status === 'delivered' ? 'bg-success' :
                                         order.status === 'cancelled' ? 'bg-danger' :
@@ -241,6 +242,18 @@
                                     %>">
                                         <%= order.status.toUpperCase() %>
                                     </span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">PAYMENT METHOD</small><br>
+                                    <% if (order.paymentMethod === 'cod') { %>
+                                        CASH ON DELIVERY
+                                    <% } else if (order.paymentMethod === 'online') { %>
+                                        ONLINE PAYMENT
+                                    <% } else if (order.paymentMethod === 'wallet') { %>
+                                        WALLET PAYMENT
+                                    <% } else { %>
+                                        UNKNOWN PAYMENT METHOD
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -255,7 +268,7 @@
                                 <div class="col-md-6">
                                     <h5><%= order.orderedItems[0].product.productName %></h5>
                                     <p class="text-muted mb-0">Quantity: <%= order.orderedItems[0].quantity %></p>
-                                    <p class="text-muted">Price: ₹<%= order.orderedItems[0].price %></p>
+                                    <p class="text-muted">Price: ₹<%= order.totalPrice/ order.orderedItems[0].quantity %></p>
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <a href="/order-details?orderId=<%= order.orderId %>" 

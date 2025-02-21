@@ -6,6 +6,8 @@ const categoryController = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
 const bannerController = require("../controllers/admin/bannerController");
 const orderController = require("../controllers/admin/orderController");
+const couponController = require('../controllers/admin/couponController');
+
 const { adminAuth } = require('../middlewares/auth');
 const multer = require("multer");
 const upload = multer();
@@ -72,5 +74,10 @@ router.get("/banner",adminAuth,bannerController.getBannerPage)
 
 
 // Coupon Management
+router.get("/coupon",adminAuth,couponController.loadCoupon)
+router.post("/createCoupon",adminAuth,couponController.createCoupon)
+router.get("/editCoupon",adminAuth,couponController.editCoupon)
+router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
+router.get("/deletecoupon",adminAuth,couponController.deleteCoupon)
 
 module.exports = router;

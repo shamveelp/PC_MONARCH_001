@@ -1,14 +1,42 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
+const Coupon = require("../../models/couponSchema");
 const Address = require("../../models/addressSchema");
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const env = require('dotenv').config();
+
+
+const DELIVERY_CHARGE = 50; // Fixed delivery charge
+
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+// Helper function to distribute discount proportionally
+const distributeDiscount = (cartItems, totalDiscount) => {
+    const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cartItems.map(item => {
+        const itemTotal = item.price * item.quantity;
+        const discountShare = (itemTotal / totalAmount) * totalDiscount;
+        return {
+            ...item,
+            discountedPrice: item.price - (discountShare / item.quantity)
+        };
+    });
+};
+
+
 
 const placeOrder = async (req, res) => {
     try {
         const userId = req.session.user;
-        const { addressId } = req.body;
+        const { addressId, paymentMethod, couponCode } = req.body;
 
-        // Get user and cart items
         const user = await User.findById(userId).populate({
             path: 'cart.productId',
             model: 'Product'
@@ -21,7 +49,6 @@ const placeOrder = async (req, res) => {
             });
         }
 
-        // Get address details
         const address = await Address.findOne({ userId: userId, 'address._id': addressId });
         if (!address) {
             return res.status(400).json({
@@ -32,25 +59,53 @@ const placeOrder = async (req, res) => {
 
         const selectedAddress = address.address.find(addr => addr._id.toString() === addressId);
 
-        // Create separate order for each cart item
-        const orders = await Promise.all(user.cart.map(async (item) => {
+        // Calculate total and apply coupon if present
+        let totalAmount = user.cart.reduce((sum, item) => 
+            sum + (item.productId.salePrice * item.quantity), 0);
+        let discount = 0;
+        let couponApplied = false;
+
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ name: couponCode, isList: true });
+            if (coupon && !coupon.userId.includes(userId)) {
+                discount = coupon.offerPrice;
+                couponApplied = true;
+                // Mark coupon as used
+                await Coupon.findByIdAndUpdate(coupon._id, {
+                    $push: { userId: userId }
+                });
+            }
+        }
+
+        const finalAmount = totalAmount - discount + DELIVERY_CHARGE;
+        const discountedItems = distributeDiscount(user.cart.map(item => ({
+            product: item.productId._id,
+            quantity: item.quantity,
+            price: item.productId.salePrice
+        })), discount);
+
+        // Create orders with distributed discount
+        const orders = await Promise.all(discountedItems.map(async (item) => {
             const order = new Order({
                 userId: userId,
                 orderedItems: [{
-                    product: item.productId._id,
+                    product: item.product,
                     quantity: item.quantity,
-                    price: item.productId.salePrice,
+                    price: item.discountedPrice,
                     status: 'pending'
                 }],
-                totalPrice: item.productId.salePrice * item.quantity,
-                finalAmount: item.productId.salePrice * item.quantity,
+                totalPrice: item.price * item.quantity,
+                discount: item.price * item.quantity - (item.discountedPrice * item.quantity),
+                finalAmount: (item.discountedPrice * item.quantity) + (DELIVERY_CHARGE / discountedItems.length),
                 address: selectedAddress,
                 status: 'pending',
+                paymentMethod: paymentMethod,
+                couponApplied: couponApplied,
+                deliveryCharge: DELIVERY_CHARGE / discountedItems.length,
                 createdOn: new Date()
             });
 
-            // Update product quantity
-            await Product.findByIdAndUpdate(item.productId._id, {
+            await Product.findByIdAndUpdate(item.product, {
                 $inc: { quantity: -item.quantity }
             });
 
@@ -157,9 +212,103 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+
+const createRazorpayOrder = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { addressId, couponCode } = req.body;
+
+        const user = await User.findById(userId).populate({
+            path: 'cart.productId',
+            model: 'Product'
+        });
+
+        if (!user || user.cart.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cart is empty'
+            });
+        }
+
+        let totalAmount = user.cart.reduce((sum, item) => 
+            sum + (item.productId.salePrice * item.quantity), 0);
+        let discount = 0;
+
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ name: couponCode, isList: true });
+            if (coupon && !coupon.userId.includes(userId)) {
+                discount = coupon.offerPrice;
+            }
+        }
+
+        const finalAmount = totalAmount - discount + DELIVERY_CHARGE;
+
+        const razorpayOrder = await razorpay.orders.create({
+            amount: finalAmount * 100, // Amount in paise
+            currency: 'INR',
+            receipt: `order_${Date.now()}`
+        });
+
+        res.json({
+            success: true,
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+            orderId: razorpayOrder.id,
+            amount: finalAmount * 100,
+            currency: 'INR',
+            customerName: user.name,
+            customerEmail: user.email,
+            customerPhone: user.phone
+        });
+
+    } catch (error) {
+        console.error('Error in createRazorpayOrder:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create order'
+        });
+    }
+};
+
+const verifyPayment = async (req, res) => {
+    try {
+        const { paymentResponse, orderData } = req.body;
+        
+        const sign = paymentResponse.razorpay_order_id + "|" + paymentResponse.razorpay_payment_id;
+        const expectedSign = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(sign)
+            .digest("hex");
+
+        if (expectedSign !== paymentResponse.razorpay_signature) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid payment signature'
+            });
+        }
+
+        // Place order with payment method as 'online'
+        orderData.paymentMethod = 'online';
+        const result = await placeOrder({ 
+            session: { user: req.session.user }, 
+            body: orderData 
+        }, res);
+
+        return result;
+
+    } catch (error) {
+        console.error('Error in verifyPayment:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Payment verification failed'
+        });
+    }
+};
+
 module.exports = {
     placeOrder,
     getOrders,
     loadOrderDetails,
-    cancelOrder
+    cancelOrder,
+    createRazorpayOrder,
+    verifyPayment
 };

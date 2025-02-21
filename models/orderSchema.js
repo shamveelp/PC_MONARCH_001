@@ -55,12 +55,21 @@ const orderSchema = new Schema({
         type: Number,
         default: 0
     },
+    deliveryCharge: {
+        type: Number,
+        default: 50
+    },
     finalAmount: {
         type: Number,
         required: true
     },
     address: {
         type: Schema.Types.Mixed,
+        required: true
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['cod', 'online', 'wallet'],
         required: true
     },
     invoiceDate: {
