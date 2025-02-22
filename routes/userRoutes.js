@@ -123,7 +123,13 @@ router.post("/apply-coupon", userAuth, checkoutController.applyCoupon);
 
 
 // wallet Management
-router.get("/wallet",userAuth,walletController.loadWallet)
+router.get('/wallet',userAuth, walletController.loadWallet);
+router.post('/wallet/create-razorpay-order', userAuth, walletController.createRazorpayOrder);
+router.post('/wallet/verify-payment', userAuth, walletController.verifyPayment);
+router.post('/wallet/withdraw-money', userAuth, walletController.withdrawMoney);
+router.post('/place-wallet-order', userAuth, orderController.placeWalletOrder);
+
+
 
 
 module.exports = router;

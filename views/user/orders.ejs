@@ -266,7 +266,7 @@
                                          class="product-image">
                                 </div>
                                 <div class="col-md-6">
-                                    <h5><%= order.orderedItems[0].product.productName %></h5>
+                                    <a href="/productDetails?id=<%= order.orderedItems.product %>"><h5><%= order.orderedItems[0].product.productName %></h5></a>
                                     <p class="text-muted mb-0">Quantity: <%= order.orderedItems[0].quantity %></p>
                                     <p class="text-muted">Price: ₹<%= order.totalPrice/ order.orderedItems[0].quantity %></p>
                                 </div>

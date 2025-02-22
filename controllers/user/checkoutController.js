@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Address = require("../../models/addressSchema"); // Assuming you have an Address model
 const Coupon = require("../../models/couponSchema");
+const Wallet = require("../../models/walletSchema");
 
 
 
@@ -17,6 +18,12 @@ const loadCheckoutPage = async (req, res) => {
               model: "Category",
           },
       });
+      const wallet = await Wallet.findOne({ userId: userId });
+        
+        let transactions = [];
+        if (wallet) {
+            transactions = wallet.transactions.sort((a, b) => b.createdAt - a.createdAt);
+        }
 
       const addressData = await Address.findOne({ userId: userId });
 
@@ -49,6 +56,7 @@ const loadCheckoutPage = async (req, res) => {
           shippingCharge,
           grandTotal,
           userAddress: addressData,
+          wallet: wallet || { balance: 0, refundAmount: 0, totalDebited: 0 },
       });
   } catch (error) {
       console.error("Error in loadCheckoutPage:", error);
