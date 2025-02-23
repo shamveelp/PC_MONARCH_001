@@ -11,7 +11,7 @@ const orderController = require("../controllers/user/orderController")
 const couponController = require("../controllers/user/couponController")
 const walletController = require("../controllers/user/walletController")
 const multer = require("multer")
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = require('../config/multer');
 
 const { userAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn} = require("../middlewares/profileAuth")
@@ -114,6 +114,8 @@ router.post('/verify-payment', userAuth, orderController.verifyPayment);
 
 // New routes for order cancellation and returns
 router.post("/orders/cancel", userAuth, orderController.cancelOrder);
+router.post("/orders/return", userAuth, upload.array('images', 3), orderController.requestReturn);
+router.post("/orders/cancel-return", userAuth, orderController.cancelReturnRequest);
 
 
 

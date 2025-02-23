@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema")
 const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
+const Category = require("../../models/categorySchema")
 const Coupon = require("../../models/couponSchema")
 const Address = require("../../models/addressSchema")
 const Wallet = require("../../models/walletSchema")
@@ -141,12 +142,19 @@ const getOrders = async (req, res) => {
         select: "productName productImage price",
       })
       .sort({ createdOn: -1 })
+      const categories = await Category.find({isListed:true})
+        let productData = await Product.find({
+            isBlocked:false,
+            category:{$in:categories.map(category=>category._id)},
+            quantity:{$gt:0},
+        })
 
     const user = await User.findById(userId)
 
     res.render("orders", {
       orders: orders,
       user: user,
+      product:productData
     })
   } catch (error) {
     console.error("Error in getOrders:", error)
@@ -182,35 +190,55 @@ const loadOrderDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
   try {
-    const { orderId, reason } = req.body
-    const userId = req.session.user
+      const { orderId, reason } = req.body;
+      const userId = req.session.user;
 
-    const order = await Order.findOne({ _id: orderId, userId })
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
-    }
+      const order = await Order.findOne({ _id: orderId, userId });
+      if (!order) {
+          return res.status(404).json({ success: false, message: "Order not found" });
+      }
 
-    if (order.status !== "cancelled" && order.status !== "delivered") {
-      order.status = "cancelled"
-      order.cancelReason = reason
-      order.orderedItems[0].status = "cancelled"
-      order.orderedItems[0].cancelReason = reason
+      if (order.status !== 'cancelled' && order.status !== 'delivered') {
+          order.status = 'cancelled';
+          order.cancelReason = reason;
+          order.orderedItems[0].status = 'cancelled';
+          order.orderedItems[0].cancelReason = reason;
 
-      // Return product quantity to stock
-      await Product.findByIdAndUpdate(order.orderedItems[0].product, {
-        $inc: { quantity: order.orderedItems[0].quantity },
-      })
+          // Return product quantity to stock
+          await Product.findByIdAndUpdate(order.orderedItems[0].product, {
+              $inc: { quantity: order.orderedItems[0].quantity }
+          });
 
-      await order.save()
-      res.json({ success: true, message: "Order cancelled successfully" })
-    } else {
-      res.status(400).json({ success: false, message: "Order cannot be cancelled" })
-    }
+          // Process refund for online and wallet payments
+          if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
+              let wallet = await Wallet.findOne({ userId });
+              if (!wallet) {
+                  wallet = new Wallet({ userId, balance: 0 });
+              }
+
+              const refundAmount = order.finalAmount - order.deliveryCharge;
+              wallet.balance += refundAmount;
+              wallet.refundAmount += refundAmount;
+              wallet.transactions.push({
+                  amount: refundAmount,
+                  transactionType: 'credit',
+                  transactionPurpose: 'refund',
+                  description: `Refund for cancelled order #${order.orderId}`
+              });
+
+              await wallet.save();
+          }
+
+          await order.save();
+          res.json({ success: true, message: "Order cancelled successfully" });
+      } else {
+          res.status(400).json({ success: false, message: "Order cannot be cancelled" });
+      }
   } catch (error) {
-    console.error("Error in cancelOrder:", error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+      console.error("Error in cancelOrder:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
   }
-}
+};
 
 const createRazorpayOrder = async (req, res) => {
   try {
@@ -419,6 +447,137 @@ const placeWalletOrder = async (req, res) => {
   }
 }
 
+
+const requestReturn = async (req, res) => {
+  try {
+      const { orderId, returnReason, returnDescription } = req.body; // Changed from reason to returnReason
+      const userId = req.session.user;
+      const files = req.files;
+
+      const order = await Order.findOne({ _id: orderId, userId });
+      if (!order) {
+          return res.status(404).json({ success: false, message: "Order not found" });
+      }
+
+      // Check if order is delivered and within return period
+      const deliveryDate = new Date(order.updatedAt);
+      const currentDate = new Date();
+      const daysSinceDelivery = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24));
+
+      if (order.status !== 'delivered' || daysSinceDelivery > 7) {
+          return res.status(400).json({ 
+              success: false, 
+              message: "Order is not eligible for return" 
+          });
+      }
+
+      // Process uploaded images
+      let imagePaths = [];
+      if (files && files.length > 0) {
+          imagePaths = files.map(file => `uploads/returns/${file.filename}`);
+      }
+
+      // Update order status
+      order.status = 'return_requested';
+      order.returnReason = returnReason; // Using returnReason instead of reason
+      order.returnDescription = returnDescription;
+      order.returnImages = imagePaths;
+      order.requestStatus = 'pending';
+      
+      // Update ordered items status
+      order.orderedItems[0].status = 'return_requested';
+      order.orderedItems[0].returnReason = returnReason; // Using returnReason instead of reason
+      order.orderedItems[0].returnDescription = returnDescription;
+      order.orderedItems[0].returnImages = imagePaths;
+      order.orderedItems[0].requestStatus = 'pending';
+
+      await order.save();
+
+      res.json({ 
+          success: true, 
+          message: "Return request submitted successfully" 
+      });
+
+  } catch (error) {
+      console.error("Error in requestReturn:", error);
+      res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+      });
+  }
+};
+
+const processRefund = async (userId, order) => {
+  try {
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+          wallet = new Wallet({ userId, balance: 0 });
+      }
+
+      // Calculate refund amount (excluding delivery charge)
+      const refundAmount = order.finalAmount - order.deliveryCharge;
+
+      // Update wallet
+      wallet.balance += refundAmount;
+      wallet.refundAmount += refundAmount;
+      wallet.transactions.push({
+          amount: refundAmount,
+          transactionType: 'credit',
+          transactionPurpose: 'refund',
+          description: `Refund for order #${order.orderId}`
+      });
+
+      await wallet.save();
+      return true;
+  } catch (error) {
+      console.error("Error processing refund:", error);
+      return false;
+  }
+};
+
+
+const cancelReturnRequest = async (req, res) => {
+  try {
+      const { orderId } = req.body;
+      const userId = req.session.user;
+
+      const order = await Order.findOne({ _id: orderId, userId });
+      if (!order) {
+          return res.status(404).json({ success: false, message: "Order not found" });
+      }
+
+      if (order.status !== 'return_requested' || order.requestStatus !== 'pending') {
+          return res.status(400).json({ 
+              success: false, 
+              message: "Return request cannot be cancelled" 
+          });
+      }
+
+      order.status = 'delivered';
+      order.returnReason = undefined;
+      order.returnImages = [];
+      order.requestStatus = undefined;
+      order.adminMessage = undefined;
+      
+      await order.save();
+
+      res.json({ 
+          success: true, 
+          message: "Return request cancelled successfully" 
+      });
+
+  } catch (error) {
+      console.error("Error in cancelReturnRequest:", error);
+      res.status(500).json({ 
+          success: false, 
+          message: "Internal server error" 
+      });
+  }
+};
+
+
+
+
 module.exports = {
   placeOrder,
   getOrders,
@@ -427,5 +586,10 @@ module.exports = {
   createRazorpayOrder,
   verifyPayment,
   placeWalletOrder,
+  requestReturn,
+  processRefund,
+  cancelReturnRequest,
+
+
 }
 

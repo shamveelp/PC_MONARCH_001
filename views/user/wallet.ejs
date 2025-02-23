@@ -243,7 +243,7 @@ body {
                 <h2 class="unique-title">Wallet & Transactions</h2>
                 <div class="row mb-4">
                     <div class="col-md-4 mb-3">
-                        <div class="unique-balance-card available">
+                        <div  id="add-money-button" class="unique-balance-card available">
                             <p class="amount">₹<span id="availableBalance"><%= wallet.balance.toFixed(2) %></span></p>
                             <p>Available Balance</p>
                         </div>
@@ -326,10 +326,10 @@ body {
                     <input type="number" id="amount" class="form-control form-control-lg text-center" placeholder="Enter Amount (₹)" min="1" step="1">
                 </div>
                 <div class="text-center mb-4">
-                    <div class="quick-amount" onclick="setAmount(100)">₹100</div>
-                    <div class="quick-amount" onclick="setAmount(500)">₹500</div>
-                    <div class="quick-amount" onclick="setAmount(1000)">₹1000</div>
-                    <div class="quick-amount" onclick="setAmount(2000)">₹2000</div>
+                    <div class="quick-amount" onclick="setAmount(10000)">₹10000</div>
+                    <div class="quick-amount" onclick="setAmount(50000)">₹50000</div>
+                    <div class="quick-amount" onclick="setAmount(100000)">₹100000</div>
+                    <div class="quick-amount" onclick="setAmount(200000)">₹200000</div>
                 </div>
             </div>
             <div class="modal-footer">

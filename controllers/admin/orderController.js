@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
+const processRefund = require("../user/orderController").processRefund;
 
 const getOrders = async (req, res) => {
     try {
@@ -99,9 +100,107 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+
+const handleReturnRequest = async (req, res) => {
+    try {
+        const { orderId, action, message, category } = req.body;
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Order not found" 
+            });
+        }
+
+        if (action === 'approve') {
+            order.status = 'returning';
+            order.requestStatus = 'approved';
+            order.orderedItems[0].status = 'returning';
+            order.orderedItems[0].requestStatus = 'approved';
+        } else if (action === 'reject') {
+            order.status = 'delivered';
+            order.requestStatus = 'rejected';
+            order.rejectionCategory = category;
+            order.rejectionReason = message;
+            order.orderedItems[0].status = 'delivered';
+            order.orderedItems[0].requestStatus = 'rejected';
+            order.orderedItems[0].rejectionCategory = category;
+            order.orderedItems[0].rejectionReason = message;
+        }
+
+        await order.save();
+        res.json({ 
+            success: true, 
+            message: `Return request ${action}ed successfully` 
+        });
+
+    } catch (error) {
+        console.error("Error handling return request:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal server error" 
+        });
+    }
+};
+
+const updateReturnStatus = async (req, res) => {
+    try {
+        const { orderId, status } = req.body;
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Order not found" 
+            });
+        }
+
+        if (order.status !== 'returning' && status === 'returned') {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Order must be in returning status first" 
+            });
+        }
+
+        order.status = status;
+        order.orderedItems[0].status = status;
+
+        // If status is 'returned', process the refund
+        if (status === 'returned') {
+            const refundSuccess = await processRefund(order.userId, order);
+            if (!refundSuccess) {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Failed to process refund" 
+                });
+            }
+        }
+
+        await order.save();
+        res.json({ 
+            success: true, 
+            message: "Return status updated successfully" 
+        });
+
+    } catch (error) {
+        console.error("Error updating return status:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal server error" 
+        });
+    }
+};
+
+
+
 module.exports = {
     getOrders,
     getOrderDetails,
     updateOrderStatus,
-    cancelOrder
+    cancelOrder,
+    handleReturnRequest,
+    updateReturnStatus,
+
+
 };

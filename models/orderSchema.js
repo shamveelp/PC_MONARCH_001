@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
-const {v4: uuidv4} = require('uuid');
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
 const orderSchema = new Schema({
     orderId: {
@@ -33,17 +33,6 @@ const orderSchema = new Schema({
             default: 'pending'
         },
         cancelReason: {
-            type: String
-        },
-        returnReason: {
-            type: String
-        },
-        requestStatus: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending'
-        },
-        adminMessage: {
             type: String
         }
     }],
@@ -84,15 +73,24 @@ const orderSchema = new Schema({
     cancelReason: {
         type: String
     },
-    returnReason: {
+    returnReason: { // Moved to order level
         type: String
     },
+    returnDescription: { // Moved to order level
+        type: String
+    },
+    returnImages: [{ // Moved to order level
+        type: String
+    }],
     requestStatus: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
-    adminMessage: {
+    rejectionCategory: {
+        type: String
+    },
+    rejectionReason: {
         type: String
     },
     createdOn: {

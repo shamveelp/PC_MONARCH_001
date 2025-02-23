@@ -7,6 +7,7 @@ const productController = require('../controllers/admin/productController');
 const bannerController = require("../controllers/admin/bannerController");
 const orderController = require("../controllers/admin/orderController");
 const couponController = require('../controllers/admin/couponController');
+const salesController = require('../controllers/admin/salesController');
 
 const { adminAuth } = require('../middlewares/auth');
 const multer = require("multer");
@@ -65,6 +66,8 @@ router.get('/deleteProduct',adminAuth,productController.deleteProduct);
 router.get('/orders', adminAuth, orderController.getOrders);
 router.get('/orders/:id', adminAuth, orderController.getOrderDetails);
 router.post('/orders/update-status', adminAuth, orderController.updateOrderStatus);
+router.post('/orders/handle-return', adminAuth, orderController.handleReturnRequest);
+router.post('/orders/update-return-status', adminAuth, orderController.updateReturnStatus);
 
 
 
@@ -79,5 +82,13 @@ router.post("/createCoupon",adminAuth,couponController.createCoupon)
 router.get("/editCoupon",adminAuth,couponController.editCoupon)
 router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
 router.get("/deletecoupon",adminAuth,couponController.deleteCoupon)
+
+
+
+// Sales Management
+router.get('/sales', adminAuth, salesController.loadSalesPage);
+router.get('/sales/report', adminAuth, salesController.loadSalesPage);
+
+
 
 module.exports = router;

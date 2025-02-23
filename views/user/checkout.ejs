@@ -223,7 +223,7 @@
                     <div class="alert alert-warning">
                         Insufficient funds in wallet. Please add money to continue.
                     </div>
-                    <button class="btn btn-primary" onclick="showAddMoneyModal()">Add Money</button>
+                    <a href="/wallet#add-money-button" class="btn btn-primary">Add Money</a>
                 </div>
             </div>
             <div class="modal-footer">
@@ -233,36 +233,6 @@
         </div>
     </div>
 </div>
-
-<!-- Add Money Modal -->
-<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-4">
-                    <input type="number" id="amount" class="form-control form-control-lg text-center" placeholder="Enter Amount (₹)" min="1" step="1">
-                </div>
-                <div class="text-center mb-4">
-                    <div class="quick-amount" onclick="setAmount(100)">₹100</div>
-                    <div class="quick-amount" onclick="setAmount(500)">₹500</div>
-                    <div class="quick-amount" onclick="setAmount(1000)">₹1000</div>
-                    <div class="quick-amount" onclick="setAmount(2000)">₹2000</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="payButton">Add Money</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 
     
@@ -574,18 +544,7 @@ function placeWalletOrder(orderData) {
 
 
 
-function showAddMoneyModal() {
-    const walletPaymentModal = bootstrap.Modal.getInstance(document.getElementById('walletPaymentModal'));
-    walletPaymentModal.hide();
-    
-    const addMoneyModal = new bootstrap.Modal(document.getElementById('addMoneyModal'));
-    addMoneyModal.show();
 
-    // Add event listener for modal close button
-    document.querySelector('#addMoneyModal .btn-close').addEventListener('click', () => {
-        addMoneyModal.hide();
-    });
-}
 
 document.getElementById('confirmWalletPayment').addEventListener('click', async () => {
     const selectedAddress = document.getElementById('existingAddress');
@@ -630,101 +589,10 @@ document.getElementById('confirmWalletPayment').addEventListener('click', async 
     }
 });
 
-// Add Money to Wallet
-document.getElementById('payButton').addEventListener('click', async () => {
-    const amount = document.getElementById('amount').value;
-    
-    if (!amount || amount < 1) {
-        Swal.fire('Error', 'Please enter a valid amount', 'error');
-        return;
-    }
-
-    try {
-        const response = await fetch('/wallet/create-razorpay-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ amount })
-        });
-
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.message);
-        }
-
-        const options = {
-            key: data.key_id,
-            amount: data.amount,
-            currency: "INR",
-            name: "Wallet Recharge",
-            description: "Add money to wallet",
-            order_id: data.order_id,
-            handler: async function (response) {
-                try {
-                    const verifyResponse = await fetch('/wallet/verify-payment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(response)
-                    });
-
-                    const verifyData = await verifyResponse.json();
-                    
-                    if (verifyData.success) {
-                        $('#addMoneyModal').modal('hide');
-                        const updatedBalance = parseFloat(document.getElementById('walletBalance').textContent) + parseFloat(amount);
-                        document.getElementById('walletBalance').textContent = updatedBalance.toFixed(2);
-                        document.getElementById('modalWalletBalance').textContent = updatedBalance.toFixed(2);
-                        
-                        // Check if we can now proceed with the payment
-                        const payableAmount = parseFloat(document.getElementById('payableAmount').textContent);
-                        if (updatedBalance >= payableAmount) {
-                            document.getElementById('insufficientFunds').style.display = 'none';
-                            document.getElementById('confirmWalletPayment').style.display = 'block';
-                        }
-                        
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'Money added to wallet successfully',
-                            icon: 'success',
-                            confirmButtonText: 'Continue Payment'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                $('#walletPaymentModal').modal('show');
-                            }
-                        });
-                    } else {
-                        Swal.fire('Error', 'Payment verification failed', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire('Error', 'Payment verification failed', 'error');
-                }
-            },
-            theme: {
-                color: "#4a5568"
-            }
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.open();
-    } catch (error) {
-        console.error('Error:', error);
-        Swal.fire('Error', 'Failed to process payment', 'error');
-    }
-});
-
-function setAmount(amount) {
-    document.getElementById('amount').value = amount;
-}
-
-
-
     // Update the place order button onclick handler
     document.querySelector('.place-order-btn').onclick = placeOrder;
+
+    
 </script>
 
 <%- include('../partials/user/footer') %>
