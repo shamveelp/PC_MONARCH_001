@@ -1,11 +1,9 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const Address = require("../../models/addressSchema"); // Assuming you have an Address model
+const Address = require("../../models/addressSchema");
 const Coupon = require("../../models/couponSchema");
 const Wallet = require("../../models/walletSchema");
-
-
 
 const loadCheckoutPage = async (req, res) => {
   try {
@@ -20,10 +18,10 @@ const loadCheckoutPage = async (req, res) => {
       });
       const wallet = await Wallet.findOne({ userId: userId });
         
-        let transactions = [];
-        if (wallet) {
-            transactions = wallet.transactions.sort((a, b) => b.createdAt - a.createdAt);
-        }
+      let transactions = [];
+      if (wallet) {
+          transactions = wallet.transactions.sort((a, b) => b.createdAt - a.createdAt);
+      }
 
       const addressData = await Address.findOne({ userId: userId });
 
@@ -31,13 +29,14 @@ const loadCheckoutPage = async (req, res) => {
           return res.status(404).send("User not found");
       }
 
-      // ✅ Filter out blocked products and unlisted categories
+      // Filter out blocked products, unlisted categories, and products with quantity <= 0
       const cartItems = user.cart
           .filter(item => 
               item.productId && 
               !item.productId.isBlocked && 
               item.productId.category && 
-              item.productId.category.isListed
+              item.productId.category.isListed && 
+              item.productId.quantity > 0 // Added quantity check
           )
           .map((item) => ({
               product: item.productId,
@@ -64,57 +63,44 @@ const loadCheckoutPage = async (req, res) => {
   }
 };
 
-
-const addAddressCheckout = async (req,res) => {
+const addAddressCheckout = async (req, res) => {
     try {
-        
         const user = req.session.user;
         const userData = await User.findById(user);
-        res.render("add-address-checkout",{
-            
-            theUser:user,
-            user:userData
-        })
-
+        res.render("add-address-checkout", {
+            theUser: user,
+            user: userData
+        });
     } catch (error) {
-
-        res.redirect("/pageNotFound")
-        
+        res.redirect("/pageNotFound");
     }
-}
+};
 
-
-const postAddAddressCheckout = async (req,res) => {
+const postAddAddressCheckout = async (req, res) => {
     try {
-        
         const userId = req.session.user;
-        const userData = await User.findOne({_id:userId})
+        const userData = await User.findOne({ _id: userId });
         const { addressType, name, country, city, landMark, state, streetAddress, pincode, phone, email, altPhone } = req.body;
 
-        const userAddress = await Address.findOne({userId:userData._id});
+        const userAddress = await Address.findOne({ userId: userData._id });
         
-        if(!userAddress){
+        if (!userAddress) {
             const newAddress = new Address({
-                userId:userData,
-                address: [{addressType, name, country, city, landMark, state, streetAddress, pincode, phone, email, altPhone}]
-
+                userId: userData,
+                address: [{ addressType, name, country, city, landMark, state, streetAddress, pincode, phone, email, altPhone }]
             });
             await newAddress.save();
-        }else{
-            userAddress.address.push({addressType, name, country, city, landMark, state, streetAddress, pincode, phone, email, altPhone})
+        } else {
+            userAddress.address.push({ addressType, name, country, city, landMark, state, streetAddress, pincode, phone, email, altPhone });
             await userAddress.save();
         }
 
-        res.redirect("/checkout")
-
+        res.redirect("/checkout");
     } catch (error) {
-
-        console.error("Error adding address",error)
-
-        res.redirect("/pageNotFound")
-        
+        console.error("Error adding address", error);
+        res.redirect("/pageNotFound");
     }
-}
+};
 
 const applyCoupon = async (req, res) => {
     try {
@@ -146,13 +132,9 @@ const applyCoupon = async (req, res) => {
     }
 };
 
-
-
 module.exports = {
     loadCheckoutPage,
     postAddAddressCheckout,
     addAddressCheckout,
     applyCoupon,
-
-
-}
+};

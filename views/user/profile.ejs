@@ -1,6 +1,7 @@
 <%- include("../../views/partials/user/header") %>
 
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
@@ -233,13 +234,22 @@
         }
         .password-wrapper {
             position: relative;
+            display: inline-block; /* Changed from block to inline-block */
+            width: 55%; /* Match your input width */
         }
+
+        .password-wrapper input {
+            width: 100%; /* Make input fill the wrapper */
+            padding-right: 40px; /* Add padding to prevent text overlap with icon */
+        }
+
         .toggle-password {
             position: absolute;
-            right: 395px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
+            z-index: 1; /* Ensure icon stays above input */
         }
     </style>
 </head>
@@ -312,39 +322,30 @@
                     <button type="submit" class="btn btn-success">Save Changes</button>
                 </form>
                 <hr class="mt-4 mb-4">
-<h3>Change Password</h3>
+                <h3>Change Password</h3>
                 <form id="changePasswordForm">
                     <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
+                        <label for="currentPassword">Current Password</label><br>
                         <div class="password-wrapper">
-                            <input style="width: 55%;" type="password" class="form-control" id="currentPassword" name="currentPassword" required>
-                            <i  ><svg onclick="togglePassword('confirmPassword', this)" class="fas fa-eye toggle-password" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                              </svg></i>
-                        </div>
+                            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                            <i onclick="togglePassword('currentPassword', this)" class="bi bi-eye-fill toggle-password"></i>
+                        </div><br>
                         <small id="currentPasswordError" class="text-danger"></small>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="newPassword">New Password</label>
+                        <label for="newPassword">New Password</label><br>
                         <div class="password-wrapper">
-                            <input style="width: 55%;" type="password" class="form-control" id="newPassword" name="newPassword" required>
-                            <i  ><svg onclick="togglePassword('confirmPassword', this)" class="fas fa-eye toggle-password" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                              </svg></i>
-                        </div>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            <i onclick="togglePassword('newPassword', this)" class="bi bi-eye-fill toggle-password"></i>
+                        </div><br>
                         <small id="newPasswordError" class="text-danger"></small>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="confirmPassword">Confirm New Password</label>
+                        <label for="confirmPassword">Confirm New Password</label><br>
                         <div class="password-wrapper">
-                            <input style="width: 55%;" type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                            <i ><svg  onclick="togglePassword('confirmPassword', this)" class="fas fa-eye toggle-password" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                              </svg></i>
-                        </div>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            <i onclick="togglePassword('confirmPassword', this)" class="bi bi-eye-fill toggle-password"></i>
+                        </div><br>
                         <small id="confirmPasswordError" class="text-danger"></small>
                     </div>
                     <button type="submit" class="btn btn-primary mt-3">Change Password</button>
@@ -363,16 +364,17 @@
     <script>
 
 function togglePassword(inputId, icon) {
-            const input = document.getElementById(inputId);
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.replace("fa-eye", "fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.replace("fa-eye-slash", "fa-eye");
-            }
-        }
-
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.add('bi-eye-slash-fill');
+        icon.classList.remove('bi-eye-fill');
+    } else {
+        input.type = "password";
+        icon.classList.add('bi-eye-fill');
+        icon.classList.remove('bi-eye-slash-fill');
+    }
+}
 
 
     document.getElementById('profileForm').addEventListener('submit', async (e) => {

@@ -37,7 +37,8 @@ const productSchema = new Schema({
     },
     quantity:{
         type: Number,
-        required: true
+        required: true,
+        min: [0, 'Quantity cannot be less than 0']
     },
     color:{
         type: String,

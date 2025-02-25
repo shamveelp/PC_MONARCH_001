@@ -1,22 +1,19 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema")
+const Category = require("../../models/categorySchema");
 
-
-
+// Clean cart by removing blocked, unlisted, or zero-quantity items
 const removeBlockedOrUnlistedItems = async (user) => {
   const updatedCart = [];
   for (const item of user.cart) {
     const product = await Product.findById(item.productId).populate('category');
-    if (product && product.isActive && product.category.isListed) {
+    if (product && product.isBlocked === false && product.category.isListed && product.quantity > 0) {
       updatedCart.push(item);
     }
   }
   user.cart = updatedCart;
   await user.save();
 };
-
-
 
 const getCartPage = async (req, res) => {
   try {
@@ -34,11 +31,14 @@ const getCartPage = async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    // Filter out blocked products or unlisted categories
+    // Filter out blocked products, unlisted categories, or products with quantity <= 0
     const cartItems = user.cart
       .filter(item => 
-        item.productId && !item.productId.isBlocked && 
-        item.productId.category && item.productId.category.isListed
+        item.productId && 
+        !item.productId.isBlocked && 
+        item.productId.category && 
+        item.productId.category.isListed && 
+        item.productId.quantity > 0 // Added quantity check
       )
       .map(item => ({
         product: item.productId,

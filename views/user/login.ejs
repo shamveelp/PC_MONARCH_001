@@ -1,182 +1,4 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-        }
-
-        .login-container {
-            display: flex;
-            width: 100%;
-        }
-
-        .login-form {
-            width: 50%;
-            padding: 48px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-form h1 {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
-        .login-form p {
-            color: #666;
-            margin-bottom: 32px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .forgot-password {
-            text-align: right;
-            font-size: 14px;
-            color: #0066ff;
-            text-decoration: none;
-            margin-top: 8px;
-            display: block;
-        }
-
-        .login-button {
-            background-color: #ffa726;
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin: 24px 0;
-        }
-
-        .or-divider {
-            text-align: center;
-            margin: 16px 0;
-            color: #666;
-        }
-
-        .google-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 16px;
-            gap: 8px;
-        }
-
-        .signup-prompt {
-            text-align: center;
-            margin-top: 24px;
-            color: #666;
-        }
-
-        .signup-prompt a {
-            color: #0066ff;
-            text-decoration: none;
-        }
-
-        .image-container {
-            width: 50%;
-            background: linear-gradient(135deg, #6b46c1, #2d3748);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="login-form">
-            <h1>Welcome back!</h1>
-            <p>Enter your Credentials to access your account</p>
-            
-            <form  id="loginform" method="post" action="/login">
-                <div class="form-group">
-                    <label>Email address</label>
-                    <input name="email" type="email" placeholder="Enter your email">
-                </div>
-                
-                <div class="form-group">
-                    <label>Password</label>
-                    <input name="password" type="password" placeholder="••••••••">
-                    <a href="#" class="forgot-password">forgot password</a>
-                </div>
-            
-                <% if(locals.message && message.length > 0){ %>
-                    <div class="alert alert-danger text-center">
-                        <%= message %>
-                    </div>
-                <% } %>
-
-                <button type="submit" class="login-button">Login</button>
-                
-                <div class="or-divider">Or</div>
-                
-                <button type="button" class="google-button">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    Sign in with Google
-                </button>
-            </form>
-            
-            <div class="signup-prompt">
-                Don't have an account? <a href="/signup">Sign Up</a>
-            </div>
-        </div>
-        
-        <div class="image-container">
-
-            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/powerful-graphics-laptops.jpg-Pxx8ujivgoa6tJFdobTd6CvVzHXOAc.jpeg" alt="Login illustration">
-        </div>
-    </div>
-</body>
-</html> -->
 
 
 <!DOCTYPE html>
@@ -186,7 +8,7 @@
 	<!-- Mobile Specific Meta -->
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<!-- Favicon-->
-	<link rel="shortcut icon" href="img/fav.png">
+	<link rel="shortcut icon" href="img/pc-logo.png">
 	<!-- Author Meta -->
 	<meta name="author" content="CodePixar">
 	<!-- Meta Description -->
@@ -209,6 +31,7 @@
 	<link rel="stylesheet" href="css/nouislider.min.css">
 	<link rel="stylesheet" href="css/bootstrap.css">
 	<link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .or-divider {
             text-align: center;
@@ -271,14 +94,10 @@
 									<li class="nav-item"><a class="nav-link" href="single-blog.html">Blog Details</a></li>
 								</ul>
 							</li>
-							<li class="nav-item submenu dropdown active">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+							<li class="nav-item submenu dropdown">
+								<a href="#" class="nav-link dropdown-toggle" role="button" aria-haspopup="true"
 								 aria-expanded="false">Pages</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item active"><a class="nav-link" href="login.html">Login</a></li>
-									<li class="nav-item"><a class="nav-link" href="tracking.html">Tracking</a></li>
-									<li class="nav-item"><a class="nav-link" href="elements.html">Elements</a></li>
-								</ul>
+								
 							</li>
 							<li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
 						</ul>
@@ -333,8 +152,11 @@
 								<input type="email" class="form-control" id="name" name="email" placeholder="Email" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Email'" required>
 							</div>
 							<div class="col-md-12 form-group">
-								<input type="password" class="form-control" id="name" name="password" placeholder="••••••••" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'" required>
-							</div>
+                                <div class="password-wrapper" style="position: relative;">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Password'" required>
+                                    <i onclick="togglePassword('password', this)" class="bi bi-eye-fill toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                                </div>
+                            </div>
 							<div class="col-md-12 form-group">
 							</div>
 							<div class="col-md-12 form-group">
@@ -374,6 +196,21 @@
 		</div>
 	</section>
 	<!--================End Login Box Area =================-->
+
+    <script>
+        function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.add('bi-eye-slash-fill');
+        icon.classList.remove('bi-eye-fill');
+    } else {
+        input.type = "password";
+        icon.classList.add('bi-eye-fill');
+        icon.classList.remove('bi-eye-slash-fill');
+    }
+}
+    </script>
 
 	
 

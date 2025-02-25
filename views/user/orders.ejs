@@ -384,41 +384,63 @@ async function submitReturn() {
         const returnDescription = document.getElementById('returnDescription');
         const imagesInput = document.getElementById('returnImages');
         
-        const category = reasonSelect.value;
-        const description = returnDescription.value;
-        
-        if (!category || !description) {
-            alert('Please select a reason category and provide a detailed description');
+        const returnReason = reasonSelect.value; // Get the selected reason
+        const description = returnDescription.value; // Get the description
+
+        // Validation
+        if (!returnReason || !description) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please select a reason category and provide a detailed description!',
+            });
             return;
         }
 
+        // Create FormData object
         const formData = new FormData();
-        formData.append('orderId', currentOrderId);
-        formData.append('category', category);
-        formData.append('description', description);
+        formData.append('orderId', currentOrderId); // Append order ID
+        formData.append('returnReason', returnReason); // Append return reason
+        formData.append('returnDescription', description); // Append description
 
-        // Append images if any
+        // Append images (if any)
         const files = imagesInput.files;
         for (let i = 0; i < Math.min(files.length, 3); i++) {
-            formData.append('images', files[i]);
+            formData.append('images', files[i]); // Append up to 3 images
         }
 
+        // Debugging: Log FormData to console
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+
+        // Send request to the server
         const response = await fetch('/orders/return', {
             method: 'POST',
-            body: formData
+            body: formData // No need to set Content-Type header for FormData
         });
 
         const data = await response.json();
         
         if (data.success) {
-            alert('Return request submitted successfully');
-            location.reload();
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Return request submitted successfully!',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload(); // Reload the page after the user clicks "OK"
+            });
         } else {
             throw new Error(data.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        alert(error.message || 'Failed to submit return request');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: error.message || 'Failed to submit return request',
+        });
     }
 }
 
