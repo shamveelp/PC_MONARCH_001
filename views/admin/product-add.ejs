@@ -312,60 +312,163 @@
     }
 
     document.getElementById('productForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Form validation
-        let isValid = true;
-        const requiredFields = ['productName', 'description', 'brand', 'regularPrice', 'salePrice', 'quantity', 'color', 'category'];
-        requiredFields.forEach(field => {
-            const input = document.getElementsByName(field)[0];
-            if (!input.value) {
-                isValid = false;
-                document.getElementById(`${field}-error`).textContent = 'This field is required.';
-            } else {
-                document.getElementById(`${field}-error`).textContent = '';
-            }
-        });
+    e.preventDefault();
+    
+    // Form validation
+    let isValid = true;
+    const requiredFields = ['productName', 'description', 'brand', 'regularPrice', 'salePrice', 'quantity', 'color', 'category'];
+    
+    // Clear previous error messages
+    requiredFields.forEach(field => {
+        document.getElementById(`${field}-error`).textContent = '';
+    });
 
-        if (isValid) {
-            const formData = new FormData(this);
-            fetch('/admin/addProducts', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Product added successfully',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/admin/addProducts';
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: data.message || 'An error occurred while adding the product',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+    // Validate required fields
+    requiredFields.forEach(field => {
+        const input = document.getElementsByName(field)[0];
+        if (!input.value) {
+            isValid = false;
+            document.getElementById(`${field}-error`).textContent = 'This field is required.';
+        }
+    });
+
+    // Get price and quantity values
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+    const salePrice = parseFloat(document.getElementById('salePrice').value);
+
+    // Validate quantity
+    if (quantity < 0) {
+        isValid = false;
+        Swal.fire({
+            title: 'Invalid Quantity!',
+            text: 'Quantity cannot be less than zero',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
+        return;
+    }
+
+    // Validate regular price
+    if (regularPrice <= 0) {
+        isValid = false;
+        Swal.fire({
+            title: 'Invalid Regular Price!',
+            text: 'Regular price must be greater than zero',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
+        return;
+    }
+
+    // Validate sale price
+    if (salePrice <= 0) {
+        isValid = false;
+        Swal.fire({
+            title: 'Invalid Sale Price!',
+            text: 'Sale price must be greater than zero',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
+        return;
+    }
+
+    // Validate sale price is not higher than regular price
+    if (salePrice > regularPrice) {
+        isValid = false;
+        Swal.fire({
+            title: 'Invalid Price!',
+            text: 'Sale price cannot be higher than regular price',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+        return;
+    }
+
+    if (isValid) {
+        const formData = new FormData(this);
+        fetch('/admin/addProducts', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Product added successfully',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/admin/addProducts';
+                    }
+                });
+            } else {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'An unexpected error occurred',
+                    text: data.message || 'An error occurred while adding the product',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'An unexpected error occurred',
+                icon: 'error',
+                confirmButtonText: 'OK'
             });
-        }
-    });
+        });
+    }
+});
+
+// Add real-time validation for quantity, regular price, and sale price
+document.getElementById('quantity').addEventListener('input', function() {
+    const quantity = parseInt(this.value);
+    if (quantity < 0) {
+        document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
+    } else {
+        document.getElementById('quantity-error').textContent = '';
+    }
+});
+
+document.getElementById('regularPrice').addEventListener('input', function() {
+    const regularPrice = parseFloat(this.value);
+    const salePrice = parseFloat(document.getElementById('salePrice').value);
+    
+    if (regularPrice <= 0) {
+        document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
+    } else {
+        document.getElementById('regularPrice-error').textContent = '';
+    }
+    
+    // Check sale price relationship
+    if (salePrice && salePrice > regularPrice) {
+        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+    } else {
+        document.getElementById('salePrice-error').textContent = '';
+    }
+});
+
+document.getElementById('salePrice').addEventListener('input', function() {
+    const salePrice = parseFloat(this.value);
+    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+    
+    if (salePrice <= 0) {
+        document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
+    } else if (regularPrice && salePrice > regularPrice) {
+        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+    } else {
+        document.getElementById('salePrice-error').textContent = '';
+    }
+});
 </script>
 
 <%- include("../../views/partials/admin/footer") %>
