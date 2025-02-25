@@ -305,29 +305,28 @@
             <!-- Main Content -->
             <div class="col-md-9 main-content">
                 <h1 id="coupons-title">My Coupons</h1>
-
+            
                 <% if (coupons.length > 0) { %>
-
-                    <% for(let i=0;i< coupons.length ;i++){ %>
-    
-                <div class="coupon">
-                    <h2><span>🎉</span>Congratulations! ₹<%=coupons[i].offerPrice%> off your next purchase!</h2>
-                    <p>Minimum Purchase Amount Should Be ₹<%=coupons[i].minimumPrice%></p>
-                    <p>Expires On: <%=new Date(coupons[i].expireOn).toLocaleDateString('en-IN')%></p>
-                    <div class="input-group">
-                        <input type="text" value="<%=coupons[i].name%>" id="coupon<%=i%>" readonly>
-                        <button onclick="copyToClipboard('coupon<%=i%>')">Copy coupon</button>
-                    </div>
-                </div>
-
-                    <%}%>
-                
-                
-
+                    <% for(let i = 0; i < coupons.length; i++) { %>
+                        <div class="coupon">
+                            <h2><span>🎉</span>Congratulations! ₹<%= coupons[i].offerPrice %> off your next purchase!</h2>
+                            <p>Minimum Purchase Amount Should Be ₹<%= coupons[i].minimumPrice %></p>
+                            <p>Expires On: <%= new Date(coupons[i].expireOn).toLocaleDateString('en-IN') %></p>
+                            <div class="input-group">
+                                <input type="text" value="<%= coupons[i].name %>" id="coupon<%= i %>" readonly>
+                                <% if (!coupons[i].isUsed) { %>
+                                    <button onclick="copyToClipboard('coupon<%= i %>')">Copy coupon</button>
+                                <% } %>
+                            </div>
+                            <p class="<%= coupons[i].isUsed ? 'text-danger' : 'text-success' %>">
+                                <%= coupons[i].usageMessage %>
+                            </p>
+                        </div>
+                    <% } %>
                 <% } else { %>
                     <p>No coupons available.</p>
                 <% } %>
-                </div>
+            </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
