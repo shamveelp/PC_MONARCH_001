@@ -248,7 +248,7 @@ body {
                             <p>Available Balance</p>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <!-- <div class="col-md-4 mb-3">
                         <div class="unique-balance-card reward">
                             <p class="amount">₹<%= wallet.refundAmount.toFixed(2) %></p>
                             <p>Refunded Amount</p>
@@ -259,7 +259,7 @@ body {
                             <p class="amount">₹<%= wallet.totalDebited.toFixed(2) %></p>
                             <p>Total Debited</p>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="unique-button-group mb-4">
                     <button class="wallet-action-button" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
@@ -360,6 +360,18 @@ body {
             </div>
         </div>
     </div>
+</div>
+
+<div class="pagination display-flex justify-content-center mt-4">
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>" class="btn btn-primary">Previous</a>
+    <% } %>
+
+    <span>Page <%= currentPage %> of <%= totalPages %></span>
+
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>" class="btn btn-primary">Next</a>
+    <% } %>
 </div>
 
 

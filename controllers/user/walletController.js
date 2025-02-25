@@ -18,16 +18,30 @@ const loadWallet = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById(userId);
         const wallet = await Wallet.findOne({ userId: userId });
-        
+
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Show 10 transactions per page
+        const skip = (page - 1) * limit;
+
         let transactions = [];
+        let totalTransactions = 0;
+
         if (wallet) {
-            transactions = wallet.transactions.sort((a, b) => b.createdAt - a.createdAt);
+            totalTransactions = wallet.transactions.length;
+            transactions = wallet.transactions
+                .sort((a, b) => b.createdAt - a.createdAt) // Sort by date (latest first)
+                .slice(skip, skip + limit); // Apply pagination
         }
-        
+
+        const totalPages = Math.ceil(totalTransactions / limit);
+
         res.render("wallet", {
             user: userData,
             wallet: wallet || { balance: 0, refundAmount: 0, totalDebited: 0 },
-            transactions: transactions
+            transactions: transactions,
+            currentPage: page,
+            totalPages: totalPages
         });
     } catch (error) {
         console.error('Error loading wallet:', error);

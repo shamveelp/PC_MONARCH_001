@@ -14,7 +14,7 @@ const multer = require("multer")
 const upload = require('../config/multer');
 
 const { userAuth } = require('../middlewares/auth');
-const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn} = require("../middlewares/profileAuth")
+const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn,forgotPassLogout} = require("../middlewares/profileAuth")
 
 
 router.get('/pagenotfound', userController.pageNotFound);
@@ -28,11 +28,24 @@ router.post('/verify-otp', userController.verifyOtp);
 
 router.post('/resend-otp', userController.resendOtp);
 
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), (req, res) => {
-    res.redirect('/');
+// router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), (req, res) => {
+//     res.redirect('/');
+// });
+
+
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), async (req, res) => {
+    try {
+        req.session.user = req.user._id;
+        res.redirect('/');
+    } catch (error) {
+        console.log("Google login error:", error);
+        res.redirect('/signup');
+    }
 });
+
 
 router.get('/login',checkLoggedIn, userController.loadLoginPage);
 
@@ -93,6 +106,8 @@ router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp)
 router.post("/update-email",userAuth,profileController.updateEmail)
 
 router.post("/change-password", userAuth, profileController.changePassword)
+
+router.get("/forgot-password-logout",forgotPassLogout,profileController.getForgotPassPage)
 
 
 //Address Management

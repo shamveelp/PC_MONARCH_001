@@ -61,11 +61,25 @@ function checkLoggedIn(req, res, next) {
 // }
 
 
+function forgotPassLogout(req, res, next) {
+    if (req.session.user) {
+        // Destroy the session
+        delete req.session.user;
+
+        return res.redirect("/forgot-password"); // Redirect after logging out
+        
+    } else {
+        next(); // Proceed if no session exists
+    }
+}
+
+
 module.exports = {
     resetPasswordMiddleware,
     blockLoggedInUsers,
     checkBlockedUser,
     checkLoggedIn,
+    forgotPassLogout
     // loggedinblock,
 
 

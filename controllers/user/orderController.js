@@ -87,6 +87,7 @@ const placeOrder = async (req, res) => {
     // Create orders with distributed discount
     const orders = await Promise.all(
       discountedItems.map(async (item) => {
+        const product = await Product.findById(item.product).select("regularPrice") // Fetch regular price
         const order = new Order({
           userId: userId,
           orderedItems: [
@@ -94,6 +95,7 @@ const placeOrder = async (req, res) => {
               product: item.product,
               quantity: item.quantity,
               price: item.discountedPrice,
+              regularPrice: product.regularPrice,
               status: "pending",
             },
           ],

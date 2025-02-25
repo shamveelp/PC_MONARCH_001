@@ -35,10 +35,13 @@ app.use(
   app.use(passport.session());
 
 
-app.use((req, res, next) => {
-    res.locals.user = req.user
-    next()
-  })
+  app.use((req, res, next) => {
+    res.locals.user = req.session.googleUser || req.session.user || null; // Prioritize Google user, else normal user
+    res.locals.admin = req.session.admin || null; // Keep admin session separate
+    next();
+});
+
+
 
 app.use((req,res,next) => {
     res.set('Cache-Control','no-store')

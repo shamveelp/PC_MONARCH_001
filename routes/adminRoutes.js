@@ -68,6 +68,7 @@ router.get('/orders/:id', adminAuth, orderController.getOrderDetails);
 router.post('/orders/update-status', adminAuth, orderController.updateOrderStatus);
 router.post('/orders/handle-return', adminAuth, orderController.handleReturnRequest);
 router.post('/orders/update-return-status', adminAuth, orderController.updateReturnStatus);
+router.post('/orders/cancel', adminAuth, orderController.cancelOrder);
 
 
 
