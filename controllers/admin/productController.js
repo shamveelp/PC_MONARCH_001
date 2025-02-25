@@ -4,6 +4,22 @@ const sharp = require("sharp")
 const path = require("path")
 const fs = require("fs")
 
+
+
+
+const calculateEffectivePrice = async (product) => {
+  const category = await Category.findById(product.category);
+  const categoryOffer = category ? category.categoryOffer || 0 : 0;
+  const productOffer = product.productOffer || 0;
+
+  const effectiveOffer = Math.max(categoryOffer, productOffer);
+  const effectivePrice = product.regularPrice * (1 - effectiveOffer / 100);
+
+  return Math.round(effectivePrice * 100) / 100;
+};
+
+
+
 const getProductAddPage = async (req, res) => {
   try {
     const category = await Category.find({ isListed: true })
@@ -118,34 +134,48 @@ const addProducts = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const search = req.query.search || "";
-    const page = req.query.page || 1;
-    const limit = 9;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 19;
 
-    const productData = await Product.find({
+    const query = {
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
       ]
-    })
-      .limit(limit * 1)
+    };
+
+    const productData = await Product.find(query)
+      .sort({ createdAt: 1 }) // Newest first
       .skip((page - 1) * limit)
-      .populate("category")  // Ensure population of category
+      .limit(limit)
+      .populate("category")
       .exec();
 
-    const count = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
-      ]
-    }).countDocuments();
+    if (page === 1) {
+      console.log("First page products (newest to oldest):", 
+        productData.map(p => ({
+          name: p.productName,
+          createdAt: new Date(p.createdAt).toISOString()
+        }))
+      );
+    }
 
+    const count = await Product.countDocuments(query);
+    const totalPages = Math.ceil(count / limit);
     const category = await Category.find({ isListed: true });
+    const productsWithEffectivePrices = await Promise.all(productData.map(async (product) => {
+      const effectivePrice = await calculateEffectivePrice(product);
+      return {
+        ...product.toObject(),
+        salePrice: effectivePrice
+      };
+    }));
 
-    if (category) {
+    if (category.length > 0) {
       res.render("products", {
-        data: productData,
+        data: productsWithEffectivePrices,
         currentPage: page,
-        totalPages: Math.ceil(count / limit),
+        totalPages: totalPages,
         cat: category,
       });
     } else {
@@ -157,55 +187,47 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-// const getAllProducts = async (req,res) => {
-//   try {
-//     res.render("products")
-    
-//   } catch (error) {
-//     res.redirect("/pageerror")
-    
-//   }
-// }
+
 
 
 
 const addProductOffer = async (req, res) => {
   try {
-      const { productId, percentage } = req.body;
-      const product = await Product.findById(productId);
+    const { productId, percentage } = req.body;
+    const product = await Product.findById(productId);
 
-      if (!product) {
-          return res.status(404).json({ status: false, message: "Product not found" });
-      }
+    if (!product) {
+      return res.status(404).json({ status: false, message: "Product not found" });
+    }
 
-      product.productOffer = parseInt(percentage);
-      product.salePrice = Math.round(product.regularPrice * (1 - percentage / 100));
-      await product.save();
+    product.productOffer = parseInt(percentage);
+    product.salePrice = await calculateEffectivePrice(product);
+    await product.save();
 
-      res.json({ status: true, message: "Offer added successfully" });
+    res.json({ status: true, message: "Offer added successfully" });
   } catch (error) {
-      console.error("Error in addProductOffer:", error);
-      res.status(500).json({ status: false, message: "Internal server error" });
+    console.error("Error in addProductOffer:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
 
 const removeProductOffer = async (req, res) => {
   try {
-      const { productId } = req.body;
-      const product = await Product.findById(productId);
+    const { productId } = req.body;
+    const product = await Product.findById(productId);
 
-      if (!product) {
-          return res.status(404).json({ status: false, message: "Product not found" });
-      }
+    if (!product) {
+      return res.status(404).json({ status: false, message: "Product not found" });
+    }
 
-      product.productOffer = 0;
-      product.salePrice = product.regularPrice;
-      await product.save();
+    product.productOffer = 0;
+    product.salePrice = await calculateEffectivePrice(product);
+    await product.save();
 
-      res.json({ status: true, message: "Offer removed successfully" });
+    res.json({ status: true, message: "Offer removed successfully" });
   } catch (error) {
-      console.error("Error in removeProductOffer:", error);
-      res.status(500).json({ status: false, message: "Internal server error" });
+    console.error("Error in removeProductOffer:", error);
+    res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
 
@@ -414,10 +436,11 @@ module.exports = {
   getEditProduct,
   editProduct,
   deleteSingleImage,
-  deleteProduct
+  deleteProduct,
+  calculateEffectivePrice
 
 
 
 
-}
+} 
 

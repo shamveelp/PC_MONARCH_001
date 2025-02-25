@@ -1,5 +1,8 @@
 const Category = require("../../models/categorySchema")
 const Product = require("../../models/productSchema")
+const { calculateEffectivePrice } = require("./productController");
+
+
 
 const addCategory = async (req, res) => {
   try {
@@ -37,21 +40,29 @@ const addCategory = async (req, res) => {
 
 const addCategoryOffer = async (req, res) => {
   try {
-    const { categoryId, percentage } = req.body
-    const category = await Category.findById(categoryId)
+    const { categoryId, percentage } = req.body;
+    const category = await Category.findById(categoryId);
     if (!category) {
-      return res.status(404).json({ status: false, message: "Category not found" })
+      return res.status(404).json({ status: false, message: "Category not found" });
     }
     if (isNaN(percentage) || percentage < 0 || percentage > 99) {
-      return res.json({ status: false, message: "Invalid percentage value" })
+      return res.json({ status: false, message: "Invalid percentage value" });
     }
-    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } })
-    res.json({ status: true, message: "Offer added successfully" })
+    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
+
+    // Update all products in this category
+    const products = await Product.find({ category: categoryId });
+    for (const product of products) {
+      product.salePrice = await calculateEffectivePrice(product);
+      await product.save();
+    }
+
+    res.json({ status: true, message: "Offer added successfully" });
   } catch (error) {
-    console.error("Error in addCategoryOffer:", error)
-    return res.status(500).json({ status: false, message: "Internal Server Error" })
+    console.error("Error in addCategoryOffer:", error);
+    return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
-}
+};
 
 const categoryInfo = async (req, res) => {
   try {
@@ -103,24 +114,26 @@ const categoryInfo = async (req, res) => {
 
 const removeCategoryOffer = async (req, res) => {
   try {
-    const categoryId = req.body.categoryId
-    const category = await Category.findById(categoryId)
+    const categoryId = req.body.categoryId;
+    const category = await Category.findById(categoryId);
     if (!category) {
-      return res.status(404).json({ status: false, message: "Category not found" })
+      return res.status(404).json({ status: false, message: "Category not found" });
     }
-    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: null } })
-    const products = await Product.find({ category: category._id })
+    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: null } });
+
+    // Update all products in this category
+    const products = await Product.find({ category: categoryId });
     for (const product of products) {
-      product.productOffer = 0
-      product.salePrice = product.regularPrice
-      await product.save()
+      product.salePrice = await calculateEffectivePrice(product);
+      await product.save();
     }
-    res.json({ status: true, message: "Offer removed successfully" })
+
+    res.json({ status: true, message: "Offer removed successfully" });
   } catch (error) {
-    console.error("Error in removeCategoryOffer:", error)
-    return res.status(500).json({ status: false, message: "Internal Server Error" })
+    console.error("Error in removeCategoryOffer:", error);
+    return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
-}
+};
 
 const getListCategory = async (req, res) => {
   try {
@@ -175,39 +188,32 @@ const editCategory = async (req, res) => {
 
 const editCategoryOffer = async (req, res) => {
   try {
-    const percentage = Number.parseInt(req.body.percentage)
-    const categoryId = req.body.categoryId
+    const percentage = Number.parseInt(req.body.percentage);
+    const categoryId = req.body.categoryId;
 
     if (isNaN(percentage) || percentage < 0 || percentage > 99) {
-      return res.json({ status: false, message: "Invalid percentage value" })
+      return res.json({ status: false, message: "Invalid percentage value" });
     }
 
-    const category = await Category.findById(categoryId)
+    const category = await Category.findById(categoryId);
     if (!category) {
-      return res.status(404).json({ status: false, message: "Category not found" })
+      return res.status(404).json({ status: false, message: "Category not found" });
     }
 
-    const products = await Product.find({ category: category._id })
-    const hasProductOffer = products.some((product) => product.productOffer > percentage)
+    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
-    if (hasProductOffer) {
-      return res.json({ status: false, message: "Some products have a higher offer already" })
-    }
-
-    await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } })
-
+    const products = await Product.find({ category: categoryId });
     for (const product of products) {
-      product.productOffer = 0
-      product.salePrice = product.regularPrice - product.regularPrice * (percentage / 100)
-      await product.save()
+      product.salePrice = await calculateEffectivePrice(product);
+      await product.save();
     }
 
-    res.json({ status: true, message: "Offer updated successfully" })
+    res.json({ status: true, message: "Offer updated successfully" });
   } catch (error) {
-    console.error("Error in editCategoryOffer:", error)
-    return res.status(500).json({ status: false, message: "Internal Server Error" })
+    console.error("Error in editCategoryOffer:", error);
+    return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
-}
+};
 
 
 const deleteCategory = async (req, res) => {

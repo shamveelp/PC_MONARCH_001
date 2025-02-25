@@ -63,7 +63,7 @@ const ExcelJS = require('exceljs');
               amount: order.finalAmount,
               discount: order.discount || 0,
               coupon: order.couponApplied ? (order.totalPrice - order.finalAmount - order.discount) : 0,
-              lessPrice: orderRegularPrice - order.finalAmount, // Difference per order
+              lessPrice: orderRegularPrice - order.finalAmount +50, // Difference per order
               date: order.createdOn
           };
       });
@@ -125,7 +125,7 @@ const generatePDF = async (res, salesData) => {
   let y = doc.y + 20;
 
   // Table headers
-  const headers = ["Date", "Order ID", "Amount", "Less Price", "Discount"];
+  const headers = ["Date", "Order ID", "Amount", "Discounts", "Coupons"];
   let x = 50;
   headers.forEach((header) => {
       doc.text(header, x, y);
@@ -166,8 +166,8 @@ const generateExcel = async (res, salesData) => {
     { header: 'Date', key: 'date', width: 15 },
     { header: 'Order ID', key: 'orderId', width: 30 },
     { header: 'Amount', key: 'amount', width: 15 },
-    { header: 'Less Price', key: 'lessPrice', width: 15 }, // Changed from discount to lessPrice
-    { header: 'Discount', key: 'discount', width: 15 } // Changed from coupon to discount
+    { header: 'Discounts', key: 'lessPrice', width: 15 }, // Changed from discount to lessPrice
+    { header: 'Coupons', key: 'discount', width: 15 } // Changed from coupon to discount
   ];
   
   // Add summary

@@ -59,7 +59,7 @@
 								color: #cccccc;
 								margin-bottom: 0;" class="l-through">₹ <%=product.regularPrice%>.00</h6>
 						
-							<h4 style="margin-left: 10px;"> <%=product.productOffer%> % Off</h4>
+							<h4 style="margin-left: 10px;"> <%=product.category.categoryOffer > product.productOffer ? product.category.categoryOffer : product.productOffer %> % Off</h4>
 						</div>
 						<ul class="list">
 							<li><a class="active" href="#"><span>Category</span> : <%=product.category.name%></a></li>
