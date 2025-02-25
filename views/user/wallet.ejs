@@ -465,14 +465,32 @@ document.getElementById('payButton').addEventListener('click', async () => {
                     const verifyData = await verifyResponse.json();
                     
                     if (verifyData.success) {
-                        alert('Payment successful! Your wallet has been updated.');
-                        window.location.reload();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Payment successful! Your wallet has been updated.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                        });
                     } else {
-                        alert('Payment verification failed. Please contact support.');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Payment verification failed. Please contact support.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Payment verification failed. Please contact support.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Payment verification failed. Please contact support.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             },
             prefill: {
@@ -516,11 +534,24 @@ document.getElementById('withdrawButton').addEventListener('click', async () => 
         const data = await response.json();
         
         if (data.success) {
-            alert('Money withdrawn successfully!');
+    Swal.fire({
+        title: 'Success!',
+        text: 'Money withdrawn successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    }).then((result) => {
+        if (result.isConfirmed) {
             window.location.reload();
-        } else {
-            alert(data.message || 'Failed to withdraw money. Please try again.');
         }
+    });
+} else {
+    Swal.fire({
+        title: 'Error!',
+        text: data.message || 'Failed to withdraw money. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+}
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to withdraw money. Please try again.');

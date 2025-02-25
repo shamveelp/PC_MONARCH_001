@@ -89,8 +89,19 @@ const cancelOrder = async (req, res) => {
                 $inc: { quantity: order.orderedItems[0].quantity }
             });
 
+            // Process refund for online and wallet payments
+            if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
+                const refundSuccess = await processRefund(order.userId, order);
+                if (!refundSuccess) {
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: "Failed to process refund" 
+                    });
+                }
+            }
+
             await order.save();
-            res.json({ success: true, message: "Order cancelled successfully" });
+            res.json({ success: true, message: "Order cancelled and refund processed successfully" });
         } else {
             res.status(400).json({ success: false, message: "Order cannot be cancelled" });
         }

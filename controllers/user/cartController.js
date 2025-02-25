@@ -2,14 +2,16 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 
-// Clean cart by removing blocked, unlisted, or zero-quantity items
+// Clean cart by removing blocked, unlisted, or zero-quantity items and adjusting quantities
 const removeBlockedOrUnlistedItems = async (user) => {
   const updatedCart = [];
   for (const item of user.cart) {
     const product = await Product.findById(item.productId).populate('category');
     if (product && product.isBlocked === false && product.category.isListed && product.quantity > 0) {
-      updatedCart.push(item);
+      const adjustedQuantity = Math.min(item.quantity, product.quantity);
+      updatedCart.push({ productId: item.productId, quantity: adjustedQuantity });
     }
+    // Items with quantity 0 are automatically excluded
   }
   user.cart = updatedCart;
   await user.save();
@@ -31,6 +33,19 @@ const getCartPage = async (req, res) => {
       return res.status(404).send('User not found');
     }
 
+    // Adjust cart based on current product stock, removing zero-quantity items
+    for (let i = user.cart.length - 1; i >= 0; i--) {
+      const item = user.cart[i];
+      if (item.productId && (item.productId.quantity === 0 || item.quantity > item.productId.quantity)) {
+        if (item.productId.quantity === 0) {
+          user.cart.splice(i, 1); // Remove if stock is 0
+        } else {
+          item.quantity = item.productId.quantity; // Adjust to available stock
+        }
+      }
+    }
+    await user.save();
+
     // Filter out blocked products, unlisted categories, or products with quantity <= 0
     const cartItems = user.cart
       .filter(item => 
@@ -38,7 +53,7 @@ const getCartPage = async (req, res) => {
         !item.productId.isBlocked && 
         item.productId.category && 
         item.productId.category.isListed && 
-        item.productId.quantity > 0 // Added quantity check
+        item.productId.quantity > 0
       )
       .map(item => ({
         product: item.productId,
@@ -53,7 +68,6 @@ const getCartPage = async (req, res) => {
       cartItems,
       grandTotal
     });
-
   } catch (error) {
     console.error('Error in getCartPage:', error);
     res.status(500).send('An error occurred while loading the cart');
@@ -115,6 +129,23 @@ const changeQuantity = async (req, res) => {
       return res.status(404).json({ status: false, message: "Product not found in cart" });
     }
 
+    if (product.quantity === 0) {
+      // Remove item if stock is zero
+      user.cart.splice(cartItemIndex, 1);
+      await user.save();
+      return res.json({
+        status: true,
+        message: "Product removed from cart due to zero stock",
+        quantity: 0,
+        swal: {
+          title: "Out of Stock!",
+          text: "This product is no longer available and has been removed from your cart.",
+          icon: "warning",
+          confirmButtonText: "OK"
+        }
+      });
+    }
+
     let newQuantity = user.cart[cartItemIndex].quantity;
 
     if (action === 'increase') {
@@ -126,13 +157,17 @@ const changeQuantity = async (req, res) => {
       if (newQuantity > 1) {
         newQuantity -= 1;
       } else {
-        // Remove item if quantity becomes 0
         user.cart.splice(cartItemIndex, 1);
         await user.save();
         return res.json({ status: true, message: "Product removed from cart", quantity: 0 });
       }
     } else {
       return res.status(400).json({ status: false, message: "Invalid action" });
+    }
+
+    // Adjust quantity if product stock is lower
+    if (newQuantity > product.quantity) {
+      newQuantity = product.quantity;
     }
 
     user.cart[cartItemIndex].quantity = newQuantity;

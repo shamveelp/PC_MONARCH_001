@@ -29,6 +29,17 @@ const loadCheckoutPage = async (req, res) => {
           return res.status(404).send("User not found");
       }
 
+      // Adjust cart quantities based on current product stock
+      for (let item of user.cart) {
+          if (item.productId && item.quantity > item.productId.quantity) {
+              item.quantity = item.productId.quantity;
+              if (item.quantity === 0) {
+                  user.cart = user.cart.filter(cartItem => cartItem.productId.toString() !== item.productId.toString());
+              }
+          }
+      }
+      await user.save();
+
       // Filter out blocked products, unlisted categories, and products with quantity <= 0
       const cartItems = user.cart
           .filter(item => 
@@ -36,7 +47,7 @@ const loadCheckoutPage = async (req, res) => {
               !item.productId.isBlocked && 
               item.productId.category && 
               item.productId.category.isListed && 
-              item.productId.quantity > 0 // Added quantity check
+              item.productId.quantity > 0
           )
           .map((item) => ({
               product: item.productId,
@@ -132,9 +143,70 @@ const applyCoupon = async (req, res) => {
     }
 };
 
+
+const checkStock = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const user = await User.findById(userId).populate({
+            path: "cart.productId",
+            model: "Product"
+        });
+
+        if (!user || !user.cart.length) {
+            return res.json({
+                success: false,
+                message: "Cart is empty"
+            });
+        }
+
+        const stockChanges = user.cart.map(item => {
+            const product = item.productId;
+            const requestedQty = item.quantity;
+            const availableQty = product.quantity;
+            
+            return {
+                productId: product._id,
+                stockChanged: requestedQty > availableQty,
+                availableQty: availableQty,
+                requestedQty: requestedQty
+            };
+        });
+
+        // Update cart quantities if needed
+        for (const item of stockChanges) {
+            if (item.stockChanged) {
+                await User.updateOne(
+                    { 
+                        _id: userId,
+                        "cart.productId": item.productId 
+                    },
+                    {
+                        $set: {
+                            "cart.$.quantity": item.availableQty
+                        }
+                    }
+                );
+            }
+        }
+
+        res.json({
+            success: true,
+            items: stockChanges
+        });
+    } catch (error) {
+        console.error("Error checking stock:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error checking stock availability"
+        });
+    }
+};
+
 module.exports = {
     loadCheckoutPage,
     postAddAddressCheckout,
     addAddressCheckout,
     applyCoupon,
+    checkStock,
+
 };

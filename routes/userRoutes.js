@@ -127,6 +127,8 @@ router.get("/order-details", userAuth, orderController.loadOrderDetails);
 router.post('/create-razorpay-order', userAuth, orderController.createRazorpayOrder);
 router.post('/verify-payment', userAuth, orderController.verifyPayment);
 
+router.get('/check-stock',userAuth, checkoutController.checkStock);
+
 // New routes for order cancellation and returns
 router.post("/orders/cancel", userAuth, orderController.cancelOrder);
 router.post("/orders/return", userAuth, upload.array('images', 3), orderController.requestReturn);
