@@ -53,7 +53,6 @@
     }
 </style>
 
-
 <section class="banner-area organic-breadcrumb">
     <div class="container">
         <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
@@ -62,7 +61,7 @@
                 <nav class="d-flex align-items-center">
                     <a href="/">Home<span class="lnr lnr-arrow-right"></span></a>
                     <a href="/userProfile">Profile<span class="lnr lnr-arrow-right"></span></a>
-                    <a href="/address">Orders<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="/orders">Orders<span class="lnr lnr-arrow-right"></span></a>
                     <a href="#">Order Details</a>
                 </nav>
             </div>
@@ -107,7 +106,7 @@
                     <% }); %>
                 </div>
 
-                <% if (order.status === 'delivered' && !order.returnReason && order.requestStatus!=="rejected") { %>
+                <% if (order.status === 'delivered' && !order.returnReason && order.requestStatus !== "rejected") { %>
                     <div class="card mt-4">
                         <div class="card-header">
                             <h5 class="mb-0">Return Order</h5>
@@ -128,7 +127,6 @@
                     </div>
                 <% } %>
                 
-                <!-- Add this for return status display -->
                 <% if (['return_requested', 'returning', 'returned'].includes(order.status)) { %>
                     <div class="card mt-4">
                         <div class="card-header <%= 
@@ -152,15 +150,6 @@
                                 </div>
                             <% } %>
 
-                            <% if (order.status === 'return_requested' && order.requestStatus === 'rejected') { %>
-                                <div class="alert alert-danger mt-3">
-                                    <h6 class="alert-heading">Return Request Rejected</h6>
-                                    <p><strong>Reason:</strong> <%= order.adminMessage %></p>
-                                </div>
-                            <% } %>
-
-                           
-                
                             <% if (order.status === 'returned') { %>
                                 <div class="alert alert-success mt-3">
                                     <strong>Your product has been returned.</strong><br>
@@ -173,7 +162,7 @@
                             <% } else if (order.requestStatus === 'rejected') { %>
                                 <div class="alert alert-danger mt-3">
                                     <strong>Return Request Rejected</strong><br>
-                                    Reason: <%= order.adminMessage %>
+                                    Reason: <%= order.rejectionReason %>
                                 </div>
                             <% } else { %>
                                 <div class="alert alert-info mt-3">
@@ -184,7 +173,6 @@
                     </div>
                 <% } %>
                 
-
                 <!-- Product Details -->
                 <div class="row mb-4">
                     <div class="col-md-8">
@@ -192,11 +180,11 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex">
-                                    <img src="<%= order.orderedItems[0].product.productImage[0] %>" 
-                                         alt="<%= order.orderedItems[0].product.productName %>"
+                                    <img src="<%= order.orderedItems[0].productImages[0] %>" 
+                                         alt="<%= order.orderedItems[0].productName %>"
                                          class="product-image me-3">
                                     <div>
-                                        <h6><%= order.orderedItems[0].product.productName %></h6>
+                                        <h6><%= order.orderedItems[0].productName %></h6>
                                         <p class="mb-1">Quantity: <%= order.orderedItems[0].quantity %></p>
                                         <p class="mb-1">Price: ₹<%= order.totalPrice/order.orderedItems[0].quantity %></p>
                                         <p class="mb-0">Status: 
@@ -260,8 +248,7 @@
                             </div>
                         </div>
 
-                        <!-- Cancel Order Button -->
-                        
+                        <!-- Order Actions -->
                         <div class="order-actions mt-4">
                             <% if (order.status === 'delivered' && !order.returnReason && order.requestStatus !== "rejected") { %>
                                 <button class="btn btn-warning" onclick="initiateReturn('<%= order._id %>')">
@@ -293,9 +280,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 <!-- Return Modal -->
 <div class="modal fade" id="returnModal" tabindex="-1">
@@ -338,10 +322,9 @@
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    async function cancelOrder(orderId) {
+async function cancelOrder(orderId) {
     const { value: reasonOption } = await Swal.fire({
         title: 'Cancel Order',
         input: 'select',
@@ -412,7 +395,6 @@
     }
 }
 
-
 let currentOrderId = null;
 
 function initiateReturn(orderId) {
@@ -421,12 +403,12 @@ function initiateReturn(orderId) {
     modal.show();
 }
 
-document.getElementById('returnReason').addEventListener('change', function() {
+document.getElementById('returnReason')?.addEventListener('change', function() {
     const otherReasonDiv = document.getElementById('otherReasonDiv');
     if (this.value === 'Other') {
-        otherReasonDiv.classList.remove('d-none');
+        otherReasonDiv?.classList.remove('d-none');
     } else {
-        otherReasonDiv.classList.add('d-none');
+        otherReasonDiv?.classList.add('d-none');
     }
 });
 
@@ -436,10 +418,9 @@ async function submitReturn() {
         const returnDescription = document.getElementById('returnDescription');
         const imagesInput = document.getElementById('returnImages');
         
-        const returnReason = reasonSelect.value; // Get the selected reason
-        const description = returnDescription.value; // Get the description
+        const returnReason = reasonSelect.value;
+        const description = returnDescription.value;
 
-        // Validation
         if (!returnReason || !description) {
             Swal.fire({
                 icon: 'error',
@@ -449,27 +430,19 @@ async function submitReturn() {
             return;
         }
 
-        // Create FormData object
         const formData = new FormData();
-        formData.append('orderId', currentOrderId); // Append order ID
-        formData.append('returnReason', returnReason); // Append return reason
-        formData.append('returnDescription', description); // Append description
+        formData.append('orderId', currentOrderId);
+        formData.append('returnReason', returnReason);
+        formData.append('returnDescription', description);
 
-        // Append images (if any)
         const files = imagesInput.files;
         for (let i = 0; i < Math.min(files.length, 3); i++) {
-            formData.append('images', files[i]); // Append up to 3 images
+            formData.append('images', files[i]);
         }
 
-        // Debugging: Log FormData to console
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
-
-        // Send request to the server
         const response = await fetch('/orders/return', {
             method: 'POST',
-            body: formData // No need to set Content-Type header for FormData
+            body: formData
         });
 
         const data = await response.json();
@@ -481,7 +454,7 @@ async function submitReturn() {
                 text: 'Return request submitted successfully!',
                 confirmButtonText: 'OK'
             }).then(() => {
-                location.reload(); // Reload the page after the user clicks "OK"
+                location.reload();
             });
         } else {
             throw new Error(data.message);
@@ -495,7 +468,6 @@ async function submitReturn() {
         });
     }
 }
-
 
 async function cancelReturn(orderId) {
     try {
@@ -541,8 +513,6 @@ async function cancelReturn(orderId) {
         });
     }
 }
-
-
 </script>
 
 <%- include('../partials/user/footer') %>

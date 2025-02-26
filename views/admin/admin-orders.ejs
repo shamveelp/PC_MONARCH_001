@@ -25,7 +25,6 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Order Management</h1>
     
-
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
@@ -59,14 +58,13 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="d-flex align-items-center">
-                                            <img src="/<%= order.orderedItems[0].product.productImage[0] %>" 
-                                                 alt="Product" 
+                                            <img src="/<%= order.orderedItems[0].productImages[0] %>" 
+                                                 alt="<%= order.orderedItems[0].productName %>" 
                                                  style="width: 50px; height: 50px; object-fit: cover;"
                                                  class="me-2">
-                                            
                                         </div>
                                         <div>
-                                            <div><%= order.orderedItems[0].product.productName %></div>
+                                            <div><%= order.orderedItems[0].productName %></div>
                                             <small class="text-muted">Qty: <%= order.orderedItems[0].quantity %></small>
                                         </div>
                                     </div>
@@ -85,11 +83,6 @@
                                         %>">
                                             <%= order.status.toUpperCase() %>
                                         </span>
-                                        <!-- <% if (order.status === 'return_requested') { %>
-                                            <span class="return-badge bg-warning">Pending Review</span>
-                                        <% } else if (order.status === 'returning' && order.requestStatus === 'approved') { %>
-                                            <span class="return-badge bg-info">In Progress</span>
-                                        <% } %> -->
                                     </div>
                                     <!-- <% if (order.paymentMethod) { %>
                                         <small class="text-muted d-block mt-1">
@@ -141,8 +134,7 @@
     </div>
 </div>
 
-
-<!-- Reject Return Modal -->
+<!-- Rejection Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -152,8 +144,19 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Rejection Reason</label>
-                    <textarea class="form-control" id="rejectionReason" rows="3" required></textarea>
+                    <label class="form-label">Rejection Category</label>
+                    <select class="form-select" id="rejectionCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="Invalid reason">Invalid reason</option>
+                        <option value="Outside return window">Outside return window</option>
+                        <option value="Product condition">Product condition</option>
+                        <option value="Policy violation">Policy violation</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Detailed Explanation</label>
+                    <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Please provide a detailed explanation for rejecting the return request..." required></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -164,10 +167,9 @@
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let currentOrderId = null;
+let currentOrderId = null;
 
 async function updateStatus(orderId) {
     const { value: status } = await Swal.fire({
@@ -326,14 +328,11 @@ async function handleReturn(action, orderId) {
 }
 
 async function submitRejection() {
+    const category = document.getElementById('rejectionCategory').value;
     const reason = document.getElementById('rejectionReason').value;
     
-    if (!reason) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Please provide a rejection reason'
-        });
+    if (!category || !reason) {
+        alert('Please select a category and provide a detailed explanation');
         return;
     }
 
@@ -346,6 +345,7 @@ async function submitRejection() {
             body: JSON.stringify({
                 orderId: currentOrderId,
                 action: 'reject',
+                category: category,
                 message: reason
             })
         });
@@ -353,23 +353,25 @@ async function submitRejection() {
         const data = await response.json();
         
         if (data.success) {
-            await Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: 'Return request rejected successfully',
-                timer: 1500
+            const modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+            modal.hide();
+            Swal.fire(
+                'Rejected!',
+                'Return request has been rejected.',
+                'success'
+            ).then(() => {
+                location.reload();
             });
-            location.reload();
         } else {
             throw new Error(data.message);
         }
     } catch (error) {
         console.error('Error:', error);
-        await Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: error.message || 'Failed to reject return request'
-        });
+        Swal.fire(
+            'Error!',
+            error.message || 'Failed to reject return request',
+            'error'
+        );
     }
 }
 

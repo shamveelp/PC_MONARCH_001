@@ -3,7 +3,6 @@ const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
- // Ensure you have this font
 
 
  const loadSalesPage = async (req, res) => {
@@ -11,7 +10,7 @@ const ExcelJS = require('exceljs');
       const { reportType, startDate, endDate, format } = req.query;
       let query = {};
       
-      // Calculate date range based on report type
+      
       const now = new Date();
       switch (reportType) {
           case 'daily':
@@ -43,13 +42,13 @@ const ExcelJS = require('exceljs');
               break;
       }
   
-      // Only include completed orders
+      
       query.status = 'delivered';
   
       // Fetch orders data
       const orders = await Order.find(query).sort({ createdOn: 1 });
       
-      // Transform orders into sales data format
+      
       let totalRegularPrice = 0;
       let totalFinalAmount = 0;
   
@@ -63,12 +62,12 @@ const ExcelJS = require('exceljs');
               amount: order.finalAmount,
               discount: order.discount || 0,
               coupon: order.couponApplied ? (order.totalPrice - order.finalAmount - order.discount) : 0,
-              lessPrice: orderRegularPrice - order.finalAmount +50, // Difference per order
+              lessPrice: orderRegularPrice - order.finalAmount +50, 
               date: order.createdOn
           };
       });
   
-      // Calculate summary data
+      
       const salesData = {
           sales,
           totalSales: sales.reduce((sum, sale) => sum + sale.amount, 0),
@@ -78,14 +77,14 @@ const ExcelJS = require('exceljs');
           lessPrices: totalRegularPrice - totalFinalAmount // Total difference
       };
   
-      // Handle different output formats
+     
       if (format === 'pdf') {
           return generatePDF(res, salesData);
       } else if (format === 'excel') {
           return generateExcel(res, salesData);
       }
   
-      // Render the EJS template with sales data
+      
       res.render('sales-report', { salesData });
   } catch (error) {
       console.error('Error in loadSalesPage:', error);
@@ -100,7 +99,7 @@ const ExcelJS = require('exceljs');
 const generatePDF = async (res, salesData) => {
   const doc = new PDFDocument();
   
-  // Set response headers for PDF download
+ 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=sales-report.pdf");
 
@@ -115,12 +114,12 @@ const generatePDF = async (res, salesData) => {
   doc.fontSize(12)
       .text(`Total Sales: Rs. ${salesData.totalSales.toLocaleString()}`)
       .text(`Total Orders: ${salesData.orderCount}`)
-      .text(`Total Discounts: Rs. ${salesData.discounts.toLocaleString()}`) // Changed from coupons to discounts
-      .text(`Total Less Prices: Rs. ${salesData.lessPrices.toLocaleString()}`); // Changed from discounts to lessPrices
+      .text(`Total Discounts: Rs. ${salesData.discounts.toLocaleString()}`) 
+      .text(`Total Less Prices: Rs. ${salesData.lessPrices.toLocaleString()}`); 
 
   doc.moveDown();
 
-  // Add detailed sales table
+  
   doc.fontSize(14).text("Detailed Sales");
   let y = doc.y + 20;
 
@@ -146,9 +145,9 @@ const generatePDF = async (res, salesData) => {
 
       doc.text(`Rs. ${sale.amount.toLocaleString()}`, x, y);
       x += 100;
-      doc.text(`Rs. ${sale.lessPrice.toLocaleString()}`, x, y); // Changed from discount to lessPrice
+      doc.text(`Rs. ${sale.lessPrice.toLocaleString()}`, x, y); 
       x += 100;
-      doc.text(`Rs. ${sale.discount.toLocaleString()}`, x, y); // Changed from coupon to discount
+      doc.text(`Rs. ${sale.discount.toLocaleString()}`, x, y); 
       y += 20;
   });
 
@@ -166,31 +165,31 @@ const generateExcel = async (res, salesData) => {
     { header: 'Date', key: 'date', width: 15 },
     { header: 'Order ID', key: 'orderId', width: 30 },
     { header: 'Amount', key: 'amount', width: 15 },
-    { header: 'Discounts', key: 'lessPrice', width: 15 }, // Changed from discount to lessPrice
-    { header: 'Coupons', key: 'discount', width: 15 } // Changed from coupon to discount
+    { header: 'Discounts', key: 'lessPrice', width: 15 }, 
+    { header: 'Coupons', key: 'discount', width: 15 }
   ];
   
-  // Add summary
+  
   worksheet.addRow(['Summary']);
   worksheet.addRow(['Total Sales', '', `Rs. ${salesData.totalSales.toLocaleString()}`]);
   worksheet.addRow(['Total Orders', '', salesData.orderCount]);
-  worksheet.addRow(['Total Discounts', '', `Rs. ${salesData.discounts.toLocaleString()}`]); // Changed from coupons to discounts
-  worksheet.addRow(['Total Less Prices', '', `Rs. ${salesData.lessPrices.toLocaleString()}`]); // Changed from discounts to lessPrices
+  worksheet.addRow(['Total Discounts', '', `Rs. ${salesData.discounts.toLocaleString()}`]);
+  worksheet.addRow(['Total Less Prices', '', `Rs. ${salesData.lessPrices.toLocaleString()}`]);
   worksheet.addRow([]);
   
-  // Add sales data
+  
   worksheet.addRow(['Detailed Sales']);
   salesData.sales.forEach(sale => {
     worksheet.addRow({
       date: new Date(sale.date).toLocaleDateString(),
       orderId: sale.orderId.toString(),
       amount: `Rs. ${sale.amount.toLocaleString()}`,
-      lessPrice: `Rs. ${sale.lessPrice.toLocaleString()}`, // Changed from discount to lessPrice
-      discount: `Rs. ${sale.discount.toLocaleString()}` // Changed from coupon to discount
+      lessPrice: `Rs. ${sale.lessPrice.toLocaleString()}`, 
+      discount: `Rs. ${sale.discount.toLocaleString()}` 
     });
   });
   
-  // Set response headers for Excel download
+
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=sales-report.xlsx');
   
@@ -198,7 +197,7 @@ const generateExcel = async (res, salesData) => {
 };
 
 
-// Helper function to create a sale record when an order is completed
+
 const createSaleRecord = async (order) => {
   try {
     const sale = new Sale({

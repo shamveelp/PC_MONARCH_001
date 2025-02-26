@@ -11,7 +11,7 @@ const removeBlockedOrUnlistedItems = async (user) => {
       const adjustedQuantity = Math.min(item.quantity, product.quantity);
       updatedCart.push({ productId: item.productId, quantity: adjustedQuantity });
     }
-    // Items with quantity 0 are automatically excluded
+    
   }
   user.cart = updatedCart;
   await user.save();
@@ -91,20 +91,43 @@ const addToCart = async (req, res) => {
     }
 
     const cartItemIndex = user.cart.findIndex(item => item.productId.toString() === productId);
+    let newQuantity;
 
     if (cartItemIndex > -1) {
-      // Product already in cart, increase quantity
-      if (user.cart[cartItemIndex].quantity >= product.quantity) {
-        return res.status(400).json({ status: false, message: "Cannot add more, product is out of stock" });
+      // Product already in cart, check limits before increasing quantity
+      const currentQuantity = user.cart[cartItemIndex].quantity;
+
+      if (currentQuantity >= 5) {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Maximum 5 quantity per user reached", 
+          quantity: currentQuantity 
+        });
       }
+
+      if (currentQuantity >= product.quantity) {
+        return res.status(400).json({ 
+          status: false, 
+          message: "Cannot add more, product is out of stock", 
+          quantity: currentQuantity 
+        });
+      }
+
       user.cart[cartItemIndex].quantity += 1;
+      newQuantity = user.cart[cartItemIndex].quantity;
     } else {
       // Add new product to cart
       user.cart.push({ productId: productId, quantity: 1 });
+      newQuantity = 1;
     }
 
     await user.save();
-    return res.json({ status: true, message: "Product added to cart", cartLength: user.cart.length });
+    return res.json({ 
+      status: true, 
+      message: "Product added to cart", 
+      quantity: newQuantity, 
+      cartLength: user.cart.length 
+    });
   } catch (error) {
     console.error('Error in addToCart:', error);
     return res.status(500).json({ status: false, message: "An error occurred while adding to cart" });

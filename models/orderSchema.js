@@ -19,6 +19,13 @@ const orderSchema = new Schema({
             ref: 'Product',
             required: true
         },
+        productName: { 
+            type: String,
+            required: true
+        },
+        productImages: [{ 
+            type: String
+        }],
         quantity: {
             type: Number,
             required: true
@@ -77,13 +84,13 @@ const orderSchema = new Schema({
     cancelReason: {
         type: String
     },
-    returnReason: { // Moved to order level
+    returnReason: {
         type: String
     },
-    returnDescription: { // Moved to order level
+    returnDescription: {
         type: String
     },
-    returnImages: [{ // Moved to order level
+    returnImages: [{
         type: String
     }],
     requestStatus: {

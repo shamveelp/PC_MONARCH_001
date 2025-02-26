@@ -56,7 +56,7 @@ const saveImage = async (req, res) => {
   }
 };
 
-// 🟢 Add Product with Multiple Image Upload (using Sharp)
+
 const addProducts = async (req, res) => {
   try {
     const { productName, description,fullDescription , brand, category, regularPrice, salePrice, quantity, color,processor,graphicsCard,storages,display, operatingSystem, boxContains } = req.body;

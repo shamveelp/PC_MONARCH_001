@@ -174,7 +174,7 @@
                         </div>
                         <div class="d-flex justify-content-between font-weight-bold">
                             <span>Total</span>
-                            <span class="total-price">₹ <span id="grandTotal"><%= subtotal ==0? subtotal:subtotal+50 %>.00</span></span>
+                            <span class="total-price">₹ <span id="grandTotal"><%= subtotal ==0? subtotal.toFixed(2):(subtotal+50).toFixed(2) %></span></span>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -497,7 +497,8 @@ function processRazorpayOrder(orderData) {
                 key: data.razorpayKeyId, // Your Razorpay Key ID
                 amount: data.amount,
                 currency: data.currency,
-                name: 'Your Store Name',
+                name: 'PC Monarch',
+                image: 'img/pc-logo.png',
                 description: 'Purchase Description',
                 order_id: data.orderId,
                 handler: function (response) {

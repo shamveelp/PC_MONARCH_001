@@ -9,11 +9,11 @@ const loadCoupons = async (req, res) => {
     // Get current date
     const currentDate = new Date();
 
-    // Fetch non-expired, listed coupons
+    // Fetch non-expired, listed coupons, sorted by createdOn (newest first)
     const coupons = await Coupon.find({
       expireOn: { $gt: currentDate },
       isList: true,
-    });
+    }).sort({ createdOn: -1 }); // Sort by createdOn in descending order
 
     // Enhance coupons with usage status
     const couponsWithStatus = coupons.map(coupon => {

@@ -21,7 +21,7 @@ const loadWallet = async (req, res) => {
 
         // Pagination
         const page = parseInt(req.query.page) || 1;
-        const limit = 10; // Show 10 transactions per page
+        const limit = 10; 
         const skip = (page - 1) * limit;
 
         let transactions = [];
@@ -30,8 +30,8 @@ const loadWallet = async (req, res) => {
         if (wallet) {
             totalTransactions = wallet.transactions.length;
             transactions = wallet.transactions
-                .sort((a, b) => b.createdAt - a.createdAt) // Sort by date (latest first)
-                .slice(skip, skip + limit); // Apply pagination
+                .sort((a, b) => b.createdAt - a.createdAt) 
+                .slice(skip, skip + limit);
         }
 
         const totalPages = Math.ceil(totalTransactions / limit);

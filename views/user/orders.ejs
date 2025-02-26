@@ -157,6 +157,11 @@
             background-color: orange;
             color: white;
         }
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
 </style>
 
 <section class="banner-area organic-breadcrumb">
@@ -192,7 +197,7 @@
             </svg> Account Details</a>
             <a href="/address"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
                 <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
-                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 0 0 0-6 3 3 0 0 0 0 6"/>
             </svg> Address</a>
             <a href="/orders" class="active"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart2" viewBox="0 0 16 16">
                 <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5M3.14 5l1.25 5h8.22l1.25-5zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0m9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0"/>
@@ -204,7 +209,7 @@
                 <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2h6a.5.5 0 0 1 .5.5c0 .253.08.644.306.958.207.288.557.542 1.194.542s.987-.254 1.194-.542C9.42 6.644 9.5 6.253 9.5 6a.5.5 0 0 1 .5-.5h6v-2A1.5 1.5 0 0 0 14.5 2z"/>
                 <path d="M16 6.5h-5.551a2.7 2.7 0 0 1-.443 1.042C9.613 8.088 8.963 8.5 8 8.5s-1.613-.412-2.006-.958A2.7 2.7 0 0 1 5.551 6.5H0v6A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5z"/>
             </svg> Wallet</a>
-            <a href="mycoupons"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash" viewBox="0 0 16 16">
+            <a href="/mycoupons"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cash" viewBox="0 0 16 16">
                 <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4"/>
                 <path d="M0 4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2z"/>
             </svg> My Coupons</a>
@@ -261,13 +266,13 @@
                         <div class="order-body">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
-                                    <img src="<%= order.orderedItems[0].product.productImage[0] %>" 
-                                         alt="<%= order.orderedItems[0].product.productName %>"
+                                    <img src="<%= order.orderedItems[0].productImages[0] %>" 
+                                         alt="<%= order.orderedItems[0].productName %>"
                                          class="product-image">
                                 </div>
                                 <div class="col-md-6">
-                                    <a href="/productDetails?id=<%= order.orderedItems[0].product._id %>">
-                                        <h5><%= order.orderedItems[0].product.productName %></h5>
+                                    <a href="/productDetails?id=<%= order.orderedItems[0].product %>">
+                                        <h5><%= order.orderedItems[0].productName %></h5>
                                     </a>
                                     <p class="text-muted mb-0">Quantity: <%= order.orderedItems[0].quantity %></p>
                                     <p class="text-muted">Price: ₹<%= order.totalPrice/order.orderedItems[0].quantity %></p>
@@ -352,15 +357,10 @@
     </div>
 </div>
 
-
-
-
 <!-- SweetAlert2 for dialogs -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
-
 let currentOrderId = null;
 
 function initiateReturn(orderId) {
@@ -372,9 +372,9 @@ function initiateReturn(orderId) {
 document.getElementById('returnReason').addEventListener('change', function() {
     const otherReasonDiv = document.getElementById('otherReasonDiv');
     if (this.value === 'Other') {
-        otherReasonDiv.classList.remove('d-none');
+        otherReasonDiv?.classList.remove('d-none');
     } else {
-        otherReasonDiv.classList.add('d-none');
+        otherReasonDiv?.classList.add('d-none');
     }
 });
 
@@ -384,10 +384,9 @@ async function submitReturn() {
         const returnDescription = document.getElementById('returnDescription');
         const imagesInput = document.getElementById('returnImages');
         
-        const returnReason = reasonSelect.value; // Get the selected reason
-        const description = returnDescription.value; // Get the description
+        const returnReason = reasonSelect.value;
+        const description = returnDescription.value;
 
-        // Validation
         if (!returnReason || !description) {
             Swal.fire({
                 icon: 'error',
@@ -397,27 +396,19 @@ async function submitReturn() {
             return;
         }
 
-        // Create FormData object
         const formData = new FormData();
-        formData.append('orderId', currentOrderId); // Append order ID
-        formData.append('returnReason', returnReason); // Append return reason
-        formData.append('returnDescription', description); // Append description
+        formData.append('orderId', currentOrderId);
+        formData.append('returnReason', returnReason);
+        formData.append('returnDescription', description);
 
-        // Append images (if any)
         const files = imagesInput.files;
         for (let i = 0; i < Math.min(files.length, 3); i++) {
-            formData.append('images', files[i]); // Append up to 3 images
+            formData.append('images', files[i]);
         }
 
-        // Debugging: Log FormData to console
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
-
-        // Send request to the server
         const response = await fetch('/orders/return', {
             method: 'POST',
-            body: formData // No need to set Content-Type header for FormData
+            body: formData
         });
 
         const data = await response.json();
@@ -429,7 +420,7 @@ async function submitReturn() {
                 text: 'Return request submitted successfully!',
                 confirmButtonText: 'OK'
             }).then(() => {
-                location.reload(); // Reload the page after the user clicks "OK"
+                location.reload();
             });
         } else {
             throw new Error(data.message);
@@ -443,7 +434,6 @@ async function submitReturn() {
         });
     }
 }
-
 
 async function cancelReturn(orderId) {
     try {
@@ -490,12 +480,7 @@ async function cancelReturn(orderId) {
     }
 }
 
-
-
-
-
-
-    async function cancelOrder(orderId) {
+async function cancelOrder(orderId) {
     const { value: reasonOption } = await Swal.fire({
         title: 'Cancel Order',
         input: 'select',
@@ -566,23 +551,22 @@ async function cancelReturn(orderId) {
     }
 }
 
-    function confirmLogout(event) {
-        event.preventDefault(); // Prevent default link behavior
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You will be logged out!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Logout"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "/logout"; // Redirect only if confirmed
-            }
-        });
-    }
+function confirmLogout(event) {
+    event.preventDefault();
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You will be logged out!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Logout"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/logout";
+        }
+    });
+}
 </script>
 
 <%- include('../partials/user/footer') %>

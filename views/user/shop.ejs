@@ -452,11 +452,13 @@ function addToCart(productId) {
                     text: response.message,
                     icon: "success",
                     timer: 2000
+                }).then(() => {
+                    location.reload(); // Reload to update cart UI
                 });
             } else {
                 Swal.fire({
                     title: "Error",
-                    text: response.message,
+                    text: response.message || "Unable to add to cart",
                     icon: "error",
                     timer: 2000
                 });
@@ -465,8 +467,8 @@ function addToCart(productId) {
         error: (error) => {
             console.error("AJAX Error:", error);
             Swal.fire({
-                title: "Error",
-                text: "There was an error adding the product to your cart",
+                title: "Sorry",
+                text: "Stock limit reached or server error or max 5 per user",
                 icon: "error",
                 timer: 2000
             });
