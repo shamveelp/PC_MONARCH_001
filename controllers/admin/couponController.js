@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 const loadCoupon = async (req,res) => {
     try {
 
-        const findCoupons = await Coupon.find({})
+        const findCoupons = await Coupon.find({}).sort({createdOn:-1})
         
 
         return res.render("coupon",{coupons:findCoupons})

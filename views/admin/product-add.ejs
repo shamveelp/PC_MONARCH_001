@@ -247,26 +247,50 @@
 
     function previewImage(event, index) {
         const input = event.target;
+        const preview = document.getElementById(`preview${index}`);
+        const errorDiv = document.getElementById(`image${index}-error`);
+
+        // Reset previous states
+        preview.style.display = 'none';
+        errorDiv.textContent = '';
+        if (croppers[index]) {
+            croppers[index].destroy();
+            delete croppers[index];
+        }
+
         if (input.files && input.files[0]) {
+            const file = input.files[0];
+            // Validation
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+
+            if (!validImageTypes.includes(file.type)) {
+                errorDiv.textContent = 'Please select a valid image file (JPEG, PNG, GIF, BMP, or WebP)';
+                input.value = '';
+                return;
+            }
+
+            if (file.size > maxSize) {
+                errorDiv.textContent = 'Image file size must be less than 5MB';
+                input.value = '';
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(e) {
-                const preview = document.getElementById(`preview${index}`);
                 preview.src = e.target.result;
                 preview.style.display = 'block';
-
-                if (croppers[index]) {
-                    croppers[index].destroy();
-                }
 
                 croppers[index] = new Cropper(preview, {
                     aspectRatio: 1,
                     viewMode: 1,
+                    autoCropArea: 1,
                     ready: function() {
                         this.cropper.crop();
                     }
                 });
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
 

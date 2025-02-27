@@ -8,6 +8,7 @@ const bannerController = require("../controllers/admin/bannerController");
 const orderController = require("../controllers/admin/orderController");
 const couponController = require('../controllers/admin/couponController');
 const salesController = require('../controllers/admin/salesController');
+const transactionController = require('../controllers/admin/transactionController');
 
 const { adminAuth } = require('../middlewares/auth');
 const multer = require("multer");
@@ -89,6 +90,12 @@ router.get("/deletecoupon",adminAuth,couponController.deleteCoupon)
 // Sales Management
 router.get('/sales', adminAuth, salesController.loadSalesPage);
 router.get('/sales/report', adminAuth, salesController.loadSalesPage);
+
+
+// Transaction Management
+router.get('/transactions', adminAuth, transactionController.loadTransactionsPage);
+router.get('/transaction-details', adminAuth, transactionController.getTransactionDetails);
+
 
 
 

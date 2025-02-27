@@ -55,6 +55,8 @@ const placeOrder = async (req, res) => {
       })
     }
 
+    
+
     const selectedAddress = address.address.find((addr) => addr._id.toString() === addressId)
 
     // Calculate total and apply coupon if present
@@ -84,6 +86,16 @@ const placeOrder = async (req, res) => {
       })),
       discount,
     )
+
+
+    if(paymentMethod === 'cod' && totalAmount > 35000){
+      return res.status(400).json({
+        success: false,
+        message: "COD not available for orders above ₹35,000",
+      })
+
+    }
+
 
     // Create orders with distributed discount
     const orders = await Promise.all(

@@ -419,37 +419,6 @@ function proceedWithOrder() {
 
 
 
-
-// function placeOrder() {
-//     const selectedAddress = document.getElementById('existingAddress');
-//     const paymentMethod = document.querySelector('input[name="payment"]:checked');
-    
-//     if (!selectedAddress || selectedAddress.value === 'Select an address') {
-//         Swal.fire('Error', 'Please select a shipping address', 'error');
-//         return;
-//     }
-
-//     if (!paymentMethod) {
-//         Swal.fire('Error', 'Please select a payment method', 'error');
-//         return;
-//     }
-
-//     const orderData = {
-//         addressId: selectedAddress.value,
-//         paymentMethod: paymentMethod.value,
-//         couponCode: appliedCoupon ? appliedCoupon.name : null
-//     };
-
-//     if (paymentMethod.value === 'cod') {
-//         processCODOrder(orderData);
-//     } else if (paymentMethod.value === 'razorpay') {
-//         processRazorpayOrder(orderData);
-//     } else if (paymentMethod.value === 'wallet') {
-//         processWalletOrder(orderData);
-//     }
-// }
-
-
 function processCODOrder(orderData) {
     fetch('/placeOrder', {
         method: 'POST',

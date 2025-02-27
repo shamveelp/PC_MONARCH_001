@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .cosmic-wrapper {
+            padding: 25px;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .stellar-panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .nebula-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .galaxy-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .wormhole-back {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .wormhole-back:hover {
+            color: #0d6efd;
+        }
+        
+        .quasar-section {
+            margin-bottom: 30px;
+        }
+        
+        .pulsar-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .supernova-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .black-hole-item {
+            margin-bottom: 15px;
+        }
+        
+        .dark-matter-label {
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stardust-value {
+            font-weight: 400;
+        }
+        
+        .atomic-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .fusion-badge {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+        }
+        
+        .plasma-badge {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .neutron-badge {
+            background-color: #fff8e1;
+            color: #ff8f00;
+        }
+        
+        .photon-amount {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .positive-flux {
+            color: #2e7d32;
+        }
+        
+        .negative-flux {
+            color: #d32f2f;
+        }
+        
+        .asteroid-divider {
+            margin: 30px 0;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .meteor-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-wrapper">
+        <div class="stellar-panel">
+            <div class="nebula-header">
+                <a href="transaction-list.html" class="wormhole-back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                    Back to Transactions
+                </a>
+                <h1 class="galaxy-title">Transaction Details</h1>
+            </div>
+            
+            <div class="quasar-section">
+                <h2 class="pulsar-title">User Details</h2>
+                <div class="supernova-grid">
+                    <div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Full Name</div>
+                            <div class="stardust-value">Sarah Johnson</div>
+                        </div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Email</div>
+                            <div class="stardust-value">sarah.johnson@example.com</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">User ID</div>
+                            <div class="stardust-value">USR-24680</div>
+                        </div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Phone</div>
+                            <div class="stardust-value">+1 (555) 123-4567</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quasar-section">
+                <h2 class="pulsar-title">Transaction Information</h2>
+                <div class="supernova-grid">
+                    <div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Transaction ID</div>
+                            <div class="stardust-value">#TRX-78946</div>
+                        </div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Transaction Date</div>
+                            <div class="stardust-value">2023-11-15 15:45:10</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Transaction Type</div>
+                            <div class="stardust-value">
+                                <span class="atomic-badge plasma-badge">Wallet Deposit</span>
+                            </div>
+                        </div>
+                        <div class="black-hole-item">
+                            <div class="dark-matter-label">Amount</div>
+                            <div class="photon-amount positive-flux">+$200.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quasar-section">
+                <h2 class="pulsar-title">Source Information</h2>
+                <div class="black-hole-item">
+                    <div class="dark-matter-label">Source Type</div>
+                    <div class="stardust-value">Bank Transfer</div>
+                </div>
+                <div class="black-hole-item">
+                    <div class="dark-matter-label">Source Details</div>
+                    <div class="stardust-value">Transfer from Bank Account ending in 4321</div>
+                </div>
+                <div class="black-hole-item">
+                    <div class="dark-matter-label">Reference Number</div>
+                    <div class="stardust-value">REF-BT-987654</div>
+                </div>
+            </div>
+            
+            <!-- Example of a refund transaction with order link -->
+            <div class="asteroid-divider"></div>
+            
+            <div class="quasar-section" id="refundSection" style="display: none;">
+                <h2 class="pulsar-title">Refund Information</h2>
+                <div class="black-hole-item">
+                    <div class="dark-matter-label">Original Order</div>
+                    <div class="stardust-value">Order #ORD-12345</div>
+                </div>
+                <div class="black-hole-item">
+                    <div class="dark-matter-label">Refund Reason</div>
+                    <div class="stardust-value">Product returned - Damaged on arrival</div>
+                </div>
+                <div class="meteor-button">
+                    <a href="#" class="btn btn-primary">View Order Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Simple script to show refund section for demo purposes -->
+    <script>
+        // Get URL parameters to check if this is a refund transaction
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionId = urlParams.get('id');
+        
+        // For demo purposes, show refund section for specific transaction
+        if (transactionId === 'TRX-78947' || transactionId === 'TRX-78950') {
+            document.getElementById('refundSection').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
