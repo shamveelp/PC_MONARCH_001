@@ -10,15 +10,14 @@ const Razorpay = require("razorpay")
 const crypto = require("crypto")
 const env = require("dotenv").config()
 
-const DELIVERY_CHARGE = 50 // Fixed delivery charge
-
 // Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
 
-// Helper function to distribute discount proportionally
+const DELIVERY_CHARGE = 50 
+
 const distributeDiscount = (cartItems, totalDiscount) => {
   const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   return cartItems.map((item) => {
@@ -56,11 +55,9 @@ const placeOrder = async (req, res) => {
       })
     }
 
-    
-
     const selectedAddress = address.address.find((addr) => addr._id.toString() === addressId)
 
-    // Calculate total and apply coupon if present
+    
     const totalAmount = user.cart.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0)
     let discount = 0
     let couponApplied = false
@@ -80,26 +77,22 @@ const placeOrder = async (req, res) => {
     const discountedItems = distributeDiscount(
       user.cart.map((item) => ({
         product: item.productId._id,
-        productName: item.productId.productName, // Add productName
-        productImages: item.productId.productImage, // Add productImages
+        productName: item.productId.productName,
+        productImages: item.productId.productImage,
         quantity: item.quantity,
         price: item.productId.salePrice,
       })),
       discount,
     )
 
-
-    if(paymentMethod === 'cod' && totalAmount > 35000){
+    if (paymentMethod === "cod" && totalAmount > 35000) {
       return res.status(400).json({
         success: false,
         message: "COD not available for orders above ₹35,000",
       })
-
     }
-    
 
-
-    // Create orders with distributed discount
+   
     const orders = await Promise.all(
       discountedItems.map(async (item) => {
         const product = await Product.findById(item.product).select("regularPrice productName productImage")
@@ -108,8 +101,8 @@ const placeOrder = async (req, res) => {
           orderedItems: [
             {
               product: item.product,
-              productName: product.productName, // Store productName
-              productImages: product.productImage, // Store productImages
+              productName: product.productName,
+              productImages: product.productImage,
               quantity: item.quantity,
               price: item.discountedPrice,
               regularPrice: product.regularPrice,
@@ -135,6 +128,47 @@ const placeOrder = async (req, res) => {
       }),
     )
 
+    
+    if (paymentMethod === "wallet") {
+      const wallet = await Wallet.findOne({ userId })
+
+      if (!wallet || wallet.balance < finalAmount) {
+        return res.status(400).json({
+          success: false,
+          message: "Insufficient wallet balance",
+        })
+      }
+
+     
+      wallet.balance -= finalAmount
+      wallet.totalDebited += finalAmount
+      wallet.transactions.push({
+        amount: finalAmount,
+        transactionType: "debit",
+        transactionPurpose: "purchase",
+        description: "Order payment from wallet",
+      })
+
+      await wallet.save()
+
+    
+      await Transaction.create({
+        userId: userId,
+        amount: finalAmount,
+        transactionType: "debit",
+        paymentMethod: "wallet",
+        paymentGateway: "wallet",
+        status: "completed",
+        purpose: "purchase",
+        description: "Order payment from wallet",
+        orders: orders.map((order) => ({
+          orderId: order.orderId,
+          amount: order.finalAmount,
+        })),
+        walletBalanceAfter: wallet.balance,
+      })
+    }
+
     // Clear cart
     await User.findByIdAndUpdate(userId, { $set: { cart: [] } })
 
@@ -155,12 +189,11 @@ const placeOrder = async (req, res) => {
 const getOrders = async (req, res) => {
   try {
     const userId = req.session.user
-    const orders = await Order.find({ userId })
-      .sort({ createdOn: -1 })
+    const orders = await Order.find({ userId }).sort({ createdOn: -1 })
     const categories = await Category.find({ isListed: true })
     const productData = await Product.find({
       isBlocked: false,
-      category: { $in: categories.map(category => category._id) },
+      category: { $in: categories.map((category) => category._id) },
       quantity: { $gt: 0 },
     })
 
@@ -209,33 +242,24 @@ const cancelOrder = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" })
     }
 
-    if (order.status !== 'cancelled' && order.status !== 'delivered') {
-      order.status = 'cancelled'
+    if (order.status !== "cancelled" && order.status !== "delivered") {
+      order.status = "cancelled"
       order.cancelReason = reason
-      order.orderedItems[0].status = 'cancelled'
+      order.orderedItems[0].status = "cancelled"
       order.orderedItems[0].cancelReason = reason
 
       await Product.findByIdAndUpdate(order.orderedItems[0].product, {
         $inc: { quantity: order.orderedItems[0].quantity },
       })
 
-      if (order.paymentMethod === 'online' || order.paymentMethod === 'wallet') {
-        let wallet = await Wallet.findOne({ userId })
-        if (!wallet) {
-          wallet = new Wallet({ userId, balance: 0 })
+      if (order.paymentMethod === "online" || order.paymentMethod === "wallet") {
+        const refundSuccess = await processRefund(userId, order)
+        if (!refundSuccess) {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to process refund",
+          })
         }
-
-        const refundAmount = order.finalAmount - order.deliveryCharge
-        wallet.balance += refundAmount
-        wallet.refundAmount += refundAmount
-        wallet.transactions.push({
-          amount: refundAmount,
-          transactionType: 'credit',
-          transactionPurpose: 'refund',
-          description: `Refund for cancelled order #${order.orderId}`,
-        })
-
-        await wallet.save()
       }
 
       await order.save()
@@ -306,6 +330,7 @@ const createRazorpayOrder = async (req, res) => {
 const verifyPayment = async (req, res) => {
   try {
     const { paymentResponse, orderData } = req.body
+    const userId = req.session.user
 
     const sign = paymentResponse.razorpay_order_id + "|" + paymentResponse.razorpay_payment_id
     const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(sign).digest("hex")
@@ -318,15 +343,57 @@ const verifyPayment = async (req, res) => {
     }
 
     orderData.paymentMethod = "online"
+
+
     const result = await placeOrder(
       {
-        session: { user: req.session.user },
+        session: { user: userId },
         body: orderData,
       },
-      res,
-    )
+      {
+        json: (data) => {
+          if (data.success) {
+            
+            const createTransactionRecord = async () => {
+              try {
+                const orders = await Order.find({
+                  orderId: { $in: data.orderIds },
+                })
 
-    return result
+                const totalAmount = orders.reduce((sum, order) => sum + order.finalAmount, 0)
+
+                await Transaction.create({
+                  userId: userId,
+                  amount: totalAmount,
+                  transactionType: "debit",
+                  paymentMethod: "online",
+                  paymentGateway: "razorpay",
+                  gatewayTransactionId: paymentResponse.razorpay_payment_id,
+                  status: "completed",
+                  purpose: "purchase",
+                  description: "Online payment for order",
+                  orders: orders.map((order) => ({
+                    orderId: order.orderId,
+                    amount: order.finalAmount,
+                  })),
+                })
+              } catch (error) {
+                console.error("Error creating transaction record:", error)
+              }
+            }
+
+            createTransactionRecord()
+          }
+
+          res.json(data)
+        },
+        status: (code) => {
+          return {
+            json: (data) => res.status(code).json(data),
+          }
+        },
+      },
+    )
   } catch (error) {
     console.error("Error in verifyPayment:", error)
     res.status(500).json({
@@ -400,11 +467,11 @@ const placeWalletOrder = async (req, res) => {
           orderedItems: [
             {
               product: item.productId._id,
-              productName: item.productId.productName, // Store productName
-              productImages: item.productId.productImage, // Store productImages
+              productName: item.productId.productName,
+              productImages: item.productId.productImage,
               quantity: item.quantity,
               price: item.productId.salePrice,
-              regularPrice: item.productId.regularPrice, // Assuming Product has regularPrice
+              regularPrice: item.productId.regularPrice,
               status: "pending",
             },
           ],
@@ -431,6 +498,7 @@ const placeWalletOrder = async (req, res) => {
     )
 
     wallet.balance -= finalAmount
+    wallet.totalDebited += finalAmount
     wallet.transactions.push({
       amount: finalAmount,
       transactionType: "debit",
@@ -438,6 +506,23 @@ const placeWalletOrder = async (req, res) => {
       description: "Order payment",
     })
     await wallet.save()
+
+   
+    await Transaction.create({
+      userId: userId,
+      amount: finalAmount,
+      transactionType: "debit",
+      paymentMethod: "wallet",
+      paymentGateway: "wallet",
+      status: "completed",
+      purpose: "purchase",
+      description: "Order payment from wallet",
+      orders: orders.map((order) => ({
+        orderId: order.orderId,
+        amount: order.finalAmount,
+      })),
+      walletBalanceAfter: wallet.balance,
+    })
 
     await User.findByIdAndUpdate(userId, { $set: { cart: [] } })
 
@@ -470,7 +555,7 @@ const requestReturn = async (req, res) => {
     const currentDate = new Date()
     const daysSinceDelivery = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24))
 
-    if (order.status !== 'delivered' || daysSinceDelivery > 7) {
+    if (order.status !== "delivered" || daysSinceDelivery > 7) {
       return res.status(400).json({
         success: false,
         message: "Order is not eligible for return",
@@ -479,16 +564,15 @@ const requestReturn = async (req, res) => {
 
     let imagePaths = []
     if (files && files.length > 0) {
-      imagePaths = files.map(file => `uploads/returns/${file.filename}`)
+      imagePaths = files.map((file) => `uploads/returns/${file.filename}`)
     }
 
-    order.status = 'return_requested'
+    order.status = "return_requested"
     order.returnReason = returnReason
     order.returnDescription = returnDescription
     order.returnImages = imagePaths
-    order.requestStatus = 'pending'
+    order.requestStatus = "pending"
 
-    // Since return fields are now at order level, no need to update orderedItems separately
     await order.save()
 
     res.json({
@@ -517,12 +601,32 @@ const processRefund = async (userId, order) => {
     wallet.refundAmount += refundAmount
     wallet.transactions.push({
       amount: refundAmount,
-      transactionType: 'credit',
-      transactionPurpose: 'refund',
-      description: `Refund for order #${order.orderId}`,
+      transactionType: "credit",
+      transactionPurpose: "refund",
+      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
     })
 
     await wallet.save()
+
+  
+    await Transaction.create({
+      userId: userId,
+      amount: refundAmount,
+      transactionType: "credit",
+      paymentMethod: "refund",
+      paymentGateway: order.paymentMethod === "online" ? "razorpay" : "wallet",
+      status: "completed",
+      purpose: order.status === "cancelled" ? "cancellation" : "return",
+      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
+      orders: [
+        {
+          orderId: order.orderId,
+          amount: refundAmount,
+        },
+      ],
+      walletBalanceAfter: wallet.balance,
+    })
+
     return true
   } catch (error) {
     console.error("Error processing refund:", error)
@@ -540,16 +644,16 @@ const cancelReturnRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" })
     }
 
-    if (order.status !== 'return_requested' || order.requestStatus !== 'pending') {
+    if (order.status !== "return_requested" || order.requestStatus !== "pending") {
       return res.status(400).json({
         success: false,
         message: "Return request cannot be cancelled",
       })
     }
 
-    order.status = 'delivered'
+    order.status = "delivered"
     order.returnReason = undefined
-    order.returnDescription = undefined // Clear return description
+    order.returnDescription = undefined
     order.returnImages = []
     order.requestStatus = undefined
     order.adminMessage = undefined
@@ -581,3 +685,4 @@ module.exports = {
   processRefund,
   cancelReturnRequest,
 }
+

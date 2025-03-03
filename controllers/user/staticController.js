@@ -18,6 +18,24 @@ const loadContact = async (req,res) => {
 
 }
 
+
+const loadAbout = async (req,res) => {
+    
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+        res.render("about",
+        {
+            user:userData
+        }
+        )
+    } catch (error) {
+        
+        res.redirect("/pagenotfound")
+    }
+}
+
 module.exports = {
-    loadContact
+    loadContact,
+    loadAbout
 }

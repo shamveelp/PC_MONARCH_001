@@ -82,12 +82,6 @@
             </div>
         </div>
 
-        <!-- Sales Chart -->
-        <!-- <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Sales Trend</h2>
-            <canvas id="salesChart" height="100"></canvas>
-        </div> -->
-
         <!-- Detailed Sales Table -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-semibold text-gray-800 p-6 border-b">Detailed Sales</h2>
@@ -129,7 +123,7 @@
     </div>
 
     <script>
-        // Handle report type selection
+       
         document.querySelector('select[name="reportType"]').addEventListener('change', function(e) {
             const customDates = document.querySelectorAll('.custom-dates');
             customDates.forEach(el => {
@@ -137,7 +131,7 @@
             });
         });
 
-        // Handle form submission
+       
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -145,7 +139,7 @@
             window.location.href = `/admin/sales/report?${params.toString()}`;
         });
 
-        // Handle report downloads
+        
         function downloadReport(format) {
             const formData = new FormData(document.getElementById('reportForm'));
             const params = new URLSearchParams(formData);
@@ -153,33 +147,8 @@
             window.location.href = `/admin/sales/report?${params.toString()}`;
         }
 
-        // Initialize sales chart
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <%- JSON.stringify(salesData.sales.map(sale => new Date(sale.date).toLocaleDateString())) %>,
-                datasets: [{
-                    label: 'Sales Amount',
-                    data: <%- JSON.stringify(salesData.sales.map(sale => sale.amount)) %>,
-                    borderColor: 'rgb(59, 130, 246)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        
+        
     </script>
 
 

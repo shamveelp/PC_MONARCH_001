@@ -92,9 +92,12 @@ router.get('/sales', adminAuth, salesController.loadSalesPage);
 router.get('/sales/report', adminAuth, salesController.loadSalesPage);
 
 
-// Transaction Management
-router.get('/transactions', adminAuth, transactionController.getAllTransactions);
-router.get('/transactions/:transactionId', adminAuth, transactionController.getTransactionDetails);
+// Transaction Management Routes
+router.get("/transactions", adminAuth, transactionController.getAllTransactions)
+router.get("/transactions/:transactionId", adminAuth, transactionController.getTransactionDetails)
+router.post("/transactions/create", adminAuth, transactionController.createManualTransaction)
+router.get("/transactions/stats", adminAuth, transactionController.getTransactionStats)
+
 
 
 

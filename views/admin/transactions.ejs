@@ -18,7 +18,7 @@
     <h1 class="mt-4">Transactions</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-        <li class="breadcrumb-item active">Transactions</li>
+        <li class="active"> > Transactions</li>
     </ol>
     
     <div class="card mb-4">
@@ -132,7 +132,7 @@
                                     <% if (transaction.orders && transaction.orders.length > 0) { %>
                                         <% transaction.orders.forEach(order => { %>
                                             <% if (order.orderDetails) { %>
-                                                <a href="/admin/orders/<%= order.orderId %>" class="badge bg-info text-decoration-none">
+                                                <a href="/admin/orders/<%= order.orderDetails._id %>" class="badge bg-info text-decoration-none">
                                                     <%= order.orderId %>
                                                 </a>
                                             <% } else { %>

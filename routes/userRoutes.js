@@ -152,6 +152,7 @@ router.post('/place-wallet-order', userAuth, orderController.placeWalletOrder);
 
 // Static Pages
 router.get("/contact",staticController.loadContact)
+router.get("/about",staticController.loadAbout)
 
 
 
