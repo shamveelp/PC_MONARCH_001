@@ -20,7 +20,8 @@ const ExcelJS = require('exceljs');
               };
               break;
           case 'weekly':
-              const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+              const weekStart = new Date(now.setDate(now.getDate()));
+              console.log('Week start:', weekStart);
               query.createdOn = {
                   $gte: new Date(weekStart.setHours(0, 0, 0, 0)),
                   $lt: new Date(now)
@@ -114,8 +115,8 @@ const generatePDF = async (res, salesData) => {
   doc.fontSize(12)
       .text(`Total Sales: Rs. ${salesData.totalSales.toLocaleString()}`)
       .text(`Total Orders: ${salesData.orderCount}`)
-      .text(`Total Discounts: Rs. ${salesData.discounts.toLocaleString()}`) 
-      .text(`Total Less Prices: Rs. ${salesData.lessPrices.toLocaleString()}`); 
+      .text(`Total Coupons: Rs. ${salesData.discounts.toLocaleString()}`) 
+      .text(`Total Discounts: Rs. ${salesData.lessPrices.toLocaleString()}`); 
 
   doc.moveDown();
 

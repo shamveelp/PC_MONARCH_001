@@ -1,245 +1,243 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Details</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <style>
-        .cosmic-wrapper {
-            padding: 25px;
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        
-        .stellar-panel {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .nebula-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .galaxy-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .wormhole-back {
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .wormhole-back:hover {
-            color: #0d6efd;
-        }
-        
-        .quasar-section {
-            margin-bottom: 30px;
-        }
-        
-        .pulsar-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .supernova-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .black-hole-item {
-            margin-bottom: 15px;
-        }
-        
-        .dark-matter-label {
-            font-weight: 500;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-        
-        .stardust-value {
-            font-weight: 400;
-        }
-        
-        .atomic-badge {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .fusion-badge {
-            background-color: #e3f2fd;
-            color: #0d6efd;
-        }
-        
-        .plasma-badge {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .neutron-badge {
-            background-color: #fff8e1;
-            color: #ff8f00;
-        }
-        
-        .photon-amount {
-            font-weight: 600;
-            font-size: 18px;
-        }
-        
-        .positive-flux {
-            color: #2e7d32;
-        }
-        
-        .negative-flux {
-            color: #d32f2f;
-        }
-        
-        .asteroid-divider {
-            margin: 30px 0;
-            border-top: 1px solid #dee2e6;
-        }
-        
-        .meteor-button {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="cosmic-wrapper">
-        <div class="stellar-panel">
-            <div class="nebula-header">
-                <a href="transaction-list.html" class="wormhole-back">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                    </svg>
-                    Back to Transactions
-                </a>
-                <h1 class="galaxy-title">Transaction Details</h1>
-            </div>
-            
-            <div class="quasar-section">
-                <h2 class="pulsar-title">User Details</h2>
-                <div class="supernova-grid">
-                    <div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Full Name</div>
-                            <div class="stardust-value">Sarah Johnson</div>
-                        </div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Email</div>
-                            <div class="stardust-value">sarah.johnson@example.com</div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">User ID</div>
-                            <div class="stardust-value">USR-24680</div>
-                        </div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Phone</div>
-                            <div class="stardust-value">+1 (555) 123-4567</div>
-                        </div>
-                    </div>
+<%- include("../../views/partials/admin/header") %>
+
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Transaction Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/admin/transactions">Transactions</a></li>
+        <li class="breadcrumb-item active">Transaction Details</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Transaction Information
                 </div>
-            </div>
-            
-            <div class="quasar-section">
-                <h2 class="pulsar-title">Transaction Information</h2>
-                <div class="supernova-grid">
-                    <div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Transaction ID</div>
-                            <div class="stardust-value">#TRX-78946</div>
-                        </div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Transaction Date</div>
-                            <div class="stardust-value">2023-11-15 15:45:10</div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Transaction ID:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= transaction.transactionId %></p>
                         </div>
                     </div>
-                    <div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Transaction Type</div>
-                            <div class="stardust-value">
-                                <span class="atomic-badge plasma-badge">Wallet Deposit</span>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Amount:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext <%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                <%= transaction.transactionType === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Transaction Type:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                <span class="badge <%= transaction.transactionType === 'credit' ? 'bg-success' : 'bg-danger' %>">
+                                    <%= transaction.transactionType %>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Payment Method:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= transaction.paymentMethod %></p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Payment Gateway:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= transaction.paymentGateway %></p>
+                        </div>
+                    </div>
+                    <% if (transaction.gatewayTransactionId) { %>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">Gateway Transaction ID:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext"><%= transaction.gatewayTransactionId %></p>
                             </div>
                         </div>
-                        <div class="black-hole-item">
-                            <div class="dark-matter-label">Amount</div>
-                            <div class="photon-amount positive-flux">+$200.00</div>
+                    <% } %>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Purpose:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= transaction.purpose %></p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Description:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= transaction.description || 'N/A' %></p>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Status:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext">
+                                <span class="badge 
+                                    <%= transaction.status === 'completed' ? 'bg-success' : 
+                                       transaction.status === 'pending' ? 'bg-warning' : 
+                                       transaction.status === 'failed' ? 'bg-danger' : 
+                                       'bg-info' %>">
+                                    <%= transaction.status %>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <% if (transaction.walletBalanceAfter !== null) { %>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">Wallet Balance After:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext">₹<%= transaction.walletBalanceAfter.toFixed(2) %></p>
+                            </div>
+                        </div>
+                    <% } %>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label fw-bold">Created At:</label>
+                        <div class="col-sm-8">
+                            <p class="form-control-plaintext"><%= new Date(transaction.createdAt).toLocaleString() %></p>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="quasar-section">
-                <h2 class="pulsar-title">Source Information</h2>
-                <div class="black-hole-item">
-                    <div class="dark-matter-label">Source Type</div>
-                    <div class="stardust-value">Bank Transfer</div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i>
+                    User Information
                 </div>
-                <div class="black-hole-item">
-                    <div class="dark-matter-label">Source Details</div>
-                    <div class="stardust-value">Transfer from Bank Account ending in 4321</div>
-                </div>
-                <div class="black-hole-item">
-                    <div class="dark-matter-label">Reference Number</div>
-                    <div class="stardust-value">REF-BT-987654</div>
-                </div>
-            </div>
-            
-            <!-- Example of a refund transaction with order link -->
-            <div class="asteroid-divider"></div>
-            
-            <div class="quasar-section" id="refundSection" style="display: none;">
-                <h2 class="pulsar-title">Refund Information</h2>
-                <div class="black-hole-item">
-                    <div class="dark-matter-label">Original Order</div>
-                    <div class="stardust-value">Order #ORD-12345</div>
-                </div>
-                <div class="black-hole-item">
-                    <div class="dark-matter-label">Refund Reason</div>
-                    <div class="stardust-value">Product returned - Damaged on arrival</div>
-                </div>
-                <div class="meteor-button">
-                    <a href="#" class="btn btn-primary">View Order Details</a>
+                <div class="card-body">
+                    <% if (transaction.userId) { %>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">User ID:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext"><%= transaction.userId._id %></p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">Name:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext"><%= transaction.userId.name %></p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">Email:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext"><%= transaction.userId.email %></p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label fw-bold">Phone:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext"><%= transaction.userId.phone || 'N/A' %></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <a href="/admin/users/<%= transaction.userId._id %>" class="btn btn-primary">
+                                <i class="fas fa-user"></i> View User Profile
+                            </a>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center">User information not available</p>
+                    <% } %>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Simple script to show refund section for demo purposes -->
-    <script>
-        // Get URL parameters to check if this is a refund transaction
-        const urlParams = new URLSearchParams(window.location.search);
-        const transactionId = urlParams.get('id');
-        
-        // For demo purposes, show refund section for specific transaction
-        if (transactionId === 'TRX-78947' || transactionId === 'TRX-78950') {
-            document.getElementById('refundSection').style.display = 'block';
-        }
-    </script>
-</body>
-</html>
+    <% if (transaction.orders && transaction.orders.length > 0) { %>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-shopping-cart me-1"></i>
+                Related Orders
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Payment Method</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% transaction.orders.forEach(order => { %>
+                                <tr>
+                                    <td><%= order.orderId %></td>
+                                    <td>₹<%= order.amount.toFixed(2) %></td>
+                                    <td>
+                                        <% if (order.orderDetails) { %>
+                                            <span class="badge 
+                                                <%= order.orderDetails.status === 'delivered' ? 'bg-success' : 
+                                                   order.orderDetails.status === 'pending' ? 'bg-warning' : 
+                                                   order.orderDetails.status === 'cancelled' ? 'bg-danger' : 
+                                                   'bg-info' %>">
+                                                <%= order.orderDetails.status %>
+                                            </span>
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (order.orderDetails) { %>
+                                            <%= order.orderDetails.paymentMethod %>
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (order.orderDetails) { %>
+                                            <%= new Date(order.orderDetails.createdOn).toLocaleString() %>
+                                        <% } else { %>
+                                            N/A
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (order.orderDetails) { %>
+                                            <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View Order
+                                            </a>
+                                        <% } else { %>
+                                            <span class="text-muted">Order not found</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <% } %>
+    
+    <% if (transaction.metadata && Object.keys(transaction.metadata).length > 0) { %>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-code me-1"></i>
+                Additional Metadata
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3 rounded"><%= JSON.stringify(transaction.metadata, null, 2) %></pre>
+            </div>
+        </div>
+    <% } %>
+    
+    <div class="mb-4">
+        <a href="/admin/transactions" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Transactions
+        </a>
+    </div>
+</div>
+
+
+
+<%- include("../../views/partials/admin/footer") %>

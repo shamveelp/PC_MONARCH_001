@@ -5,6 +5,7 @@ const Category = require("../../models/categorySchema")
 const Coupon = require("../../models/couponSchema")
 const Address = require("../../models/addressSchema")
 const Wallet = require("../../models/walletSchema")
+const Transaction = require("../../models/transactionSchema")
 const Razorpay = require("razorpay")
 const crypto = require("crypto")
 const env = require("dotenv").config()
@@ -95,6 +96,7 @@ const placeOrder = async (req, res) => {
       })
 
     }
+    
 
 
     // Create orders with distributed discount

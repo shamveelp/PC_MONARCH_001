@@ -14,203 +14,198 @@
 </style>
 
 
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Management</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <style>
-        .cosmic-wrapper {
-            padding: 25px;
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        
-        .stellar-panel {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .nebula-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .galaxy-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .orbit-filter {
-            width: 250px;
-        }
-        
-        .quantum-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-        
-        .quantum-table th {
-            background-color: #f1f3f5;
-            padding: 12px 15px;
-            font-weight: 600;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-        }
-        
-        .quantum-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .quantum-table tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .atomic-badge {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .fusion-badge {
-            background-color: #e3f2fd;
-            color: #0d6efd;
-        }
-        
-        .plasma-badge {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-        
-        .neutron-badge {
-            background-color: #fff8e1;
-            color: #ff8f00;
-        }
-        
-        .photon-amount {
-            font-weight: 600;
-        }
-        
-        .positive-flux {
-            color: #2e7d32;
-        }
-        
-        .negative-flux {
-            color: #d32f2f;
-        }
-    </style>
-</head>
-<body>
-    <div class="cosmic-wrapper">
-        <div class="stellar-panel">
-            <div class="nebula-header">
-                <h1 class="galaxy-title">Transaction Management</h1>
-                <select class="form-select orbit-filter">
-                    <option selected>All Transactions</option>
-                    <option>Wallet Transactions</option>
-                    <option>Online Transactions</option>
-                </select>
-            </div>
-            
-            <table class="quantum-table">
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Transactions</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item active">Transactions</li>
+    </ol>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-filter me-1"></i>
+            Filter Transactions
+        </div>
+        <div class="card-body">
+            <form id="filterForm" method="GET" action="/admin/transactions">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="transactionType" class="form-label">Transaction Type</label>
+                        <select class="form-select" id="transactionType" name="transactionType">
+                            <option value="">All</option>
+                            <option value="credit">Credit</option>
+                            <option value="debit">Debit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="paymentMethod" class="form-label">Payment Method</label>
+                        <select class="form-select" id="paymentMethod" name="paymentMethod">
+                            <option value="">All</option>
+                            <option value="wallet">Wallet</option>
+                            <option value="online">Online</option>
+                            <option value="refund">Refund</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="purpose" class="form-label">Purpose</label>
+                        <select class="form-select" id="purpose" name="purpose">
+                            <option value="">All</option>
+                            <option value="purchase">Purchase</option>
+                            <option value="refund">Refund</option>
+                            <option value="wallet_add">Wallet Add</option>
+                            <option value="wallet_withdraw">Wallet Withdraw</option>
+                            <option value="cancellation">Cancellation</option>
+                            <option value="return">Return</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="orderId" class="form-label">Order ID</label>
+                        <input type="text" class="form-control" id="orderId" name="orderId" placeholder="Enter Order ID">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="userId" class="form-label">User ID/Email</label>
+                        <input type="text" class="form-control" id="userId" name="userId" placeholder="User ID or Email">
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Transactions List
+        </div>
+        <div class="card-body">
+            <table id="transactionsTable" class="table table-striped table-bordered">
                 <thead>
                     <tr>
                         <th>Transaction ID</th>
-                        <th>Transaction Date</th>
                         <th>User</th>
-                        <th>Transaction Type</th>
                         <th>Amount</th>
+                        <th>Type</th>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                        <th>Date</th>
+                        <th>Orders</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#TRX-78945</td>
-                        <td>2023-11-15 14:30:22</td>
-                        <td>John Smith</td>
-                        <td><span class="atomic-badge fusion-badge">Online Payment</span></td>
-                        <td><span class="photon-amount negative-flux">-$125.00</span></td>
-                        <td><a href="transaction-detail.html?id=TRX-78945" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX-78946</td>
-                        <td>2023-11-15 15:45:10</td>
-                        <td>Sarah Johnson</td>
-                        <td><span class="atomic-badge plasma-badge">Wallet Deposit</span></td>
-                        <td><span class="photon-amount positive-flux">+$200.00</span></td>
-                        <td><a href="transaction-detail.html?id=TRX-78946" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX-78947</td>
-                        <td>2023-11-16 09:12:45</td>
-                        <td>Michael Brown</td>
-                        <td><span class="atomic-badge neutron-badge">Refund</span></td>
-                        <td><span class="photon-amount positive-flux">+$75.50</span></td>
-                        <td><a href="transaction-detail.html?id=TRX-78947" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX-78948</td>
-                        <td>2023-11-16 11:30:18</td>
-                        <td>Emily Davis</td>
-                        <td><span class="atomic-badge fusion-badge">Online Payment</span></td>
-                        <td><span class="photon-amount negative-flux">-$89.99</span></td>
-                        <td><a href="transaction-detail.html?id=TRX-78948" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX-78949</td>
-                        <td>2023-11-17 13:25:36</td>
-                        <td>Robert Wilson</td>
-                        <td><span class="atomic-badge plasma-badge">Wallet Deposit</span></td>
-                        <td><span class="photon-amount positive-flux">+$150.00</span></td>
-                        <td><a href="transaction-detail.html?id=TRX-78949" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX-78950</td>
-                        <td>2023-11-17 16:42:09</td>
-                        <td>Jennifer Lee</td>
-                        <td><span class="atomic-badge neutron-badge">Refund</span></td>
-                        <td><span class="photon-amount positive-flux">+$45.25</span></td>
-                        <td><a href="transaction-details" class="btn btn-sm btn-outline-primary">View Details</a></td>
-                    </tr>
+                    <% if (transactions && transactions.length > 0) { %>
+                        <% transactions.forEach(transaction => { %>
+                            <tr>
+                                <td><%= transaction.transactionId %></td>
+                                <td>
+                                    <% if (transaction.userId) { %>
+                                        <%= transaction.userId.name %><br>
+                                        <small><%= transaction.userId.email %></small>
+                                    <% } else { %>
+                                        Unknown User
+                                    <% } %>
+                                </td>
+                                <td class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                    <%= transaction.transactionType === 'credit' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                                </td>
+                                <td><span class="badge <%= transaction.transactionType === 'credit' ? 'bg-success' : 'bg-danger' %>">
+                                    <%= transaction.transactionType %>
+                                </span></td>
+                                <td><%= transaction.paymentMethod %></td>
+                                <td><%= transaction.purpose %></td>
+                                <td><%= new Date(transaction.createdAt).toLocaleString() %></td>
+                                <td>
+                                    <% if (transaction.orders && transaction.orders.length > 0) { %>
+                                        <% transaction.orders.forEach(order => { %>
+                                            <% if (order.orderDetails) { %>
+                                                <a href="/admin/orders/<%= order.orderId %>" class="badge bg-info text-decoration-none">
+                                                    <%= order.orderId %>
+                                                </a>
+                                            <% } else { %>
+                                                <span class="badge bg-secondary"><%= order.orderId %></span>
+                                            <% } %>
+                                        <% }); %>
+                                    <% } else { %>
+                                        N/A
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <a href="/admin/transactions/<%= transaction.transactionId %>" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" class="text-center">No transactions found</td>
+                        </tr>
+                    <% } %>
                 </tbody>
             </table>
             
-            <nav aria-label="Transaction pagination" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
+            <!-- Pagination -->
+            <% if (totalPages > 1) { %>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>" tabindex="-1">Previous</a>
+                        </li>
+                        
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+                        
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            <% } %>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<script>
+    function resetFilters() {
+        document.getElementById('filterForm').reset();
+        window.location.href = '/admin/transactions';
+    }
+    
+    // Preserve filter values after form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const fields = [
+            'transactionType', 'paymentMethod', 'purpose', 
+            'orderId', 'startDate', 'endDate', 'userId'
+        ];
+        
+        fields.forEach(field => {
+            const value = urlParams.get(field);
+            if (value) {
+                document.getElementById(field).value = value;
+            }
+        });
+    });
+</script>
+
 
 
 

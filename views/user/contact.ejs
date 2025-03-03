@@ -1,0 +1,362 @@
+<%- include('../partials/user/header') %>
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+ .card-green {
+   background-color: #ADD8E6;
+ }
+ .main {
+   padding: 30px 0;
+ }
+
+ .dashboard-menu {
+   background-color: #cce3e6;
+   border-radius: 10px;
+   padding: 15px;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+ }
+
+ .dashboard-menu .nav-link {
+   font-weight: bold;
+   color: #30683c;
+   box-shadow: 0 4px 10px rgba(123, 131, 112, 0.3), 0 4px 20px rgba(0, 191, 255, 0.2);
+   transition: box-shadow 0.3s ease;
+ }
+
+ .dashboard-menu .nav-link:hover {
+   color: #00bfff;
+   box-shadow: 0 4px 15px rgba(173, 255, 47, 0.5), 0 6px 25px rgba(0, 191, 255, 0.4);
+ }
+
+ .card {
+   border-radius: 10px;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+   margin-bottom: 20px;
+ }
+
+ .card-header {
+   background-color: #487379;
+   color: white;
+   border-radius: 10px 10px 0 0;
+ }
+
+ .profile-image-container {
+   display: flex;
+   align-items: center;
+ }
+
+ .rounded-circle {
+   border-radius: 50%;
+   border: 2px solid #fff;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+ }
+
+ .ml-3 {
+   margin-left: 15px;
+ }
+
+ @media (max-width: 768px) {
+   .dashboard-menu {
+     padding: 10px;
+   }
+   .card {
+     margin-bottom: 15px;
+   }
+ }
+ body {
+            background-color: #f7f7f7;
+        }
+        .sidebar {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar a {
+            color: #333;
+            display: block;
+            padding: 10px 0;
+            text-decoration: none;
+        }
+        .sidebar a.active {
+            color: #ff6600;
+        }
+        .sidebar a:hover {
+            color: #ff6600;
+        }
+        .sidebar a i {
+            margin-right: 10px;
+        }
+        .main-content {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .main-content h2 {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group span {
+            color: red;
+        }
+        .btn-orange {
+            background-color: #ff6600;
+            color: white;
+        }
+        .btn-orange:hover {
+            background-color: #e65c00;
+        }
+        .btn-blue {
+            background-color: #0000ff;
+            color: white;
+        }
+        .btn-blue:hover {
+            background-color: #0000cc;
+        }
+        .photo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .order-header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .order-body {
+            padding: 20px;
+        }
+        .order-footer {
+            padding: 10px;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        .order-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .order-status {
+            color: red;
+        }
+        .order-ship-to {
+            color: green;
+        }
+        .order-link {
+            color: blue;
+            text-decoration: none;
+        }
+        .order-link:hover {
+            text-decoration: underline;
+        }
+        .btn-orange {
+            background-color: orange;
+            color: white;
+        }
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+</style>
+
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-between">
+            <div class="col-left d-flex align-items-center">
+                <div class="profile-image-container">
+                    
+                </div>
+                
+            </div>
+            <div class="col-first">
+                <h1>Contact Us</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="/">Home<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">Contact Us</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!--================Contact Area =================-->
+<section class="contact_area section_gap_bottom">
+    <div class="container">
+        <!-- <div id="mapBox" class="mapBox" data-lat="40.701083" data-lon="-74.1522848" data-zoom="13" data-info="PO Box CT16122 Collins Street West, Victoria 8007, Australia."
+         data-mlat="40.701083" data-mlon="-74.1522848"> -->
+        <!-- </div> -->
+         <br><br><br>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="contact_info">
+                    <div class="info_item">
+                        <i class="lnr lnr-home"></i>
+                        <h6>Calicut, Kakkanchery</h6>
+                        <p>Kinfra, Brototype</p>
+                    </div>
+                    <div class="info_item">
+                        <i class="lnr lnr-phone-handset"></i>
+                        <h6><a href="#">+00 000 0000 000</a></h6>
+                        <p>Mon to Fri 9am to 6 pm</p>
+                    </div>
+                    <div class="info_item">
+                        <i class="lnr lnr-envelope"></i>
+                        <h6><a href="#">pcmonarch@gmail.com</a></h6>
+                        <p>Send us your query anytime!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <form class="row contact_form" action="https://api.web3forms.com/submit" method="post" id="contactForm">
+                    <input type="hidden" name="access_key" value="587b49ca-f0f4-4cf8-9128-530fcb628868">
+        		<input type="hidden" name="email" value="bscphysicsdegree@gmail.com">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Your Name'">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Your Email'">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Subject'">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <textarea class="form-control" name="message" id="message" cols="30" rows="7" placeholder="Message" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Message'"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5">
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================Contact Area =================-->
+
+
+
+
+<!-- SweetAlert2 for dialogs -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+
+// Form  Code 
+
+document.getElementById("contactForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent traditional form submission
+
+    // Add a loading state
+    const submitButton = this.querySelector('input[type="submit"]');
+    const originalButtonText = submitButton.value;
+    submitButton.value = "Sending...";
+    submitButton.disabled = true;
+
+    // Create a message container if not already present
+    let messageContainer = this.querySelector(".form-status-message");
+    if (!messageContainer) {
+        messageContainer = document.createElement("div");
+        messageContainer.className = "form-status-message";
+        messageContainer.style.marginTop = "10px";
+        messageContainer.style.fontWeight = "bold";
+        this.appendChild(messageContainer);
+    }
+
+    // Collect user input values
+    const nameInput = this.querySelector('input[placeholder="Your Name"]');
+    const emailInput = this.querySelector('input[placeholder="Your Email"]');
+    const subjectInput = this.querySelector('input[placeholder="Subject"]');
+    const messageInput = this.querySelector('textarea[placeholder="Message"]');
+
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const subject = subjectInput.value.trim();
+    const message = messageInput.value.trim();
+
+    // Validation logic
+    // Check if name is empty or starts with space
+    const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/; // Only alphabetic characters with single spaces between words
+    if (!name || name.startsWith(' ') || !nameRegex.test(name)) {
+        messageContainer.textContent = "Please enter a valid name (no leading spaces, only alphabetic characters, and single spaces between names).";
+        messageContainer.style.color = "red";
+        submitButton.value = originalButtonText;
+        submitButton.disabled = false;
+        return;
+    }
+
+    // Email validation
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        messageContainer.textContent = "Please enter a valid email address.";
+        messageContainer.style.color = "red";
+        submitButton.value = originalButtonText;
+        submitButton.disabled = false;
+        return;
+    }
+
+    // Subject validation
+    if (!subject || /^\s+$/.test(subject)) {
+        messageContainer.textContent = "Subject cannot be empty or spaces only.";
+        messageContainer.style.color = "red";
+        submitButton.value = originalButtonText;
+        submitButton.disabled = false;
+        return;
+    }
+
+    // Message validation
+    if (!message || /^\s+$/.test(message)) {
+        messageContainer.textContent = "Message cannot be empty or spaces only.";
+        messageContainer.style.color = "red";
+        submitButton.value = originalButtonText;
+        submitButton.disabled = false;
+        return;
+    }
+
+    // Gather form data
+    const formData = new FormData();
+    formData.append("access_key", "587b49ca-f0f4-4cf8-9128-530fcb628868");
+    formData.append("email", "bscphysicsdegree@gmail.com");
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("subject", subject);
+    formData.append("message", message);
+
+    // Send data using Fetch API
+    fetch(this.action, {
+        method: this.method,
+        body: formData,
+        headers: { Accept: "application/json" },
+    })
+        .then((response) => {
+            if (response.ok) {
+                messageContainer.textContent = "Your message has been sent successfully!";
+                messageContainer.style.color = "green";
+                this.reset(); // Clear the form fields
+            } else {
+                messageContainer.textContent = "There was an error sending your message. Please try again.";
+                messageContainer.style.color = "red";
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+            messageContainer.textContent = "An unexpected error occurred. Please try again later.";
+            messageContainer.style.color = "red";
+        })
+        .finally(() => {
+            submitButton.value = originalButtonText;
+            submitButton.disabled = false;
+        });
+});
+
+</script>
+
+<%- include('../partials/user/footer') %>

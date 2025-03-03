@@ -93,9 +93,15 @@ router.get('/sales/report', adminAuth, salesController.loadSalesPage);
 
 
 // Transaction Management
-router.get('/transactions', adminAuth, transactionController.loadTransactionsPage);
-router.get('/transaction-details', adminAuth, transactionController.getTransactionDetails);
+router.get('/transactions', adminAuth, transactionController.getAllTransactions);
+router.get('/transactions/:transactionId', adminAuth, transactionController.getTransactionDetails);
 
+
+
+//
+router.get("/api/sales-data", adminAuth, adminController.getSalesData)
+// router.get("/api/top-products", adminAuth, adminController.getTopProducts)
+router.get("/api/top-selling", adminAuth, adminController.getTopSelling)
 
 
 

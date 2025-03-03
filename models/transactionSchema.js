@@ -1,182 +1,86 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
-// Transaction Schema
 const transactionSchema = new Schema({
-  transactionId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    required: true
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  },
-  
-  // User Information
-  user: {
+    transactionId: {
+        type: String,
+        default: () => uuidv4(),
+        unique: true
+    },
     userId: {
-      type: String,
-      required: true,
-      index: true
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    fullName: {
-      type: String,
-      required: true
+    amount: {
+        type: Number,
+        required: true
     },
-    email: {
-      type: String,
-      required: true
+    transactionType: {
+        type: String,
+        enum: ['credit', 'debit'],
+        required: true
     },
-    phone: {
-      type: String
-    }
-  },
-  
-  // Transaction Details
-  transactionType: {
-    type: String,
-    required: true,
-    enum: ['ONLINE_PAYMENT', 'WALLET_DEPOSIT', 'WALLET_WITHDRAWAL', 'REFUND', 'ADJUSTMENT'],
-    index: true
-  },
-  amount: {
-    type: Number,
-    required: true
-  },
-  currency: {
-    type: String,
-    default: 'USD',
-    required: true
-  },
-  status: {
-    type: String,
-    required: true,
-    enum: ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED'],
-    default: 'PENDING',
-    index: true
-  },
-  
-  // Source Information
-  source: {
-    sourceType: {
-      type: String,
-      required: true,
-      enum: ['CREDIT_CARD', 'BANK_TRANSFER', 'PAYPAL', 'WALLET', 'ORDER_REFUND', 'OTHER']
-    },
-    sourceDetails: {
-      type: String
-    },
-    referenceNumber: {
-      type: String
-    }
-  },
-  
-  // For Refund Transactions
-  refundInfo: {
-    originalOrderId: {
-      type: String,
-      index: true
-    },
-    reason: {
-      type: String
-    },
-    returnedItems: [{
-      productId: String,
-      quantity: Number,
-      amount: Number
-    }]
-  },
-  
-  // For Online Payments
-  paymentInfo: {
     paymentMethod: {
-      type: String
-    },
-    cardLast4: {
-      type: String
+        type: String,
+        enum: ['wallet', 'online', 'refund', 'admin'],
+        required: true
     },
     paymentGateway: {
-      type: String
+        type: String,
+        enum: ['razorpay', 'wallet', 'admin', 'none'],
+        default: 'none'
     },
     gatewayTransactionId: {
-      type: String
-    }
-  },
-  
-  // For Wallet Transactions
-  walletInfo: {
-    walletId: {
-      type: String
+        type: String,
+        default: null
     },
-    balanceBefore: {
-      type: Number
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'failed', 'refunded'],
+        default: 'completed'
     },
-    balanceAfter: {
-      type: Number
+    purpose: {
+        type: String,
+        enum: ['purchase', 'refund', 'wallet_add', 'wallet_withdraw', 'cancellation', 'return'],
+        required: true
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    orders: [{
+        orderId: {
+            type: String,
+            ref: 'Order'
+        },
+        amount: {
+            type: Number
+        }
+    }],
+    walletBalanceAfter: {
+        type: Number,
+        default: null
+    },
+    metadata: {
+        type: Schema.Types.Mixed,
+        default: {}
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now
     }
-  },
-  
-  // Additional Metadata
-  metadata: {
-    ipAddress: String,
-    userAgent: String,
-    deviceInfo: String,
-    location: {
-      country: String,
-      city: String
-    }
-  },
-  
-  // Notes and Admin Information
-  adminNotes: {
-    type: String
-  },
-  lastModifiedBy: {
-    type: String
-  }
-}, {
-  timestamps: true // This automatically adds createdAt and updatedAt fields
-});
+}, { timestamps: true });
 
-// Indexes for common queries
-transactionSchema.index({ 'user.userId': 1, createdAt: -1 });
-transactionSchema.index({ transactionType: 1, createdAt: -1 });
-transactionSchema.index({ status: 1, createdAt: -1 });
-transactionSchema.index({ createdAt: -1 });
+// Indexes for faster queries
+transactionSchema.index({ userId: 1, createdAt: -1 });
 
-// Virtual for formatted amount with currency symbol
-transactionSchema.virtual('formattedAmount').get(function() {
-  const symbol = this.currency === 'USD' ? '$' : 
-                 this.currency === 'EUR' ? '€' : 
-                 this.currency === 'GBP' ? '£' : '';
-  
-  const prefix = this.amount >= 0 ? '+' : '';
-  return `${prefix}${symbol}${Math.abs(this.amount).toFixed(2)}`;
-});
+transactionSchema.index({ 'orders.orderId': 1 });
 
-// Method to check if transaction is a refund
-transactionSchema.methods.isRefund = function() {
-  return this.transactionType === 'REFUND';
-};
-
-// Static method to find user's transactions
-transactionSchema.statics.findByUserId = function(userId) {
-  return this.find({ 'user.userId': userId }).sort({ createdAt: -1 });
-};
-
-// Static method to find transactions by type
-transactionSchema.statics.findByType = function(type) {
-  return this.find({ transactionType: type }).sort({ createdAt: -1 });
-};
-
-// Create model from schema
 const Transaction = mongoose.model('Transaction', transactionSchema);
-
 module.exports = Transaction;

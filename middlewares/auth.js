@@ -21,8 +21,17 @@ const userAuth = (req, res, next) => {
       res.redirect("/login")
     }
   }
+
+  const addCartWishlist = (req, res, next) => {
+    if (!req.session.user) {
+      res.redirect("/login")
+
+    }
+  }
+
+
   
-  module.exports = { userAuth }
+  module.exports = { userAuth}
   
   userBlockedEmitter.on("userBlocked", (userId) => {
     // This function will be called whenever a user is blocked
@@ -58,4 +67,6 @@ const adminAuth = (req, res, next) => {
 module.exports = {
     userAuth,
     adminAuth,
+    addCartWishlist,
+    
 }

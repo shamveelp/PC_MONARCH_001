@@ -10,10 +10,11 @@ const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
 const couponController = require("../controllers/user/couponController")
 const walletController = require("../controllers/user/walletController")
+const staticController = require("../controllers/user/staticController")
 const multer = require("multer")
 const upload = require('../config/multer');
 
-const { userAuth } = require('../middlewares/auth');
+const { userAuth,addCartWishlist } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn,forgotPassLogout} = require("../middlewares/profileAuth")
 
 
@@ -147,6 +148,10 @@ router.post('/wallet/create-razorpay-order', userAuth, walletController.createRa
 router.post('/wallet/verify-payment', userAuth, walletController.verifyPayment);
 router.post('/wallet/withdraw-money', userAuth, walletController.withdrawMoney);
 router.post('/place-wallet-order', userAuth, orderController.placeWalletOrder);
+
+
+// Static Pages
+router.get("/contact",staticController.loadContact)
 
 
 
