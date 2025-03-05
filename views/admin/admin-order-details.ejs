@@ -132,6 +132,17 @@
                         </div>
                     <% } %>
 
+                    <% if (order.status === 'delivered' || order.status === 'returned') { %>
+                        <div class="card">
+                            <div class="card-header">
+                                <p class="mb-0"><strong>Delivered On:</strong> <%= new Date(order.deliveredOn).toLocaleDateString() %></p>
+
+                            </div>
+
+                        </div>
+                        
+                    <% } %>
+
                     <!-- Product Details -->
                     <h5 class="mb-3">Product Information</h5>
                     <div class="table-responsive">
@@ -265,6 +276,22 @@
                         <h6>Order Information</h6>
                         <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.createdOn).toLocaleString() %></p>
                         <p class="mb-0"><strong>Order Status:</strong> <%= order.status.toUpperCase() %></p>
+                        <% if (order.status === 'confirmed') { %>
+                            <p class="mb-0"><strong>Confirmed On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
+                        <% } %>
+                        
+                        <% if (order.status === 'shipped') { %>
+                            <p class="mb-0"><strong>Shipped On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
+                        <% } %>
+                        
+                        <% if (order.status === 'delivered') { %>
+                            <p class="mb-0"><strong>Delivered On:</strong> <%= new Date(order.deliveredOn).toLocaleDateString() %></p>
+                        <% } %>
+                        
+                        <% if (order.status === 'returned') { %>
+                            <p class="mb-0"><strong>Returned On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
+                        <% } %>
+                        
                     </div>
                 </div>
             </div>

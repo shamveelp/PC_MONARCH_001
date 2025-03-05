@@ -106,6 +106,20 @@ router.get("/api/sales-data", adminAuth, adminController.getSalesData)
 // router.get("/api/top-products", adminAuth, adminController.getTopProducts)
 router.get("/api/top-selling", adminAuth, adminController.getTopSelling)
 
+router.get("/dashboard",adminAuth,async (req,res)=>{
+    try {
+        res.redirect("/admin")
+        
+    } catch (error) {
+        res.redirect("/admin/pageerror")
+        
+    }
+})
+
+router.use((req, res) => {
+    res.status(404).redirect("/admin/pageerror");
+});
+
 
 
 module.exports = router;

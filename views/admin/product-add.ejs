@@ -1,6 +1,8 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
     <style>
         /* General Styling */
@@ -227,8 +229,10 @@
                 <div class="form-group">
                     <label for="image<%= i %>">Image <%= i %></label>
                     <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control" accept="image/*" onchange="previewImage(event, <%= i %>)">
-                    <img id="preview<%= i %>" src="#" alt="Image preview" class="image-preview" style="display: none;">
-                    <button type="button" class="btn btn-primary mt-2" onclick="saveImage(<%= i %>)">Save Image <%= i %></button>
+                    <div class="preview-container" style="margin-top: 10px; display: none;">
+                        <img id="preview<%= i %>" src="#" alt="Image preview" class="image-preview">
+                    </div>
+                    <input type="hidden" name="croppedImage<%= i %>" id="croppedImage<%= i %>" value="">
                     <div id="image<%= i %>-error" class="error-message"></div>
                 </div>
             <% } %>
@@ -242,16 +246,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
 <script>
     let croppers = {};
 
     function previewImage(event, index) {
         const input = event.target;
+        const previewContainer = input.parentElement.querySelector('.preview-container');
         const preview = document.getElementById(`preview${index}`);
         const errorDiv = document.getElementById(`image${index}-error`);
 
         // Reset previous states
-        preview.style.display = 'none';
+        previewContainer.style.display = 'none';
         errorDiv.textContent = '';
         if (croppers[index]) {
             croppers[index].destroy();
@@ -279,7 +287,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 preview.src = e.target.result;
-                preview.style.display = 'block';
+                previewContainer.style.display = 'block';
 
                 croppers[index] = new Cropper(preview, {
                     aspectRatio: 1,
@@ -294,205 +302,191 @@
         }
     }
 
-    function saveImage(index) {
-        if (croppers[index]) {
-            croppers[index].getCroppedCanvas().toBlob((blob) => {
-                const formData = new FormData();
-                formData.append('image', blob, `product-${Date.now()}-${index}.webp`);
-                
-                fetch('/admin/saveImage', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: `Image ${index} saved successfully`,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message || `Failed to save Image ${index}`,
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An unexpected error occurred',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                });
-            }, 'image/webp');
-        }
-    }
-
     document.getElementById('productForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Form validation
-    let isValid = true;
-    const requiredFields = ['productName', 'description', 'brand', 'regularPrice', 'salePrice', 'quantity', 'color', 'category'];
-    
-    // Clear previous error messages
-    requiredFields.forEach(field => {
-        document.getElementById(`${field}-error`).textContent = '';
-    });
-
-    // Validate required fields
-    requiredFields.forEach(field => {
-        const input = document.getElementsByName(field)[0];
-        if (!input.value) {
-            isValid = false;
-            document.getElementById(`${field}-error`).textContent = 'This field is required.';
-        }
-    });
-
-    // Get price and quantity values
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-    const salePrice = parseFloat(document.getElementById('salePrice').value);
-
-    // Validate quantity
-    if (quantity < 0) {
-        isValid = false;
-        Swal.fire({
-            title: 'Invalid Quantity!',
-            text: 'Quantity cannot be less than zero',
-            icon: 'error',
-            confirmButtonText: 'OK'
+        e.preventDefault();
+        
+        // Form validation
+        let isValid = true;
+        const requiredFields = ['productName', 'description', 'brand', 'regularPrice', 'salePrice', 'quantity', 'color', 'category'];
+        
+        // Clear previous error messages
+        requiredFields.forEach(field => {
+            document.getElementById(`${field}-error`).textContent = '';
         });
-        document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
-        return;
-    }
 
-    // Validate regular price
-    if (regularPrice <= 0) {
-        isValid = false;
-        Swal.fire({
-            title: 'Invalid Regular Price!',
-            text: 'Regular price must be greater than zero',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
-        return;
-    }
-
-    // Validate sale price
-    if (salePrice <= 0) {
-        isValid = false;
-        Swal.fire({
-            title: 'Invalid Sale Price!',
-            text: 'Sale price must be greater than zero',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
-        return;
-    }
-
-    // Validate sale price is not higher than regular price
-    if (salePrice > regularPrice) {
-        isValid = false;
-        Swal.fire({
-            title: 'Invalid Price!',
-            text: 'Sale price cannot be higher than regular price',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
-        return;
-    }
-
-    if (isValid) {
-        const formData = new FormData(this);
-        fetch('/admin/addProducts', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Product added successfully',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/admin/addProducts';
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message || 'An error occurred while adding the product',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
+        // Validate required fields
+        requiredFields.forEach(field => {
+            const input = document.getElementsByName(field)[0];
+            if (!input.value) {
+                isValid = false;
+                document.getElementById(`${field}-error`).textContent = 'This field is required.';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        });
+
+        // Get price and quantity values
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+        const salePrice = parseFloat(document.getElementById('salePrice').value);
+
+        // Validate quantity
+        if (quantity < 0) {
+            isValid = false;
             Swal.fire({
-                title: 'Error!',
-                text: 'An unexpected error occurred',
+                title: 'Invalid Quantity!',
+                text: 'Quantity cannot be less than zero',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
-        });
-    }
-});
+            document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
+            return;
+        }
 
-// Add real-time validation for quantity, regular price, and sale price
-document.getElementById('quantity').addEventListener('input', function() {
-    const quantity = parseInt(this.value);
-    if (quantity < 0) {
-        document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
-    } else {
-        document.getElementById('quantity-error').textContent = '';
-    }
-});
+        // Validate regular price
+        if (regularPrice <= 0) {
+            isValid = false;
+            Swal.fire({
+                title: 'Invalid Regular Price!',
+                text: 'Regular price must be greater than zero',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
+            return;
+        }
 
-document.getElementById('regularPrice').addEventListener('input', function() {
-    const regularPrice = parseFloat(this.value);
-    const salePrice = parseFloat(document.getElementById('salePrice').value);
-    
-    if (regularPrice <= 0) {
-        document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
-    } else {
-        document.getElementById('regularPrice-error').textContent = '';
-    }
-    
-    // Check sale price relationship
-    if (salePrice && salePrice > regularPrice) {
-        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
-    } else {
-        document.getElementById('salePrice-error').textContent = '';
-    }
-});
+        // Validate sale price
+        if (salePrice <= 0) {
+            isValid = false;
+            Swal.fire({
+                title: 'Invalid Sale Price!',
+                text: 'Sale price must be greater than zero',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
+            return;
+        }
 
-document.getElementById('salePrice').addEventListener('input', function() {
-    const salePrice = parseFloat(this.value);
-    const regularPrice = parseFloat(document.getElementById('regularPrice').value);
-    
-    if (salePrice <= 0) {
-        document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
-    } else if (regularPrice && salePrice > regularPrice) {
-        document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
-    } else {
-        document.getElementById('salePrice-error').textContent = '';
-    }
-});
+        // Validate sale price is not higher than regular price
+        if (salePrice > regularPrice) {
+            isValid = false;
+            Swal.fire({
+                title: 'Invalid Price!',
+                text: 'Sale price cannot be higher than regular price',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+            return;
+        }
+
+        // Check if at least one image is uploaded
+        let imageCount = 0;
+        for (let i = 1; i <= 4; i++) {
+            if (document.getElementById(`image${i}`).files.length > 0) {
+                imageCount++;
+                
+                // Process cropped images before submitting
+                if (croppers[i]) {
+                    // Get the cropped canvas as a data URL
+                    const croppedDataUrl = croppers[i].getCroppedCanvas().toDataURL('image/jpeg');
+                    // Store the cropped image data in the hidden input
+                    document.getElementById(`croppedImage${i}`).value = croppedDataUrl;
+                }
+            }
+        }
+
+        if (imageCount < 4) {
+            isValid = false;
+            Swal.fire({
+                title: 'Images Required!',
+                text: 'Please upload all 4 product images',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        if (isValid) {
+            const formData = new FormData(this);
+            fetch('/admin/addProducts', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Product added successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/admin/products';
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'An error occurred while adding the product',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+    });
+
+    // Add real-time validation for quantity, regular price, and sale price
+    document.getElementById('quantity').addEventListener('input', function() {
+        const quantity = parseInt(this.value);
+        if (quantity < 0) {
+            document.getElementById('quantity-error').textContent = 'Quantity cannot be less than zero';
+        } else {
+            document.getElementById('quantity-error').textContent = '';
+        }
+    });
+
+    document.getElementById('regularPrice').addEventListener('input', function() {
+        const regularPrice = parseFloat(this.value);
+        const salePrice = parseFloat(document.getElementById('salePrice').value);
+        
+        if (regularPrice <= 0) {
+            document.getElementById('regularPrice-error').textContent = 'Regular price must be greater than zero';
+        } else {
+            document.getElementById('regularPrice-error').textContent = '';
+        }
+        
+        // Check sale price relationship
+        if (salePrice && salePrice > regularPrice) {
+            document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+        } else {
+            document.getElementById('salePrice-error').textContent = '';
+        }
+    });
+
+    document.getElementById('salePrice').addEventListener('input', function() {
+        const salePrice = parseFloat(this.value);
+        const regularPrice = parseFloat(document.getElementById('regularPrice').value);
+        
+        if (salePrice <= 0) {
+            document.getElementById('salePrice-error').textContent = 'Sale price must be greater than zero';
+        } else if (regularPrice && salePrice > regularPrice) {
+            document.getElementById('salePrice-error').textContent = 'Sale price cannot be higher than regular price';
+        } else {
+            document.getElementById('salePrice-error').textContent = '';
+        }
+    });
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

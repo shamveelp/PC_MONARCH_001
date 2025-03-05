@@ -246,7 +246,16 @@
                                         'bg-warning'
                                     %>">
                                         <%= order.status.toUpperCase() %>
+                                           
                                     </span>
+                                    <%if(order.status === 'delivered'){%>
+                                        On
+                                        <%=new Date(order.deliveredOn).toLocaleDateString()%>
+                                    <%}%> 
+                                    <%if(order.status === 'returned'){%>
+                                        On
+                                        <%=new Date(order.updatedOn).toLocaleDateString()%>
+                                    <%}%>
                                 </div>
                                 <div class="col-md-3">
                                     <small class="text-muted">PAYMENT METHOD</small><br>
@@ -277,6 +286,7 @@
                                     <p class="text-muted mb-0">Quantity: <%= order.orderedItems[0].quantity %></p>
                                     <p class="text-muted">Price: ₹<%= order.totalPrice/order.orderedItems[0].quantity %></p>
                                 </div>
+                                
                                 <div class="col-md-4 text-end">
                                     <a href="/order-details?orderId=<%= order.orderId %>" 
                                        class="btn btn-outline-primary btn-sm">View Details</a>

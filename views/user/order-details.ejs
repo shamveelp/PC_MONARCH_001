@@ -106,10 +106,21 @@
                     <% }); %>
                 </div>
 
+                <%if(order.status === "delivered" || order.status === "returned"){%>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Delivered On: <%= new Date(order.deliveredOn).toLocaleDateString() %></h5>
+                    </div>
+                </div>
+                <%}%>
+
+
+
                 <% if (order.status === 'delivered' && !order.returnReason && order.requestStatus !== "rejected") { %>
                     <div class="card mt-4">
                         <div class="card-header">
-                            <h5 class="mb-0">Return Order</h5>
+                            <h5 class="mb-0">Return Order <span style="font-size: 10px; color: gray;">(Return Window Will be open for Only 15 Days After delivered)</span></h5>
                         </div>
                         <div class="card-body">
                             <button class="btn btn-warning" onclick="initiateReturn('<%= order._id %>')">
@@ -124,6 +135,7 @@
                         <h6 class="alert-heading">Return Request Rejected</h6>
                         <p><strong>Category:</strong> <%= order.rejectionCategory %></p>
                         <p><strong>Reason:</strong> <%= order.rejectionReason %></p>
+                        
                     </div>
                 <% } %>
                 
@@ -138,6 +150,9 @@
                         </div>
                         <div class="card-body">
                             <p><strong>Return Reason:</strong> <%= order.returnReason %></p>
+                            <% if (order.status === "returned") { %>
+                            <p><strong>Returned On:</strong> <%=new Date(order.updatedOn).toLocaleDateString()%></p>
+                            <% } %>
                             
                             <% if (order.returnImages && order.returnImages.length > 0) { %>
                                 <div class="mt-3">
@@ -172,7 +187,10 @@
                         </div>
                     </div>
                 <% } %>
+
+
                 
+                <br>
                 <!-- Product Details -->
                 <div class="row mb-4">
                     <div class="col-md-8">
@@ -202,6 +220,8 @@
                             </div>
                         </div>
                     </div>
+
+                    
 
                     <div class="col-md-4">
                         <!-- Order Summary -->
@@ -247,6 +267,10 @@
                                 </div>
                             </div>
                         </div>
+
+                        <%if(order.status === 'delivered'){%>
+                            <a href="/download-invoice?orderId=<%= order.orderId %>" class="btn btn-primary mt-2">Download Invoice</a>
+                        <%}%>
 
                         <!-- Order Actions -->
                         <div class="order-actions mt-4">

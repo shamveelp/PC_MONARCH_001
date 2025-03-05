@@ -198,6 +198,8 @@ const resendOtp = async (req, res) => {
 
         const emailSent = await sendVerificationEmail(email,otp);
 
+        console.log("Resended OTP:",otp)
+
         if(!emailSent){
             console.log("Resend OTP",otp);
             res.status(200).json({success:true,message:'OTP Resend Successfully'})
@@ -263,9 +265,9 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         if (req.session.user) {
-            delete req.session.user; // ✅ Remove only user session
+            delete req.session.user; 
         }
-        res.redirect('/login'); // Redirect user to login page
+        res.redirect('/login'); 
     } catch (error) {
         console.log('Logout Error', error);
         res.redirect('/pagenotfound');
@@ -273,93 +275,35 @@ const logout = async (req, res) => {
 };
 
 
-// const loadShoppingPage = async (req,res) => {
-//     try {
-
-//         const user = req.session.user;
-//         const userData = await User.findOne({_id:user});
-//         const categories = await Category.find({isListed:true});
-
-//         const categoriesWithCounts = await Promise.all(categories.map(async (category) => {
-//             const count = await Product.countDocuments({ 
-//                 category: category._id, 
-//                 isBlocked: false, 
-//                 quantity: { $gt: 0 } 
-//             });
-//             return { _id: category._id, name: category.name, productCount: count };
-//         }));
-    
-
-//         const categoryIds = categories.map((category) => category._id.toString());
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = 9;
-//         const skip = (page-1)*limit;
-//         const products = await Product.find({
-//             isBlocked:false,
-//             category:{$in:categoryIds},
-//             quantity:{$gt:0},
-
-//         }).sort({createdOn:-1}).skip(skip).limit(limit)
-
-//         const totalProducts = await Product.countDocuments({
-//             isBlocked:false,
-//             category:{$in:categoryIds},
-//             quantity:{$gt:0},
-
-//         })
-
-//         const totalPages = Math.ceil(totalProducts/limit);
-
-//         // const brands = await Brand.find({isBlocked:false});
-
-//         const categoriesWithIds = categories.map(category => ({_id:category._id,name:category.name}));
-
-        
-//         res.render("shop",{
-//             user:userData,
-//             products:products,
-//             category:categoriesWithIds,
-//             // brand:brands,
-//             totalProducts:totalProducts,
-//             currentPage:page,
-//             totalPages:totalPages
-//         })
-
-//     } catch (error) {
-
-//         res.redirect("/pageNotFound")
-        
-//     }
-// }
 
 const loadShoppingPage = async (req, res) => {
     try {
-        // Get user data if authenticated
+        
         const user = req.session.user;
         const userData = user ? await User.findOne({ _id: user }) : null;
 
-        // Pagination setup
+        
         const page = parseInt(req.query.page) || 1;
         const limit = 9;
         const skip = (page - 1) * limit;
 
-        // Build query object
+        
         let query = {
             isBlocked: false,
             quantity: { $gt: 0 }
         };
 
-        // Add search functionality
+        
         if (req.query.search) {
             query.productName = { $regex: req.query.search, $options: 'i' };
         }
 
-        // Get categories and ensure they're listed
+        
         const categories = await Category.find({ isListed: true });
         const categoryIds = categories.map(category => category._id);
         query.category = { $in: categoryIds };
 
-        // Determine sort order
+        
         let sort = {};
         switch (req.query.sort) {
             case 'popularity':
@@ -387,10 +331,10 @@ const loadShoppingPage = async (req, res) => {
                 sort = { productName: -1 };
                 break;
             default:
-                sort = { createdAt: -1 }; // Default sort by newest
+                sort = { createdAt: -1 }; 
         }
 
-        // Get category counts using aggregation
+        
         const categoriesWithCounts = await Category.aggregate([
             {
                 $match: { isListed: true }
@@ -424,7 +368,7 @@ const loadShoppingPage = async (req, res) => {
             }
         ]);
 
-        // Fetch products with pagination and sorting
+        
         const products = await Product.find(query)
             .sort(sort)
             .skip(skip)

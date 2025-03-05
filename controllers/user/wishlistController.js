@@ -28,8 +28,7 @@ const loadWishlist = async (req,res) => {
 
 const addToWishlist = async (req, res) => {
     try {
-        console.log("Received productId:", req.body.productId);
-        console.log("User ID from session:", req.session.user);
+        
 
         const productId = req.body.productId;
         const userId = req.session.user;

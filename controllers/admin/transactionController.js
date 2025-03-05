@@ -63,30 +63,54 @@ const getAllTransactions = async (req, res) => {
       .limit(limit)
 
    
-    const totalTransactions = await Transaction.countDocuments(filter)
-    const totalPages = Math.ceil(totalTransactions / limit)
-
-    
-    const processedTransactions = await Promise.all(
-      transactions.map(async (transaction) => {
-        if (transaction.orders && transaction.orders.length > 0) {
-          for (let i = 0; i < transaction.orders.length; i++) {
-            const orderDetails = await Order.findOne({ orderId: transaction.orders[i].orderId })
-            transaction.orders[i].orderDetails = orderDetails
+      const uniqueUsers = await Transaction.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$userId"
+          }
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "user"
+          }
+        },
+        { $unwind: "$user" },
+        {
+          $project: {
+            email: "$user.email",
+            _id: "$user._id"
           }
         }
-        return transaction
-      }),
-    )
-
-    res.render("transactions", {
-      transactions: processedTransactions,
-      currentPage: page,
-      totalPages,
-      totalTransactions,
-      query: req.query,
-      title: "Transaction Management",
-    })
+      ])
+  
+      const totalTransactions = await Transaction.countDocuments(filter)
+      const totalPages = Math.ceil(totalTransactions / limit)
+  
+      const processedTransactions = await Promise.all(
+        transactions.map(async (transaction) => {
+          if (transaction.orders && transaction.orders.length > 0) {
+            for (let i = 0; i < transaction.orders.length; i++) {
+              const orderDetails = await Order.findOne({ orderId: transaction.orders[i].orderId })
+              transaction.orders[i].orderDetails = orderDetails
+            }
+          }
+          return transaction
+        }),
+      )
+  
+      res.render("transactions", {
+        transactions: processedTransactions,
+        currentPage: page,
+        totalPages,
+        totalTransactions,
+        query: req.query,
+        users: uniqueUsers,  // Add users to the template data
+        title: "Transaction Management",
+      })
   } catch (error) {
     console.error("Error fetching transactions:", error)
     res.status(500).send("Internal Server Error")

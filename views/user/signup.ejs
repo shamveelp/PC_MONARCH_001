@@ -60,6 +60,104 @@
             font-size: 12px;
             display: none;
         }
+
+        .or-divider {
+            text-align: center;
+            margin: 16px 0;
+            color: #666;
+        }
+
+        .google-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            gap: 8px;
+        }
+        
+        #flex-clm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-left: 127px;
+        }
+        
+        .error-message {
+            color: red;
+            font-size: 12px;
+            display: none;
+        }
+
+        /* New responsive styles */
+        @media screen and (max-width: 768px) {
+            .login_box_area .row {
+                flex-direction: column;
+            }
+
+            .login_box_img {
+                display: none; /* Hide image on mobile */
+            }
+
+            .col-lg-6 {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .login_form_inner {
+                padding: 20px;
+            }
+
+            #flex-clm {
+                margin-left: 0;
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            /* Add Login button for mobile */
+            .mobile-login {
+                display: block;
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .mobile-login .primary-btn {
+                display: inline-block;
+            }
+        }
+
+        @media screen and (min-width: 769px) {
+            .mobile-login {
+                display: none; /* Hide mobile button on desktop */
+            }
+        }
+
+        /* Additional responsive adjustments */
+        @media screen and (max-width: 576px) {
+            .login_form_inner h3 {
+                font-size: 24px;
+            }
+
+            .primary-btn {
+                padding: 2px 10px;
+            }
+
+            .google-button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .error-message {
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 
@@ -86,25 +184,8 @@
 								<a href="/shop" class="nav-link dropdown-toggle" role="button" aria-haspopup="true"
 								 aria-expanded="false">Shop</a>
 							</li>
-							<li class="nav-item submenu dropdown">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Blog</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
-									<li class="nav-item"><a class="nav-link" href="single-blog.html">Blog Details</a></li>
-								</ul>
-							</li>
-							<li class="nav-item submenu dropdown active">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Pages</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-									<li class="nav-item active"><a class="nav-link" href="signup.html">Sign Up</a></li>
-									<li class="nav-item"><a class="nav-link" href="tracking.html">Tracking</a></li>
-									<li class="nav-item"><a class="nav-link" href="elements.html">Elements</a></li>
-								</ul>
-							</li>
-							<li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+							<li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+							<li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
 							<li class="nav-item"><a href="#" class="cart"><span class="ti-bag"></span></a></li>
@@ -130,40 +211,40 @@
 
 	<!--================Sign Up Box Area =================-->
 	<section class="login_box_area section_gap">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-6">
-					<div class="login_box_img">
-						<img class="img-fluid" src="img/login.jpg" alt="Gaming laptop display">
-						<div class="hover">
-							<h4>Already have an account?</h4>
-							<p>There are advances being made in science and technology everyday, and a good example of this is the</p>
-							<a class="primary-btn" href="/login">Login to your Account</a>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-6">
-					<div class="login_form_inner">
-						<h3>Sign up to enter</h3>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="login_box_img">
+                        <img class="img-fluid" src="img/login.jpg" alt="Gaming laptop display">
+                        <div class="hover">
+                            <h4>Already have an account?</h4>
+                            <p>There are advances being made in science and technology everyday, and a good example of this is the</p>
+                            <a class="primary-btn" href="/login">Login to your Account</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="login_form_inner">
+                        <h3>Sign up to enter</h3>
                         <% if(locals.message && message.length > 0){ %>
                             <div class="alert alert-danger text-center">
                                 <%= message %>
                             </div>
                         <% } %>
-						<form class="row login_form" action="/signup" method="post" id="signForm">
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                        <form class="row login_form" action="/signup" method="post" id="signForm">
+                            <div class="col-md-12 form-group">
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
                                 <div id="error1" class="error-message"></div>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
                                 <div id="error2" class="error-message"></div>
-							</div>
-							<div class="col-md-12 form-group">
-								<input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
                                 <div id="error3" class="error-message"></div>
-							</div>
-							<div class="col-md-12 form-group">
+                            </div>
+                            <div class="col-md-12 form-group">
                                 <div class="password-wrapper" style="position: relative;">
                                     <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                                     <i onclick="togglePassword('password', this)" class="bi bi-eye-fill toggle-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
@@ -177,9 +258,9 @@
                                 </div>
                                 <div id="error5" class="error-message"></div>
                             </div>
-							<div class="col-md-12 form-group">
-								<button type="submit" value="submit" class="primary-btn">Sign Up</button>
-							</div>
+                            <div class="col-md-12 form-group">
+                                <button type="submit" value="submit" class="primary-btn">Sign Up</button>
+                            </div>
                             <div id="flex-clm">
                                 <div class="or-divider">Or</div>
                                 <a href="/auth/google" class="google-button">
@@ -192,12 +273,17 @@
                                     Sign up with Google
                                 </a>
                             </div>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+                        </form>
+                        <!-- Add mobile-only Login button -->
+                        <div class="mobile-login">
+                            <p>Already have an account?</p>
+                            <a class="primary-btn" href="/login">Login to your Account</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 	<!--================End Sign Up Box Area =================-->
 
 

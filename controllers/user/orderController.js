@@ -10,13 +10,18 @@ const Razorpay = require("razorpay")
 const crypto = require("crypto")
 const env = require("dotenv").config()
 
+const fs = require("fs")
+const path = require("path")
+const ejs = require("ejs")
+const puppeteer = require("puppeteer")
+
 // Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
 
-const DELIVERY_CHARGE = 50 
+const DELIVERY_CHARGE = 50
 
 const distributeDiscount = (cartItems, totalDiscount) => {
   const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -57,7 +62,6 @@ const placeOrder = async (req, res) => {
 
     const selectedAddress = address.address.find((addr) => addr._id.toString() === addressId)
 
-    
     const totalAmount = user.cart.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0)
     let discount = 0
     let couponApplied = false
@@ -92,7 +96,6 @@ const placeOrder = async (req, res) => {
       })
     }
 
-   
     const orders = await Promise.all(
       discountedItems.map(async (item) => {
         const product = await Product.findById(item.product).select("regularPrice productName productImage")
@@ -118,6 +121,7 @@ const placeOrder = async (req, res) => {
           couponApplied: couponApplied,
           deliveryCharge: DELIVERY_CHARGE / discountedItems.length,
           createdOn: new Date(),
+          updatedOn: new Date(), // Set initial updatedOn timestamp
         })
 
         await Product.findByIdAndUpdate(item.product, {
@@ -128,7 +132,6 @@ const placeOrder = async (req, res) => {
       }),
     )
 
-    
     if (paymentMethod === "wallet") {
       const wallet = await Wallet.findOne({ userId })
 
@@ -139,7 +142,6 @@ const placeOrder = async (req, res) => {
         })
       }
 
-     
       wallet.balance -= finalAmount
       wallet.totalDebited += finalAmount
       wallet.transactions.push({
@@ -151,7 +153,6 @@ const placeOrder = async (req, res) => {
 
       await wallet.save()
 
-    
       await Transaction.create({
         userId: userId,
         amount: finalAmount,
@@ -248,6 +249,9 @@ const cancelOrder = async (req, res) => {
       order.orderedItems[0].status = "cancelled"
       order.orderedItems[0].cancelReason = reason
 
+      // Update the timestamp when user cancels the order
+      order.updatedOn = new Date()
+
       await Product.findByIdAndUpdate(order.orderedItems[0].product, {
         $inc: { quantity: order.orderedItems[0].quantity },
       })
@@ -270,6 +274,213 @@ const cancelOrder = async (req, res) => {
   } catch (error) {
     console.error("Error in cancelOrder:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
+  }
+}
+
+const requestReturn = async (req, res) => {
+  try {
+    const { orderId, returnReason, returnDescription } = req.body
+    const userId = req.session.user
+    const files = req.files
+
+    const order = await Order.findOne({ _id: orderId, userId })
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" })
+    }
+
+    const deliveryDate = new Date(order.updatedAt)
+    const currentDate = new Date()
+    const daysSinceDelivery = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24))
+
+    if (order.status !== "delivered" || daysSinceDelivery > 7) {
+      return res.status(400).json({
+        success: false,
+        message: "Order is not eligible for return",
+      })
+    }
+
+    let imagePaths = []
+    if (files && files.length > 0) {
+      imagePaths = files.map((file) => `uploads/returns/${file.filename}`)
+    }
+
+    order.status = "return_requested"
+    order.returnReason = returnReason
+    order.returnDescription = returnDescription
+    order.returnImages = imagePaths
+    order.requestStatus = "pending"
+
+    // Update the timestamp when return is requested
+    order.updatedOn = new Date()
+
+    await order.save()
+
+    res.json({
+      success: true,
+      message: "Return request submitted successfully",
+    })
+  } catch (error) {
+    console.error("Error in requestReturn:", error)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    })
+  }
+}
+
+const processRefund = async (userId, order) => {
+  try {
+    let wallet = await Wallet.findOne({ userId })
+    if (!wallet) {
+      wallet = new Wallet({ userId, balance: 0 })
+    }
+
+    const refundAmount = order.finalAmount - order.deliveryCharge
+
+    wallet.balance += refundAmount
+    wallet.refundAmount += refundAmount
+    wallet.transactions.push({
+      amount: refundAmount,
+      transactionType: "credit",
+      transactionPurpose: "refund",
+      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
+    })
+
+    await wallet.save()
+
+    await Transaction.create({
+      userId: userId,
+      amount: refundAmount,
+      transactionType: "credit",
+      paymentMethod: "refund",
+      paymentGateway: order.paymentMethod === "online" ? "razorpay" : "wallet",
+      status: "completed",
+      purpose: order.status === "cancelled" ? "cancellation" : "return",
+      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
+      orders: [
+        {
+          orderId: order.orderId,
+          amount: refundAmount,
+        },
+      ],
+      walletBalanceAfter: wallet.balance,
+    })
+
+    return true
+  } catch (error) {
+    console.error("Error processing refund:", error)
+    return false
+  }
+}
+
+const cancelReturnRequest = async (req, res) => {
+  try {
+    const { orderId } = req.body
+    const userId = req.session.user
+
+    const order = await Order.findOne({ _id: orderId, userId })
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" })
+    }
+
+    if (order.status !== "return_requested" || order.requestStatus !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Return request cannot be cancelled",
+      })
+    }
+
+    order.status = "delivered"
+    order.returnReason = undefined
+    order.returnDescription = undefined
+    order.returnImages = []
+    order.requestStatus = undefined
+    order.adminMessage = undefined
+
+    // Update the timestamp when return request is cancelled
+    order.updatedOn = new Date()
+
+    await order.save()
+
+    res.json({
+      success: true,
+      message: "Return request cancelled successfully",
+    })
+  } catch (error) {
+    console.error("Error in cancelReturnRequest:", error)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    })
+  }
+}
+
+const generateInvoice = async (req, res) => {
+  try {
+    const userId = req.session.user
+    const orderId = req.query.orderId
+
+    const order = await Order.findOne({ orderId: orderId, userId })
+    if (!order) {
+      return res.status(404).send("Order not found")
+    }
+
+    if (order.status !== "delivered") {
+      return res.status(400).send("Invoice is only available for delivered orders")
+    }
+
+    if (!order.invoiceDate) {
+      order.invoiceDate = new Date()
+      await order.save()
+    }
+
+    const templatePath = path.join(__dirname, "../../views/user/invoice-template.ejs")
+    const html = await ejs.renderFile(templatePath, { order })
+
+    const browser = await puppeteer.launch({ headless: true })
+    const page = await browser.newPage()
+
+    // Set content and generate PDF
+    await page.setContent(html, { waitUntil: "networkidle0" })
+
+    // Create directory if it doesn't exist
+    const invoiceDir = path.join(__dirname, "../../public/invoices")
+    if (!fs.existsSync(invoiceDir)) {
+      fs.mkdirSync(invoiceDir, { recursive: true })
+    }
+
+    // Generate PDF file name
+    const fileName = `invoice-${order.orderId}.pdf`
+    const filePath = path.join(invoiceDir, fileName)
+
+    // Generate PDF
+    await page.pdf({
+      path: filePath,
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "20px",
+        right: "20px",
+        bottom: "20px",
+        left: "20px",
+      },
+    })
+
+    await browser.close()
+
+    // Send the PDF file
+    res.download(filePath, fileName, (err) => {
+      if (err) {
+        console.error("Error sending file:", err)
+        res.status(500).send("Error generating invoice")
+      }
+
+      // Optionally delete the file after sending
+      // fs.unlinkSync(filePath);
+    })
+  } catch (error) {
+    console.error("Error generating invoice:", error)
+    res.status(500).send("Error generating invoice")
   }
 }
 
@@ -420,36 +631,6 @@ const placeWalletOrder = async (req, res) => {
       })
     }
 
-    const wallet = await Wallet.findOne({ userId: userId })
-    if (!wallet) {
-      return res.status(400).json({
-        success: false,
-        message: "Wallet not found",
-      })
-    }
-
-    const totalAmount = user.cart.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0)
-    let discount = 0
-
-    if (couponCode) {
-      const coupon = await Coupon.findOne({ name: couponCode, isList: true })
-      if (coupon && !coupon.userId.includes(userId)) {
-        discount = coupon.offerPrice
-        await Coupon.findByIdAndUpdate(coupon._id, {
-          $push: { userId: userId },
-        })
-      }
-    }
-
-    const finalAmount = totalAmount - discount + DELIVERY_CHARGE
-
-    if (wallet.balance < finalAmount) {
-      return res.status(400).json({
-        success: false,
-        message: "Insufficient wallet balance",
-      })
-    }
-
     const address = await Address.findOne({ userId: userId, "address._id": addressId })
     if (!address) {
       return res.status(400).json({
@@ -460,36 +641,62 @@ const placeWalletOrder = async (req, res) => {
 
     const selectedAddress = address.address.find((addr) => addr._id.toString() === addressId)
 
+    const totalAmount = user.cart.reduce((sum, item) => sum + item.productId.salePrice * item.quantity, 0)
+    let discount = 0
+    let couponApplied = false
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ name: couponCode, isList: true })
+      if (coupon && !coupon.userId.includes(userId)) {
+        discount = coupon.offerPrice
+        couponApplied = true
+        await Coupon.findByIdAndUpdate(coupon._id, {
+          $push: { userId: userId },
+        })
+      }
+    }
+
+    const finalAmount = totalAmount - discount + DELIVERY_CHARGE
+    const discountedItems = distributeDiscount(
+      user.cart.map((item) => ({
+        product: item.productId._id,
+        productName: item.productId.productName,
+        productImages: item.productId.productImage,
+        quantity: item.quantity,
+        price: item.productId.salePrice,
+      })),
+      discount,
+    )
+
     const orders = await Promise.all(
-      user.cart.map(async (item) => {
+      discountedItems.map(async (item) => {
+        const product = await Product.findById(item.product).select("regularPrice productName productImage")
         const order = new Order({
           userId: userId,
           orderedItems: [
             {
-              product: item.productId._id,
-              productName: item.productId.productName,
-              productImages: item.productId.productImage,
+              product: item.product,
+              productName: product.productName,
+              productImages: product.productImage,
               quantity: item.quantity,
-              price: item.productId.salePrice,
-              regularPrice: item.productId.regularPrice,
+              price: item.discountedPrice,
+              regularPrice: product.regularPrice,
               status: "pending",
             },
           ],
-          totalPrice: item.productId.salePrice * item.quantity,
-          discount: ((item.productId.salePrice * item.quantity) / totalAmount) * discount,
-          finalAmount:
-            item.productId.salePrice * item.quantity -
-            ((item.productId.salePrice * item.quantity) / totalAmount) * discount +
-            DELIVERY_CHARGE / user.cart.length,
+          totalPrice: item.price * item.quantity,
+          discount: item.price * item.quantity - item.discountedPrice * item.quantity,
+          finalAmount: item.discountedPrice * item.quantity + DELIVERY_CHARGE / discountedItems.length,
           address: selectedAddress,
           status: "pending",
           paymentMethod: "wallet",
-          couponApplied: couponCode ? true : false,
-          deliveryCharge: DELIVERY_CHARGE / user.cart.length,
+          couponApplied: couponApplied,
+          deliveryCharge: DELIVERY_CHARGE / discountedItems.length,
           createdOn: new Date(),
+          updatedOn: new Date(), // Set initial updatedOn timestamp
         })
 
-        await Product.findByIdAndUpdate(item.productId._id, {
+        await Product.findByIdAndUpdate(item.product, {
           $inc: { quantity: -item.quantity },
         })
 
@@ -497,17 +704,27 @@ const placeWalletOrder = async (req, res) => {
       }),
     )
 
+    //rest of the code is same as placeOrder function.
+    const wallet = await Wallet.findOne({ userId })
+
+    if (!wallet || wallet.balance < finalAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient wallet balance",
+      })
+    }
+
     wallet.balance -= finalAmount
     wallet.totalDebited += finalAmount
     wallet.transactions.push({
       amount: finalAmount,
       transactionType: "debit",
       transactionPurpose: "purchase",
-      description: "Order payment",
+      description: "Order payment from wallet",
     })
+
     await wallet.save()
 
-   
     await Transaction.create({
       userId: userId,
       amount: finalAmount,
@@ -524,6 +741,7 @@ const placeWalletOrder = async (req, res) => {
       walletBalanceAfter: wallet.balance,
     })
 
+    // Clear cart
     await User.findByIdAndUpdate(userId, { $set: { cart: [] } })
 
     res.json({
@@ -540,139 +758,6 @@ const placeWalletOrder = async (req, res) => {
   }
 }
 
-const requestReturn = async (req, res) => {
-  try {
-    const { orderId, returnReason, returnDescription } = req.body
-    const userId = req.session.user
-    const files = req.files
-
-    const order = await Order.findOne({ _id: orderId, userId })
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
-    }
-
-    const deliveryDate = new Date(order.updatedAt)
-    const currentDate = new Date()
-    const daysSinceDelivery = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24))
-
-    if (order.status !== "delivered" || daysSinceDelivery > 7) {
-      return res.status(400).json({
-        success: false,
-        message: "Order is not eligible for return",
-      })
-    }
-
-    let imagePaths = []
-    if (files && files.length > 0) {
-      imagePaths = files.map((file) => `uploads/returns/${file.filename}`)
-    }
-
-    order.status = "return_requested"
-    order.returnReason = returnReason
-    order.returnDescription = returnDescription
-    order.returnImages = imagePaths
-    order.requestStatus = "pending"
-
-    await order.save()
-
-    res.json({
-      success: true,
-      message: "Return request submitted successfully",
-    })
-  } catch (error) {
-    console.error("Error in requestReturn:", error)
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    })
-  }
-}
-
-const processRefund = async (userId, order) => {
-  try {
-    let wallet = await Wallet.findOne({ userId })
-    if (!wallet) {
-      wallet = new Wallet({ userId, balance: 0 })
-    }
-
-    const refundAmount = order.finalAmount - order.deliveryCharge
-
-    wallet.balance += refundAmount
-    wallet.refundAmount += refundAmount
-    wallet.transactions.push({
-      amount: refundAmount,
-      transactionType: "credit",
-      transactionPurpose: "refund",
-      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
-    })
-
-    await wallet.save()
-
-  
-    await Transaction.create({
-      userId: userId,
-      amount: refundAmount,
-      transactionType: "credit",
-      paymentMethod: "refund",
-      paymentGateway: order.paymentMethod === "online" ? "razorpay" : "wallet",
-      status: "completed",
-      purpose: order.status === "cancelled" ? "cancellation" : "return",
-      description: `Refund for ${order.status === "cancelled" ? "cancelled" : "returned"} order #${order.orderId}`,
-      orders: [
-        {
-          orderId: order.orderId,
-          amount: refundAmount,
-        },
-      ],
-      walletBalanceAfter: wallet.balance,
-    })
-
-    return true
-  } catch (error) {
-    console.error("Error processing refund:", error)
-    return false
-  }
-}
-
-const cancelReturnRequest = async (req, res) => {
-  try {
-    const { orderId } = req.body
-    const userId = req.session.user
-
-    const order = await Order.findOne({ _id: orderId, userId })
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
-    }
-
-    if (order.status !== "return_requested" || order.requestStatus !== "pending") {
-      return res.status(400).json({
-        success: false,
-        message: "Return request cannot be cancelled",
-      })
-    }
-
-    order.status = "delivered"
-    order.returnReason = undefined
-    order.returnDescription = undefined
-    order.returnImages = []
-    order.requestStatus = undefined
-    order.adminMessage = undefined
-
-    await order.save()
-
-    res.json({
-      success: true,
-      message: "Return request cancelled successfully",
-    })
-  } catch (error) {
-    console.error("Error in cancelReturnRequest:", error)
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    })
-  }
-}
-
 module.exports = {
   placeOrder,
   getOrders,
@@ -684,5 +769,6 @@ module.exports = {
   requestReturn,
   processRefund,
   cancelReturnRequest,
+  generateInvoice,
 }
 

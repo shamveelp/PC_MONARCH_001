@@ -34,9 +34,7 @@ const userAuth = (req, res, next) => {
   module.exports = { userAuth}
   
   userBlockedEmitter.on("userBlocked", (userId) => {
-    // This function will be called whenever a user is blocked
-    // You might want to implement a way to find and clear the session for this user
-    // This could involve storing session IDs in the database or using a different session store
+    
     console.log(`User ${userId} has been blocked. Their session should be cleared.`)
   })
   

@@ -1,6 +1,6 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
         :root {
       --primary-color: #3498db;
@@ -165,20 +165,19 @@
                                         </div>
                                     <% } else { %>
                                         <div class="card-body">
-                                            <input type="file" name="image<%= i+1 %>" accept="image/*" class="form-control" onchange="previewImage(event, <%= i %>)">
-                                            <img id="preview<%= i %>" src="#" alt="Image preview" style="display: none; max-width: 100%; height: auto; margin-top: 10px;">
+                                            <div class="image-upload-container">
+                                                <input type="file" name="image<%= i+1 %>" accept="image/*" class="form-control image-input" data-index="<%= i %>" onchange="previewImage(event, <%= i %>)">
+                                                <div class="preview-container" style="margin-top: 10px; display: none;">
+                                                    <img id="preview<%= i %>" src="#" alt="Image preview" style="max-width: 100%; height: auto;">
+                                                </div>
+                                                <input type="hidden" name="croppedImage<%= i+1 %>" id="croppedImage<%= i+1 %>" value="">
+                                            </div>
                                         </div>
                                     <% } %>
                                 </div>
                             </div>
                         <% } %>
                     </div>
-                </div>
-
-                
-
-                <div id="cropperContainer" class="cropper-container" style="display: none;">
-                    <img id="cropperImage" src="/placeholder.svg" alt="Image to crop">
                 </div>
 
                 <div class="mb-4">
@@ -189,7 +188,7 @@
     </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script>
     let croppers = {};
 
@@ -198,6 +197,9 @@ function previewImage(event, index) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
+            const previewContainer = input.parentElement.querySelector('.preview-container');
+            previewContainer.style.display = 'block';
+            
             const preview = document.getElementById(`preview${index}`);
             preview.src = e.target.result;
             preview.style.display = 'block';
@@ -278,17 +280,18 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
     }
 
     if (isValid) {
-        const formData = new FormData(this);
-
-        // Process cropped images
+        // Process cropped images before submitting
         for (let i = 0; i < 4; i++) {
             if (croppers[i]) {
-                croppers[i].getCroppedCanvas().toBlob((blob) => {
-                    formData.set(`image${i+1}`, blob, `cropped-image-${i+1}.jpg`);
-                }, 'image/jpeg');
+                // Get the cropped canvas as a data URL
+                const croppedDataUrl = croppers[i].getCroppedCanvas().toDataURL('image/jpeg');
+                // Store the cropped image data in the hidden input
+                document.getElementById(`croppedImage${i+1}`).value = croppedDataUrl;
             }
         }
 
+        const formData = new FormData(this);
+        
         fetch(this.action, {
             method: 'POST',
             body: formData

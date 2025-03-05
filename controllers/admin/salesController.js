@@ -21,7 +21,7 @@ const ExcelJS = require('exceljs');
               break;
           case 'weekly':
               const weekStart = new Date(now.setDate(now.getDate()));
-              console.log('Week start:', weekStart);
+      
               query.createdOn = {
                   $gte: new Date(weekStart.setHours(0, 0, 0, 0)),
                   $lt: new Date(now)

@@ -77,10 +77,37 @@
         background-color: #f8d7da;
         color: #721c24;
     }
+
+    button {
+  background: #fbca1f;
+  font-family: inherit;
+  padding: 0.6em 1.3em;
+  font-weight: 900;
+  font-size: 18px;
+  border: 3px solid black;
+  border-radius: 0.4em;
+  box-shadow: 0.1em 0.1em;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: translate(-0.05em, -0.05em);
+  box-shadow: 0.15em 0.15em;
+}
+
+button:active {
+  transform: translate(0.05em, 0.05em);
+  box-shadow: 0.05em 0.05em;
+}
+
 </style>
 
 <div class="container-fluid py-4">
-    <h1 class="font-weight-bold mb-4">Dashboard</h1>
+    <div class="d-flex justify-content-between">
+        <h1 class="font-weight-bold mb-4">Dashboard</h1>
+    <button onclick="window.location.href='/admin/sales'" >Get Or Download Sales Report</button>
+    </div>
+    
     <!-- Top Stats -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
@@ -351,32 +378,46 @@
 
     // Update Sales Chart based on time period
     function updateSalesChart(period) {
-        // Highlight the active button
-        document.getElementById('weeklyBtn').classList.remove('active');
-        document.getElementById('monthlyBtn').classList.remove('active');
-        document.getElementById('yearlyBtn').classList.remove('active');
-        document.getElementById(period + 'Btn').classList.add('active');
-        
-        let url = `/admin/api/sales-data?period=${period}`;
-        
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                salesChart.data.labels = data.labels;
-                salesChart.data.datasets[0].data = data.data;
-                salesChart.update();
-            })
-            .catch(error => {
-                console.error('Error fetching sales data:', error);
-                alert('Failed to update chart. Please try again.');
-            });
-    }
+    // Highlight the active button
+    document.getElementById('weeklyBtn').classList.remove('btn-primary');
+    document.getElementById('weeklyBtn').classList.add('btn-outline-primary');
+    document.getElementById('monthlyBtn').classList.remove('btn-primary');
+    document.getElementById('monthlyBtn').classList.add('btn-outline-primary');
+    document.getElementById('yearlyBtn').classList.remove('btn-primary');
+    document.getElementById('yearlyBtn').classList.add('btn-outline-primary');
+    
+    document.getElementById(period + 'Btn').classList.remove('btn-outline-primary');
+    document.getElementById(period + 'Btn').classList.add('btn-primary');
+    
+    let url = `/admin/api/sales-data?period=${period}`;
+    
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.data;
+            salesChart.update();
+        })
+        .catch(error => {
+            console.error('Error fetching sales data:', error);
+            alert('Failed to update chart. Please try again.');
+        });
+}
 
+// Initialize with active button styling
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default values
+    document.getElementById('productFilter').value = 'products';
+    
+    // Set the monthly button as active by default
+    document.getElementById('monthlyBtn').classList.remove('btn-outline-primary');
+    document.getElementById('monthlyBtn').classList.add('btn-primary');
+});
     // Update Top Selling Products/Categories based on filter
     function updateTopSellingProducts(filter) {
         let url = `/admin/api/top-selling?type=${filter}`;

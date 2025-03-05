@@ -74,9 +74,17 @@
                         <input type="date" class="form-control" id="endDate" name="endDate">
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label for="userId" class="form-label">User ID/Email</label>
-                        <input type="text" class="form-control" id="userId" name="userId" placeholder="User ID or Email">
+                        <label for="userId" class="form-label">User Email</label>
+                        <select class="form-control" id="userId" name="userId">
+                            <option value="">Select a user</option>
+                            <% users.forEach(user => { %>
+                                <option value="<%= user.email %>" <%= query.userId === user.email ? 'selected' : '' %>>
+                                    <%= user.email %>
+                                </option>
+                            <% }) %>
+                        </select>
                     </div>
+                    
                     <div class="col-md-3 mb-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
                         <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>

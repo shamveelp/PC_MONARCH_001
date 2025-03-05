@@ -208,7 +208,7 @@ const userProfile = async (req,res) => {
 
         })
 
-        console.log(userData.email);
+        // console.log(userData.email);
         
 
     } catch (error) {
@@ -366,10 +366,10 @@ const updateEmail = async (req,res) => {
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
-        const userId = req.session.user; // Assuming you store the user's ID in the session
-        console.log(req.session.user)
+        const userId = req.session.user;
+        
 
-        // Server-side validation
+        
         if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
             return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long and contain both letters and numbers.' });
         }
@@ -378,7 +378,7 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Passwords do not match.' });
         }
 
-        // Fetch the user from the database
+        
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found.' });

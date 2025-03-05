@@ -59,14 +59,8 @@ const saveImage = async (req, res) => {
 
 const addProducts = async (req, res) => {
   try {
-    const { productName, description,fullDescription , brand, category, regularPrice, salePrice, quantity, color,processor,graphicsCard,storages,display, operatingSystem, boxContains } = req.body;
-    const files = req.files;
-
-    // Check if at least one image is uploaded
-    if (!files || Object.keys(files).length <4) {
-      return res.status(400).json({ success: false, message: "Please upload at least 4 image" });
-    }
-
+    const { productName, description, fullDescription, brand, category, regularPrice, salePrice, quantity, color, processor, graphicsCard, storages, display, operatingSystem, boxContains } = req.body;
+    
     // Check if product already exists
     const productExists = await Product.findOne({ productName });
     if (productExists) {
@@ -79,21 +73,46 @@ const addProducts = async (req, res) => {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    // Process images using Sharp
+    // Process images - handle both cropped images and regular file uploads
     const imageFilenames = [];
 
-    for (let key in files) {
-      for (const file of files[key]) {
-        const filename = Date.now() + '-' + file.originalname.replace(/\s/g, "");
-        const filePath = path.join(uploadDir, filename);
+    // Process cropped images first
+    for (let i = 1; i <= 4; i++) {
+      const croppedImageData = req.body[`croppedImage${i}`];
+      
+      if (croppedImageData && croppedImageData.startsWith('data:image')) {
+        // Extract base64 data from the data URL
+        const base64Data = croppedImageData.replace(/^data:image\/\w+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate filename
+        const filename = Date.now() + "-" + `cropped-image-${i}` + ".webp";
+        const filepath = path.join(uploadDir, filename);
+
+        // Save the cropped image
+        await sharp(imageBuffer)
+          .webp({ quality: 80 })
+          .toFile(filepath);
+
+        imageFilenames.push(`uploads/product-images/${filename}`);
+      } else if (req.files && req.files[`image${i}`]) {
+        // Fallback to original file handling if no cropped data
+        const file = req.files[`image${i}`][0];
+        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp";
+        const filepath = path.join(uploadDir, filename);
 
         await sharp(file.buffer)
           .resize(800, 800, { fit: "inside", withoutEnlargement: true })
           .webp({ quality: 80 })
-          .toFile(filePath);
+          .toFile(filepath);
 
         imageFilenames.push(`uploads/product-images/${filename}`);
       }
+    }
+
+    // Check if we have all required images
+    if (imageFilenames.length < 4) {
+      return res.status(400).json({ success: false, message: "Please upload all 4 product images" });
     }
 
     // Find category by name (ensure it exists)
@@ -151,14 +170,14 @@ const getAllProducts = async (req, res) => {
       .populate("category")
       .exec();
 
-    if (page === 1) {
-      console.log("First page products (newest to oldest):", 
-        productData.map(p => ({
-          name: p.productName,
-          createdAt: new Date(p.createdAt).toISOString()
-        }))
-      );
-    }
+    // if (page === 1) {
+    //   console.log("First page products (newest to oldest):", 
+    //     productData.map(p => ({
+    //       name: p.productName,
+    //       createdAt: new Date(p.createdAt).toISOString()
+    //     }))
+    //   );
+    // }
 
     const count = await Product.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
@@ -333,40 +352,62 @@ const editProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found" })
     }
 
-    // Handle image updates
+    // Handle image updates with cropped data
     for (let i = 1; i <= 4; i++) {
-      if (req.files[`image${i}`]) {
-        const file = req.files[`image${i}`][0]
-        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp"
-        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename)
+      const croppedImageData = req.body[`croppedImage${i}`];
+      
+      if (croppedImageData && croppedImageData.startsWith('data:image')) {
+        // Extract base64 data from the data URL
+        const base64Data = croppedImageData.replace(/^data:image\/\w+;base64,/, '');
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate filename
+        const filename = Date.now() + "-" + `cropped-image-${i}` + ".webp";
+        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
 
-        // Process the cropped image data
-        const croppedImageBuffer = Buffer.from(file.buffer, "base64")
+        // Save the cropped image
+        await sharp(imageBuffer)
+          .webp({ quality: 80 })
+          .toFile(filepath);
 
-        await sharp(croppedImageBuffer)
+        const imagePath = `uploads/product-images/${filename}`;
+
+        // Update product image array
+        if (product.productImage[i - 1]) {
+          product.productImage[i - 1] = imagePath;
+        } else {
+          product.productImage.push(imagePath);
+        }
+      } else if (req.files && req.files[`image${i}`]) {
+        // Fallback to original file handling if no cropped data
+        const file = req.files[`image${i}`][0];
+        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp";
+        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
+
+        await sharp(file.buffer)
           .resize(800, 800, { fit: "inside", withoutEnlargement: true })
           .webp({ quality: 80 })
-          .toFile(filepath)
+          .toFile(filepath);
 
-        const imagePath = `uploads/product-images/${filename}`
+        const imagePath = `uploads/product-images/${filename}`;
 
         if (product.productImage[i - 1]) {
-          product.productImage[i - 1] = imagePath
+          product.productImage[i - 1] = imagePath;
         } else {
-          product.productImage.push(imagePath)
+          product.productImage.push(imagePath);
         }
       }
     }
 
-    Object.assign(product, updateFields)
-    await product.save()
+    Object.assign(product, updateFields);
+    await product.save();
 
-    res.json({ success: true, message: "Product updated successfully" })
+    res.json({ success: true, message: "Product updated successfully" });
   } catch (error) {
-    console.error("Error in editProduct:", error)
-    res.status(500).json({ success: false, message: "An error occurred while updating the product" })
+    console.error("Error in editProduct:", error);
+    res.status(500).json({ success: false, message: "An error occurred while updating the product" });
   }
-}
+};
 
 
 

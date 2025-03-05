@@ -130,6 +130,8 @@ router.post('/verify-payment', userAuth, orderController.verifyPayment);
 
 router.get('/check-stock',userAuth, checkoutController.checkStock);
 
+router.get("/download-invoice", userAuth, orderController.generateInvoice);
+
 // New routes for order cancellation and returns
 router.post("/orders/cancel", userAuth, orderController.cancelOrder);
 router.post("/orders/return", userAuth, upload.array('images', 3), orderController.requestReturn);
@@ -154,6 +156,10 @@ router.post('/place-wallet-order', userAuth, orderController.placeWalletOrder);
 router.get("/contact",staticController.loadContact)
 router.get("/about",staticController.loadAbout)
 
+
+// router.use((req, res) => {
+//     res.status(404).redirect("/pageNotFound");
+// });
 
 
 

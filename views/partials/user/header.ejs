@@ -30,6 +30,38 @@
 	<link rel="stylesheet" href="css/ion.rangeSlider.skinFlat.css" />
 	<link rel="stylesheet" href="css/magnific-popup.css">
 	<link rel="stylesheet" href="css/main.css">
+	<style>
+		.dropdown-menu li a:hover {
+    background-color: #ffba00 !important;
+    color: #000 !important;
+}
+
+@media (max-width: 991px) {
+    .navbar-right {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.5rem 0;
+    }
+    
+    .navbar-right .nav-item {
+        margin: 0 1rem 0 0; /* Space between icons on mobile */
+    }
+    
+    .navbar-right .cart,
+    .navbar-right .wishlist,
+    .navbar-right .search {
+        display: inline-block; /* Ensure icons are visible */
+    }
+    
+    .navbar-right .search {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+}
+
+	</style>
 </head>
 
 <body>
@@ -39,63 +71,41 @@
 		<div class="main_menu">
 			<nav class="navbar navbar-expand-lg navbar-light main_box">
 				<div class="container">
-					<!-- Brand and toggle get grouped for better mobile display -->
+					<!-- Brand and toggle -->
 					<a class="navbar-brand logo_h" href="/"><img src="img/logo.png" alt="" style="height: 42px;"></a>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-					 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+						aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<!-- Collect the nav links, forms, and other content for toggling -->
+					<!-- Collapsible content -->
 					<div class="collapse navbar-collapse offset" id="navbarSupportedContent">
 						<ul class="nav navbar-nav menu_nav ml-auto">
 							<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
 							<li class="nav-item submenu dropdown">
-								<a href="/shop" class="nav-link active" role="button" aria-haspopup="true"
-								 aria-expanded="false">Shop</a>
+								<a href="/shop" class="nav-link active" role="button" aria-haspopup="true" aria-expanded="false">Shop</a>
 							</li>
-							<!-- <li class="nav-item submenu dropdown">
-								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-								 aria-expanded="false">Blog</a>
-								<ul class="dropdown-menu">
-									<li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
-									<li class="nav-item"><a class="nav-link" href="single-blog.html">Blog Details</a></li>
-								</ul>
-							</li> -->
-                            <!-- <li class="nav-item"><a class="nav-link" href="contact.html">Promotions</a></li> -->
-                            <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
-
-                            <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
-							<li class="nav-item submenu dropdown">
-                                <%if(user){%>
-                                    <div class="dropdown">
-                                        <a href="#" class="sign-in-link nav-link"><%=user.name%></a>
-                                        <ul class="dropdown-menu">
-                                            <li class="nav-item"><a class="nav-link" href="/userProfile">Profile</a></li>
-                                            <li class="nav-item"><a class="nav-link" href="#" onclick="confirmLogout(event)">Logout</a></li>
-                                            <!-- <li class="nav-item"><a class="nav-link" href="/userProfile">P</a></li> -->
-                                        </ul>
-                                        <!-- <div class="dropdown-content">
-                
-                
-                                            <a href="/userProfile">Profile</a>
-                                            <a href="/logout">Logout</a>
-                
-                
-                                        </div> -->
-                
-                
-                                    </div>
-                                    <% console.log(locals.user)%>
-                                <%}else {%>
-								<a href="/login" class="nav-link" role="button" aria-haspopup="true"
-								 aria-expanded="false">Login</a>
-								
-                                <%}%>
+							<li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+							<li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+							<li class="nav-item">
+								<% if(user) { %>
+									<div class="dropdown">
+										<a href="#" class="nav-link dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+											<%= user.name %>
+											<span class="ti-angle-down ms-1"></span>
+										</a>
+										<ul class="dropdown-menu" aria-labelledby="userDropdown">
+											<li><a class="dropdown-item" href="/userProfile">Profile</a></li>
+											<li><a class="dropdown-item" href="#" onclick="confirmLogout(event)">Logout</a></li>
+										</ul>
+									</div>
+								<% } else { %>
+									<a href="/login" class="nav-link">Login</a>
+								<% } %>
 							</li>
-							
 						</ul>
+						<!-- Right-aligned items moved inside collapse -->
 						<ul class="nav navbar-nav navbar-right">
 							<li class="nav-item">
 								<a href="/cart" class="cart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cart">
@@ -108,24 +118,21 @@
 								</a>
 							</li>
 							<li class="nav-item">
-								<a href="/shop#advanced-search-glow"><button data-bs-toggle="tooltip" data-bs-placement="top" title="Search" class="search"><span class="lnr lnr-magnifier" id="search"></span></button></a>
+								<a href="/shop#advanced-search-glow">
+									<button data-bs-toggle="tooltip" data-bs-placement="top" title="Search" class="search">
+										<span class="lnr lnr-magnifier" id="search"></span>
+									</button>
+								</a>
 							</li>
 						</ul>
 					</div>
 				</div>
 			</nav>
 		</div>
-		<!-- <div class="search_input" id="search_input_box">
-			<div class="container">
-				<form class="d-flex justify-content-between" id="searchForm">
-					<input type="text" class="form-control" id="search_input" placeholder="Search Here">
-					<button type="submit" class="btn"></button>
-					<span class="lnr lnr-cross" id="close_search" title="Close Search"></span>
-				</form>
-			</div>
-		</div> -->
 	</header>
 	<!-- End Header Area -->
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

@@ -109,7 +109,9 @@
                     { link: '/admin/transactions', icon: 'fas fa-wallet', text: 'Transactions' },
                     { link: '/admin/sales', icon: 'fas fa-image', text: 'Sales Report' },
                     
+                    
                 ]; %>
+                
                 
                 <% menuItems.forEach(item => { %>
                     <li class="menu-item">
@@ -119,6 +121,11 @@
                         </a>
                     </li>
                 <% }); %>
+                <li>
+                    <a class="dropdown-item text-danger" href="#" onclick="confirmAdminLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
             </ul>
         </nav>
     </aside>
@@ -137,11 +144,7 @@
                             <img class="img-xs rounded-circle" src="https://avatars.githubusercontent.com/u/77664311?s=96&v=4" alt="User">
                         </a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                            <a class="dropdown-item text-secondary" href="/admin/profile">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
-                                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
-                                  </svg> Profile
-                            </a>
+                            
                             <a class="dropdown-item text-danger" href="#" onclick="confirmAdminLogout(event)">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
