@@ -104,24 +104,24 @@
 					<a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Description</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+					<a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
 					 aria-selected="false">Specification</a>
 				</li>
-				<!-- <li class="nav-item">
+				<li class="nav-item">
 					<a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
 					 aria-selected="false">Comments</a>
-				</li> -->
-				<li class="nav-item">
-					<a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
-					 aria-selected="false">Reviews</a>
 				</li>
+				<!-- <li class="nav-item">
+					<a class="nav-link" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review"
+					 aria-selected="false">Reviews</a>
+				</li> -->
 			</ul>
 			<div class="tab-content" id="myTabContent">
 				<div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
 					<p><%=product.fullDescription%></p>
 					
 				</div>
-				<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+				<div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
 					<div class="table-responsive">
 						<table class="table">
 							<tbody>
@@ -193,90 +193,42 @@
 						</table>
 					</div>
 				</div>
-				<!-- <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+				<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
 					<div class="row">
-						<div class="col-lg-6">
-							<div class="comment_list">
-								<div class="review_item">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-1.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<h5>12th Feb, 2018 at 05:56 pm</h5>
-											<a class="reply_btn" href="#">Reply</a>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-								<div class="review_item reply">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-2.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<h5>12th Feb, 2018 at 05:56 pm</h5>
-											<a class="reply_btn" href="#">Reply</a>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-								<div class="review_item">
-									<div class="media">
-										<div class="d-flex">
-											<img src="img/product/review-3.png" alt="">
-										</div>
-										<div class="media-body">
-											<h4>Blake Ruiz</h4>
-											<h5>12th Feb, 2018 at 05:56 pm</h5>
-											<a class="reply_btn" href="#">Reply</a>
-										</div>
-									</div>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-										commodo</p>
-								</div>
-							</div>
+					  <div class="col-lg-6">
+						<div class="comment_list" id="comments-container">
+						  <!-- Comments will be loaded here dynamically -->
 						</div>
-						<div class="col-lg-6">
-							<div class="review_box">
-								<h4>Post a comment</h4>
-								<form class="row contact_form" action="contact_process.php" method="post" id="contactForm" novalidate="novalidate">
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="text" class="form-control" id="name" name="name" placeholder="Your Full name">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="email" class="form-control" id="email" name="email" placeholder="Email Address">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<input type="text" class="form-control" id="number" name="number" placeholder="Phone Number">
-										</div>
-									</div>
-									<div class="col-md-12">
-										<div class="form-group">
-											<textarea class="form-control" name="message" id="message" rows="1" placeholder="Message"></textarea>
-										</div>
-									</div>
-									<div class="col-md-12 text-right">
-										<button type="submit" value="submit" class="btn primary-btn">Submit Now</button>
-									</div>
-								</form>
-							</div>
+						<div id="comments-pagination" class="d-flex justify-content-center mt-4">
+						  <!-- Pagination will be added here -->
 						</div>
+					  </div>
+					  <div class="col-lg-6">
+						<div class="review_box">
+						  <h4>Post a comment</h4>
+						  <% if (locals.user) { %>
+							<form class="row contact_form" onsubmit="submitComment('<%= product._id %>'); return false;">
+							  <div class="col-md-12">
+								<div class="form-group">
+								  <textarea class="form-control" id="comment-text" rows="4" placeholder="Your Comment" maxlength="500" required></textarea>
+								  <small class="text-muted">Maximum 500 characters</small>
+								</div>
+							  </div>
+							  <div class="col-md-12 text-right">
+								<button type="submit" class="btn primary-btn">Submit Comment</button>
+							  </div>
+							</form>
+						  <% } else { %>
+							<div class="alert alert-info">
+							  Please <a href="/login">login</a> to post a comment.
+							</div>
+						  <% } %>
+						</div>
+					  </div>
 					</div>
-				</div> -->
-				<div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+				  </div>
+				</div>				  
+				<!-- <div class="tab-pane fade" id="review" role="tabpanel" aria-labelledby="review-tab">
 					<div class="row">
 						<div class="col-lg-6">
 							<div class="row total_rate">
@@ -396,7 +348,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</div>
 	</section>
@@ -417,7 +369,7 @@
 				<div class="col-lg-9">
 					<div class="row">
 						<%for(let i=0;i< products.length; i++){%>
-						<div class="col-lg-4 col-md-4 col-sm-6 mb-20">
+						<div class="col-lg-4 col-md-4 col-sm-6 col-6 mb-20">
 							<div class="single-related-product d-flex">
 								<a href="#"><img src="<%= products[i].productImage[0] %>" alt=""></a>
 								<div class="desc">
@@ -445,7 +397,7 @@
 	</section>
 	<!-- End related-product Area -->
 
-
+	
 
     <script>
         document.querySelectorAll('.zoom-container').forEach(function(container) {
@@ -481,80 +433,132 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-function addToWishlist(productId) {
-    
-
-    $.ajax({
-        url: '/addToWishlist',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            
-
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Wishlist",
-                    text: "The Product has been added to your wishlist",
-                    icon: "success",
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    title: "Already in Wishlist",
-                    text: response.message,
-                    icon: "info",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error); // Debugging
-		
-            Swal.fire({
-                title: "Error",
-                text: "There was an error adding the product to your wishlist",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
+function handleAuthError(title, message) {
+  return Swal.fire({
+    title: title,
+    text: message,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Login",
+    cancelButtonText: "Cancel",
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/login";
+    }
+  });
 }
 
+// Add to wishlist function
+function addToWishlist(productId) {
+  $.ajax({
+    url: '/addToWishlist',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+          title: "Added to Wishlist",
+          text: "The product has been added to your wishlist.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          title: "Already in Wishlist",
+          text: response.message,
+          icon: "info",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your wishlist."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "There was an error adding the product to your wishlist.",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
+}
+
+// Add to cart function
 function addToCart(productId) {
-    $.ajax({
-        url: '/addToCart',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Cart",
-                    text: response.message,
-                    icon: "success",
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: response.message,
-                    icon: "error",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error);
-            Swal.fire({
-                title: "Sorry",
-                text: "Stock Limit Reached",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
+  $.ajax({
+    url: '/addToCart',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+			title: "Added to Cart",
+			text: response.message,
+			icon: "success",
+			showCancelButton: true,  // Enables the second button
+			confirmButtonText: "Cart", // Redirects to cart
+			cancelButtonText: "OK",  // Closes the alert
+			timer: 2000
+		}).then((result) => {
+			if (result.isConfirmed) {
+				window.location.href = "/cart"; // Redirects to the cart page
+			} else {
+				location.reload(); // Reload to update cart UI
+			}
+		});
+
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: response.message || "Unable to add to cart",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your cart."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Stock limit reached or maximum 5 items per user",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
 }
 
 
     </script>
+
+<script src="/js/comments.js"></script>
+<script>
+	const currentUserId = '<%= locals.user ? user._id : null %>';
+  </script>
+  <script src="/js/comments.js"></script>
+  <script>
+	document.addEventListener('DOMContentLoaded', function() {
+	  loadComments('<%= product._id %>');
+	});
+  </script>
+
 
 	<%- include('../partials/user/footer') %>

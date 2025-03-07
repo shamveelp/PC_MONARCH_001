@@ -26,7 +26,7 @@ const login = async (req, res) => {
         if (admin) {
             const passwordMatch = await bcrypt.compare(password, admin.password);
             if (passwordMatch) {
-                // ✅ Store the admin's ObjectId instead of true
+                
                 req.session.admin = admin._id;
                 return res.redirect('/admin');
             } else {
@@ -83,10 +83,8 @@ const loadDashboard = async (req, res) => {
   }
 }
 
-// Helper function to get top selling products
 const getTopSellingProducts = async (limit = 5) => {
   try {
-    // Aggregate to find products with highest sales
     const topProducts = await Order.aggregate([
       { $match: { status: "delivered" } },
       { $unwind: "$orderedItems" },
@@ -102,7 +100,7 @@ const getTopSellingProducts = async (limit = 5) => {
       { $limit: limit },
     ])
 
-    // Get additional product details
+ 
     const enrichedProducts = await Promise.all(
       topProducts.map(async (product) => {
         const productDetails = await Product.findById(product._id).populate("category")
@@ -124,12 +122,12 @@ const getTopSellingProducts = async (limit = 5) => {
   }
 }
 
-// Helper function to get recent orders
+
 const getRecentOrders = async (limit = 5) => {
   try {
     const recentOrders = await Order.find().sort({ createdOn: -1 }).limit(limit)
 
-    // Get customer names
+    
     const ordersWithCustomers = await Promise.all(
       recentOrders.map(async (order) => {
         const customer = await User.findById(order.userId)
@@ -147,7 +145,7 @@ const getRecentOrders = async (limit = 5) => {
   }
 }
 
-// Rename the existing getSalesData function to getSalesDataHelper to avoid naming conflicts
+
 const getSalesDataHelper = async (period = "yearly") => {
   try {
     const now = new Date()
@@ -155,7 +153,7 @@ const getSalesDataHelper = async (period = "yearly") => {
     const data = []
 
     if (period === "weekly") {
-      // Last 7 days
+      
       for (let i = 6; i >= 0; i--) {
         const date = new Date(now)
         date.setDate(date.getDate() - i)
@@ -174,7 +172,7 @@ const getSalesDataHelper = async (period = "yearly") => {
         data.push(daySales)
       }
     } else if (period === "monthly") {
-      // Last 6 months
+      
       for (let i = 5; i >= 0; i--) {
         const date = new Date(now)
         date.setMonth(date.getMonth() - i)
@@ -193,7 +191,7 @@ const getSalesDataHelper = async (period = "yearly") => {
         data.push(monthSales)
       }
     } else if (period === "yearly") {
-      // Last 5 years
+      
       for (let i = 4; i >= 0; i--) {
         const year = now.getFullYear() - i
 
@@ -219,7 +217,7 @@ const getSalesDataHelper = async (period = "yearly") => {
   }
 }
 
-// Helper function to get order status counts for pie chart
+
 const getOrderStatusCounts = async () => {
   try {
     const statusCounts = {
@@ -252,9 +250,9 @@ const getOrderStatusCounts = async () => {
 const logout = async (req, res) => {
     try {
         if (req.session.admin) {
-            delete req.session.admin; // ✅ Remove only admin session
+            delete req.session.admin; 
         }
-        res.redirect('/admin/login'); // Redirect admin to login page
+        res.redirect('/admin/login'); 
     } catch (error) {
         console.log('Logout Error', error);
         res.redirect('/pageerror');
@@ -266,7 +264,7 @@ const getTopSelling = async (req, res) => {
     const { type } = req.query
 
     if (type === "categories") {
-      // Get top selling categories
+      
       const topCategories = await Order.aggregate([
         { $match: { status: "delivered" } },
         { $unwind: "$orderedItems" },
@@ -312,7 +310,7 @@ const getTopSelling = async (req, res) => {
 
       res.json({ categories: topCategories })
     } else {
-      // Get top selling products (existing functionality)
+     
       const topProducts = await Order.aggregate([
         { $match: { status: "delivered" } },
         { $unwind: "$orderedItems" },
@@ -328,7 +326,7 @@ const getTopSelling = async (req, res) => {
         { $limit: 10 },
       ])
 
-      // Get additional product details
+     
       const enrichedProducts = await Promise.all(
         topProducts.map(async (product) => {
           const productDetails = await Product.findById(product._id).populate("category")
@@ -351,7 +349,6 @@ const getTopSelling = async (req, res) => {
   }
 }
 
-// Add the getSalesData API endpoint after the getTopSelling function
 const getSalesData = async (req, res) => {
   try {
     const { period = "monthly" } = req.query

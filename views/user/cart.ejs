@@ -59,6 +59,204 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* General container and section styling */
+@media (max-width: 1200px) {
+    .container {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 991px) {
+    .row {
+        flex-direction: column;
+    }
+    .col-9, .col-3 {
+        width: 100%;
+        max-width: 100%;
+    }
+    .col-9 {
+        margin-bottom: 30px;
+    }
+}
+
+/* Table responsiveness */
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .shopping-summery {
+        min-width: 600px;
+    }
+
+    .shopping-summery th, .shopping-summery td {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .product-name h5 {
+        font-size: 16px;
+    }
+
+    .detail-qty .quantity-control {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .quantity-input {
+        width: 35px !important;
+    }
+
+    .increment-button, .decrement-button {
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .shopping-summery {
+        display: block;
+        min-width: unset;
+    }
+
+    .shopping-summery thead {
+        display: none; /* Hide table headers */
+    }
+
+    .shopping-summery tbody tr {
+        display: block;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+
+    .shopping-summery tbody td {
+        display: block;
+        text-align: left;
+        padding: 8px 0;
+        border: none;
+        position: relative; /* For better positioning */
+    }
+
+    /* Ensure data-title is applied correctly */
+    .shopping-summery tbody td::before {
+        content: attr(data-title) ": ";
+        font-weight: bold;
+        display: inline-block;
+        width: 80px; /* Adjusted width for better spacing */
+        vertical-align: top;
+    }
+
+    /* Specific styling for Image column */
+    .shopping-summery .image {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    .shopping-summery .image::before {
+        content: "Image: "; /* Explicitly set label */
+        font-weight: bold;
+        width: 80px;
+        flex-shrink: 0;
+    }
+
+    .shopping-summery .image img {
+        max-width: 80px; /* Smaller image for mobile */
+        height: auto;
+        display: block;
+    }
+
+    /* Specific styling for Name column */
+    .shopping-summery .product-des {
+        padding: 10px 0;
+    }
+
+    .shopping-summery .product-des::before {
+        content: "Name: "; /* Explicitly set label */
+        font-weight: bold;
+        width: 80px;
+        display: inline-block;
+    }
+
+    .shopping-summery .product-des h5 {
+        display: inline; /* Keep name inline with label */
+        margin: 0;
+    }
+
+    .shopping-summery .product-des p {
+        margin: 5px 0 0 80px; /* Align category/brand under name */
+        font-size: 12px;
+    }
+
+    /* Ensure other columns remain visible */
+    .shopping-summery .price::before {
+        content: "Price: ";
+    }
+
+    .shopping-summery .text-center::before {
+        content: "Quantity: ";
+    }
+
+    .shopping-summery .action::before {
+        content: "Remove: ";
+    }
+
+    .shopping-summery .action a {
+        display: inline-block;
+        margin-top: 5px;
+    }
+}
+
+/* Cart totals responsiveness */
+@media (max-width: 991px) {
+    .cart-totals-container {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .cart-totals-container .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .cart-totals-container a.w-full {
+        display: block;
+    }
+}
+
+@media (max-width: 576px) {
+    .cart-totals-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .cart-totals-container .flex {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .cart-totals-container .flex span {
+        margin-bottom: 5px;
+    }
+
+    .cart-totals-container .flex div {
+        text-align: center;
+    }
+}
+
+@media (max-width: 767px) {
+    .mt-50 {
+        margin-top: 30px;
+    }
+
+    .mb-50 {
+        margin-bottom: 30px;
+    }
+}
 </style>
 
 
@@ -98,10 +296,10 @@
                                 <% if (cartItems && cartItems.length > 0) { %>
                                     <% cartItems.forEach(function(item) { %>
                                         <tr>
-                                            <td class="image product-thumbnail">
+                                            <td class="image product-thumbnail" data-title="Image">
                                                 <img src="<%= item.product.productImage[0] %>" alt="#" />
                                             </td>
-                                            <td class="product-des product-name">
+                                            <td class="product-des product-name" data-title="Name">
                                                 <h5 class="product-name">
                                                     <a href="/productDetails?id=<%= item.product._id %>"><%= item.product.productName %></a>
                                                 </h5>
@@ -156,22 +354,19 @@
                         <div class="flex">
                             <span>Shipping</span>
                             <div class="text-right">
-                                <span class="font-semibold">Free</span>
+                                <span class="font-semibold">₹ 50.00</span>
                                 <br>
                                 <a href="#" onclick="viewShippingCharge()" class="text-blue text-sm">View shipping charge</a>
                             </div>
                         </div>
                         <div class="flex mb-4">
                             <span>Total</span>
-                            <span class="font-semibold text-blue">₹ <%= grandTotal %></span>
+                            <span class="font-semibold text-blue">₹ <%= Math.round(grandTotal)+50 %></span>
                         </div>
                         <a href="/checkout" class="w-full bg-yellow text-white py-2 px-2 rounded mb-4">Proceed To Checkout</a>
                         <br>
                         <a href="/shop" class="block text-center text-blue mt-3">Continue Shopping</a>
-                        <!-- <div class="flex">
-                            <input type="text" class="coupon-input" placeholder="Enter coupon code">
-                            <button class="apply-coupon-btn">Apply Coupon</button>
-                        </div> -->
+                        
                     </div>
                 </div>
             </div>
@@ -255,11 +450,10 @@
 
     function viewShippingCharge() {
         Swal.fire({
-            title: "Shipping Charge",
-            text: "Shipping is free at the current moment!",
-            icon: "info",
-            confirmButtonText: "OK",
-            confirmButtonColor: "#3085d6"
+            title: 'Shipping Charge',
+            text: 'Shipping charge is ₹ 50.00 For All Orders',
+            icon: 'info',
+            confirmButtonText: 'OK'
         });
     }
 </script>

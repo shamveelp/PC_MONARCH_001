@@ -108,13 +108,18 @@
 						<!-- Right-aligned items moved inside collapse -->
 						<ul class="nav navbar-nav navbar-right">
 							<li class="nav-item">
-								<a href="/cart" class="cart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cart">
-									<span class="ti-bag"></span>
+								<a href="" class="cart" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cart">
+									<span></span>
 								</a>
 							</li>
 							<li class="nav-item">
 								<a href="/wishlist" class="wishlist" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Wishlist">
 									<span class="ti-heart"></span>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="/cart" class="wishlist" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cart">
+									<span class="ti-bag"></span>
 								</a>
 							</li>
 							<li class="nav-item">
@@ -150,7 +155,7 @@
             confirmButtonText: "Yes, Logout"
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "/logout"; // Redirect only if confirmed
+                window.location.href = "/logout"; 
             }
         });
     }
@@ -162,11 +167,11 @@
     const query = document.getElementById('search_input').value.trim();
 
     if (query) {
-        console.log("Search query:", query); // Log the search query for debugging
+        console.log("Search query:", query); 
         const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
         const data = await response.json();
 
-        // Render the products based on the search response
+        
         renderProducts(data.products, data.totalPages, data.currentPage, data.selectedCategory);
     }
 });

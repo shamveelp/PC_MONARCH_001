@@ -8,7 +8,7 @@ const addCategory = async (req, res) => {
   try {
     const { name, description } = req.body
 
-    // Improved name validation
+    
     const trimmedName = name.trim()
     if (!trimmedName || trimmedName.length === 0) {
     
@@ -20,7 +20,7 @@ const addCategory = async (req, res) => {
       return res.status(400).json({ success: false, message: "Description is required" })
     }
 
-    // Check if category with the same name already exists
+    
     const existingCategory = await Category.findOne({ name: new RegExp(`^${trimmedName}$`, "i") })
     if (existingCategory) {
       

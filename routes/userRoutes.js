@@ -11,10 +11,11 @@ const orderController = require("../controllers/user/orderController")
 const couponController = require("../controllers/user/couponController")
 const walletController = require("../controllers/user/walletController")
 const staticController = require("../controllers/user/staticController")
+const commentController = require("../controllers/user/commentController")
 const multer = require("multer")
 const upload = require('../config/multer');
 
-const { userAuth,addCartWishlist } = require('../middlewares/auth');
+const { userAuth,addCartWishlist,checkUserAuthWish,ajaxAuth } = require('../middlewares/auth');
 const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn,forgotPassLogout} = require("../middlewares/profileAuth")
 
 
@@ -80,13 +81,13 @@ router.get("/cart",userAuth,cartController.getCartPage)
 // wishlist management
 
 router.get("/wishlist",userAuth,wishlistController.loadWishlist)
-router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.post("/addToWishlist",ajaxAuth,wishlistController.addToWishlist)
 router.get("/removeFromWishList",userAuth,wishlistController.removeProduct)
 
 
 // Cart Management
 router.get("/cart", userAuth, cartController.getCartPage);
-router.post("/addToCart", userAuth, cartController.addToCart);
+router.post("/addToCart", ajaxAuth, cartController.addToCart);
 router.post("/changeQuantity", userAuth, cartController.changeQuantity);
 router.get("/deleteItem", userAuth, cartController.deleteProduct);
 
@@ -157,10 +158,18 @@ router.get("/contact",staticController.loadContact)
 router.get("/about",staticController.loadAbout)
 
 
+
+
+
+// Comment routes
+router.post('/api/comments', userAuth, commentController.addComment);
+router.get('/api/products/:productId/comments', commentController.getProductComments);
+router.delete('/api/comments/:commentId', userAuth, commentController.deleteComment);
+
+
+
 // router.use((req, res) => {
 //     res.status(404).redirect("/pageNotFound");
 // });
-
-
 
 module.exports = router;

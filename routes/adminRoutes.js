@@ -8,6 +8,7 @@ const bannerController = require("../controllers/admin/bannerController");
 const orderController = require("../controllers/admin/orderController");
 const couponController = require('../controllers/admin/couponController');
 const salesController = require('../controllers/admin/salesController');
+const commentController = require('../controllers/admin/commentController');
 const transactionController = require('../controllers/admin/transactionController');
 
 const { adminAuth } = require('../middlewares/auth');
@@ -116,9 +117,18 @@ router.get("/dashboard",adminAuth,async (req,res)=>{
     }
 })
 
+
+router.get('/comments', adminAuth, commentController.getAllComments);
+router.delete('/comments/:commentId', adminAuth, commentController.deleteComment);
+router.post('/comments/:commentId/block', adminAuth, commentController.blockComment);
+router.post('/comments/:commentId/unblock', adminAuth, commentController.unblockComment);
+
+
 router.use((req, res) => {
     res.status(404).redirect("/admin/pageerror");
 });
+
+
 
 
 

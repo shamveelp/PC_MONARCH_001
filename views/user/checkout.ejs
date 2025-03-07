@@ -60,45 +60,114 @@
     <div class="container py-5">
         <div class="row">
             <!-- Billing Address -->
-            <div class="col-lg-8 mb-4">
-                <div class="bg-white p-4 rounded shadow-sm">
-                    <h2 class="h4 mb-4">Shipping Address</h2>
-                    
-                    <!-- Address Selection Area -->
-                    <div class="form-group">
-                        <label for="existingAddress">Select Existing Address</label>
-                        <select id="existingAddress" class="form-control">
-                            <option selected>Select an address</option>
-                            <% if (userAddress && userAddress.address.length > 0) { %>
-                                <% userAddress.address.forEach((address) => { %>
-                                    <option value="<%= address._id %>">
-                                        <%= address.addressType %> - <%= address.name %>,
-                                        <%= address.streetAddress %>, <%= address.city %>, <%= address.state %>, <%= address.country %>,
-                                        &#10;
-                                        <%= address.phone %>
-                                    </option>
-                                <% }); %>
-                            <% } else { %>
-                                <option disabled>No addresses available</option>
-                            <% } %>
-                        </select>
-                    </div>
-                    <a href="/addAddressCheckout"><button type="button" class="btn btn-primary mt-5" id="addNewAddressBtn">Add New Address</button></a>
-                    
-            
-                    <!-- Add New Address Button -->
-                    <% if (!userAddress || userAddress.address.length === 0) { %>
-                        <p  id="addNewAddressBtn">Add New Address</p>
-                    <% } %>
-            
-                    <!-- New Address Form (hidden by default) -->
-                    <div id="newAddressForm" style="display: none;">
-                        <h3 class="h5 mt-4">New Address</h3>
-                        <!-- Include the new address form fields here -->
-                        <!-- Similar to the form structure you provided earlier -->
-                    </div>
+            <!-- Billing Address -->
+<div class="col-lg-8 mb-4">
+    <div class="bg-white p-4 rounded shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 mb-0">Shipping Address</h2>
+            <a href="/addAddressCheckout" class="btn btn-primary">Add New Address</a>
+        </div>
+        
+        <!-- Address Selection Area -->
+        <div class="address-cards">
+            <% if (userAddress && userAddress.address.length > 0) { %>
+                <div class="row">
+                    <% userAddress.address.forEach((address) => { %>
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="selectedAddress" 
+                                               id="address_<%= address._id %>" 
+                                               value="<%= address._id %>">
+                                        <label class="form-check-label" for="address_<%= address._id %>">
+                                            <span class="badge badge-primary mb-2"><%= address.addressType %></span>
+                                            <h6 class="mb-1"><%= address.name %></h6>
+                                            <p class="mb-1 text-muted small">
+                                                <%= address.streetAddress %><br>
+                                                <%= address.city %>, <%= address.state %><br>
+                                                <%= address.country %><br>
+                                                Phone: <%= address.phone %>
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
                 </div>
-            </div>
+            <% } else { %>
+                <div class="text-center py-4">
+                    <p class="mb-3">No addresses available</p>
+                    <a href="/addAddressCheckout" class="btn btn-primary">Add Your First Address</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Hidden select for form compatibility -->
+        <select id="existingAddress" style="position: absolute; visibility: hidden; opacity: 0; pointer-events: none;">
+            <option selected>Select an address</option>
+            <% if (userAddress && userAddress.address.length > 0) { %>
+                <% userAddress.address.forEach((address) => { %>
+                    <option value="<%= address._id %>">
+                        <%= address.addressType %>
+                    </option>
+                <% }); %>
+            <% } %>
+        </select>
+    </div>
+</div>
+
+<style>
+    .address-cards .card {
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .address-cards .card:hover {
+        border-color: #007bff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .address-cards .form-check {
+        padding-left: 0;
+    }
+    
+    .address-cards .form-check-input {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+    }
+    
+    .address-cards .form-check-label {
+        display: block;
+        width: 100%;
+        cursor: pointer;
+    }
+    
+    .address-cards .card.selected {
+        border-color: #007bff;
+        background-color: #f8f9ff;
+    }
+</style>
+
+<script>
+    // Update the hidden select when a card is selected
+    document.querySelectorAll('input[name="selectedAddress"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Update the hidden select
+            document.getElementById('existingAddress').value = this.value;
+            
+            // Update card styling
+            document.querySelectorAll('.address-cards .card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            this.closest('.card').classList.add('selected');
+        });
+    });
+</script>
             
             <script>
                 // JavaScript to handle the "Add New Address" button click

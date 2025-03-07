@@ -399,83 +399,119 @@
 
 
 	<script>
-		function addToWishlist(productId) {
-    
-
-    $.ajax({
-        url: '/addToWishlist',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            
-
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Wishlist",
-                    text: "The Product has been added to your wishlist",
-                    icon: "success",
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    title: "Already in Wishlist",
-                    text: response.message,
-                    icon: "info",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error); // Debugging
-			
-            Swal.fire({
-                title: "Error",
-                text: "There was an error adding the product to your wishlist",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
+		// Common function to handle authentication errors
+function handleAuthError(title, message) {
+  return Swal.fire({
+    title: title,
+    text: message,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Login",
+    cancelButtonText: "Cancel",
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/login";
+    }
+  });
 }
 
+// Add to wishlist function
+function addToWishlist(productId) {
+  $.ajax({
+    url: '/addToWishlist',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+          title: "Added to Wishlist",
+          text: "The product has been added to your wishlist.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          title: "Already in Wishlist",
+          text: response.message,
+          icon: "info",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your wishlist."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "There was an error adding the product to your wishlist.",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
+}
 
-
+// Add to cart function
 function addToCart(productId) {
-    $.ajax({
-        url: '/addToCart',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Cart",
-                    text: response.message,
-                    icon: "success",
-                    timer: 2000
-                }).then(() => {
-                    location.reload(); // Reload to update cart UI
-                });
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: response.message || "Unable to add to cart",
-                    icon: "error",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error);
-            Swal.fire({
-                title: "Sorry",
-                text: "Stock limit reached or server error or max 5 per user",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
-}
+  $.ajax({
+    url: '/addToCart',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+			title: "Added to Cart",
+			text: response.message,
+			icon: "success",
+			showCancelButton: true,  // Enables the second button
+			confirmButtonText: "Cart", // Redirects to cart
+			cancelButtonText: "OK",  // Closes the alert
+			timer: 2000
+		}).then((result) => {
+			if (result.isConfirmed) {
+				window.location.href = "/cart"; // Redirects to the cart page
+			} else {
+				location.reload(); // Reload to update cart UI
+			}
+		});
 
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: response.message || "Unable to add to cart",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your cart."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Stock limit reached or maximum 5 items per user",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
+}
 
 	</script>
 

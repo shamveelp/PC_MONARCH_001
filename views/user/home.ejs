@@ -58,7 +58,7 @@
 						<div class="row single-slide align-items-center d-flex">
 							<div class="col-lg-5 col-md-6">
 								<div class="banner-content">
-									<h1>UNLEASH <br>THE POWER</h1>
+									<h1>UNLOCK <br>YOUR DESIRE</h1>
 									<p>Your One-Stop Shop for Laptops and Accessories Top Brands | Gaming Rigs | Office Essentials | Custom Builds.</p>
 									<div class="add-bag d-flex align-items-center">
 										<a class="add-btn" href="#product_section_main"><span class="lnr lnr-cross"></span></a>
@@ -79,12 +79,14 @@
 	</section>
 	<!-- End banner Area -->
 
+	
+
 	<!-- start features Area -->
 	<section class="features-area section_gap">
 		<div class="container">
 			<div class="row features-inner">
 				<!-- single features -->
-				<div class="col-lg-3 col-md-6 col-sm-6">
+				<div class="col-lg-3 col-md-6 col-sm-3 col-3">
 					<div class="single-features">
 						<div class="f-icon">
 							<img src="img/features/f-icon1.png" alt="">
@@ -94,7 +96,7 @@
 					</div>
 				</div>
 				<!-- single features -->
-				<div class="col-lg-3 col-md-6 col-sm-6">
+				<div class="col-lg-3 col-md-6 col-sm-3 col-3">
 					<div class="single-features">
 						<div class="f-icon">
 							<img src="img/features/f-icon2.png" alt="">
@@ -104,7 +106,7 @@
 					</div>
 				</div>
 				<!-- single features -->
-				<div class="col-lg-3 col-md-6 col-sm-6">
+				<div class="col-lg-3 col-md-6 col-sm-3 col-3">
 					<div class="single-features">
 						<div class="f-icon">
 							<img src="img/features/f-icon3.png" alt="">
@@ -114,7 +116,7 @@
 					</div>
 				</div>
 				<!-- single features -->
-				<div class="col-lg-3 col-md-6 col-sm-6">
+				<div class="col-lg-3 col-md-6 col-sm-3 col-3">
 					<div class="single-features">
 						<div class="f-icon">
 							<img src="img/features/f-icon4.png" alt="">
@@ -127,6 +129,16 @@
 		</div>
 	</section>
 	<!-- end features Area -->
+
+	<style>
+		/* Desktop layout */
+		@media (max-width: 767px) {
+    .features-area {
+        display: none;
+    }
+}
+
+		</style>
 
 	<!-- start product Area -->
 	<section class="owl-carousel active-product-area section_gap" id="product_section_main">
@@ -196,7 +208,7 @@
 
 					<%for(let i=0;i< products.length; i++){%>
 
-						<div class="col-lg-3 col-md-6">
+						<div class="col-lg-3 col-md-6 col-sm-6 col-6">
 							<div class="single-product">
 								<a href="/productDetails?id=<%=products._id%>">
 								<img class="img-fluid" src="<%= products[i].productImage[0] %>" alt="">
@@ -273,90 +285,117 @@
 });
 
 
-function addToWishlist(productId) {
-   
-
-    $.ajax({
-        url: '/addToWishlist',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            
-
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Wishlist",
-                    text: "The product has been added to your wishlist",
-                    icon: "success",
-                    timer: 2000
-                });
-            } else if (response.requiresLogin) {
-                Swal.fire({
-                    title: "Not Logged In",
-                    text: "You need to be logged in to add items to your wishlist",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Login",
-                    cancelButtonText: "OK"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "/login"; // Redirect to login page
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: "Already in Wishlist",
-                    text: response.message,
-                    icon: "info",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error); // Debugging
-           
-            Swal.fire({
-                title: "Error",
-                text: "There was an error adding the product to your wishlist",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
+function handleAuthError(title, message) {
+  return Swal.fire({
+    title: title,
+    text: message,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Login",
+    cancelButtonText: "Cancel",
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = "/login";
+    }
+  });
 }
 
+// Add to wishlist function
+function addToWishlist(productId) {
+  $.ajax({
+    url: '/addToWishlist',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+          title: "Added to Wishlist",
+          text: "The product has been added to your wishlist.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          title: "Already in Wishlist",
+          text: response.message,
+          icon: "info",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your wishlist."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "There was an error adding the product to your wishlist.",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
+}
+
+// Add to cart function
 function addToCart(productId) {
-    $.ajax({
-        url: '/addToCart',
-        method: "POST",
-        data: { productId: productId },
-        success: (response) => {
-            if (response.status) {
-                Swal.fire({
-                    title: "Added to Cart",
-                    text: response.message,
-                    icon: "success",
-                    timer: 2000
-                });
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: response.message,
-                    icon: "error",
-                    timer: 2000
-                });
-            }
-        },
-        error: (error) => {
-            console.error("AJAX Error:", error);
-            Swal.fire({
-                title: "Sorry",
-                text: "Stock Limit reached",
-                icon: "error",
-                timer: 2000
-            });
-        }
-    });
+  $.ajax({
+    url: '/addToCart',
+    method: "POST",
+    data: { productId: productId },
+    success: (response) => {
+      if (response.status) {
+        Swal.fire({
+			title: "Added to Cart",
+			text: response.message,
+			icon: "success",
+			showCancelButton: true,  // Enables the second button
+			confirmButtonText: "Cart", // Redirects to cart
+			cancelButtonText: "OK",  // Closes the alert
+			timer: 2000
+		}).then((result) => {
+			if (result.isConfirmed) {
+				window.location.href = "/cart"; // Redirects to the cart page
+			} else {
+				location.reload(); // Reload to update cart UI
+			}
+		});
+
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: response.message || "Unable to add to cart",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    },
+    error: (xhr) => {
+      if (xhr.status === 401) {
+        handleAuthError(
+          "Not Logged In",
+          "You need to log in to add items to your cart."
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: "Stock limit reached or maximum 5 items per user",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    }
+  });
 }
 
 

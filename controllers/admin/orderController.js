@@ -52,10 +52,8 @@ const updateOrderStatus = async (req, res) => {
     order.status = status
     order.orderedItems[0].status = status
 
-    // Update the timestamps
     order.updatedOn = new Date()
 
-    // If order is delivered, set the deliveredOn timestamp
     if (status === "delivered") {
       order.deliveredOn = new Date()
     }
@@ -81,7 +79,6 @@ const cancelOrder = async (req, res) => {
       order.status = "cancelled"
       order.orderedItems[0].status = "cancelled"
 
-      // Update the timestamp when order is cancelled
       order.updatedOn = new Date()
 
       await Product.findByIdAndUpdate(order.orderedItems[0].product, {
@@ -124,16 +121,13 @@ const handleReturnRequest = async (req, res) => {
     if (action === "approve") {
       order.status = "returning"
       order.requestStatus = "approved"
-      // No need to update orderedItems separately since return fields are at order level
     } else if (action === "reject") {
       order.status = "delivered"
       order.requestStatus = "rejected"
       order.rejectionCategory = category
       order.rejectionReason = message
-      // No need to update orderedItems separately
     }
 
-    // Update the timestamp when return request is handled
     order.updatedOn = new Date()
 
     await order.save()
@@ -170,9 +164,7 @@ const updateReturnStatus = async (req, res) => {
     }
 
     order.status = status
-    // No need to update orderedItems separately since status is tracked at order level
-
-    // Update the timestamp when return status is updated
+    
     order.updatedOn = new Date()
 
     if (status === "returned") {
