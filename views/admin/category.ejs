@@ -4,42 +4,92 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"/>
   <style>
     :root {
-      --primary-color: #3498db;
-      --secondary-color: #2c3e50;
-      --success-color: #2ecc71;
-      --danger-color: #e74c3c;
-      --info-color: #3498db;
-      --light-gray: #ecf0f1;
+      --primary-color: #1e90ff;
+      --secondary-color: #2d3436;
+      --success-color: #00b894;
+      --danger-color: #d63031;
+      --info-color: #0984e3;
+      --light-gray: #dfe6e9;
+      --background-color: #f5f6fa;
+      --white: #ffffff;
+      --shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: #2d3436;
+      line-height: 1.6;
     }
 
     .content-main {
-      padding: 2rem;
+      padding: 2.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .content-header h2 {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
     }
 
     .card {
       border: none;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
+      box-shadow: var(--shadow);
+      border-radius: 12px;
+      background-color: var(--white);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     }
 
     .card-header {
-      background-color: var(--secondary-color);
-      color: white;
-      border-radius: 8px 8px 0 0;
+      background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+      color: var(--white);
+      border-radius: 12px 12px 0 0;
+      padding: 1rem 1.5rem;
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 1.5rem;
     }
 
     .form-control {
-      border-radius: 20px;
+      border-radius: 25px;
+      border: 1px solid var(--light-gray);
+      padding: 0.75rem 1.25rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.2);
+    }
+
+    .input-group {
+      gap: 0.75rem;
     }
 
     .btn {
-      border-radius: 20px;
-      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      padding: 0.4rem 1.25rem; /* Reduced padding from 0.6rem 1.75rem */
+      font-size: 0.9rem; /* Reduced font size slightly */
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: var(--transition);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
@@ -62,28 +112,67 @@
       border-color: var(--info-color);
     }
 
+    .btn-sm {
+      padding: 0.25rem 0.75rem; /* Reduced padding from 0.4rem 1rem */
+      font-size: 0.8rem; /* Reduced font size for small buttons */
+    }
+
     .table {
-      background-color: white;
+      background-color: var(--white);
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .table th {
-      background-color: var(--secondary-color);
-      color: white;
+      background: var(--secondary-color);
+      color: var(--white);
+      font-weight: 500;
+      padding: 1rem;
+    }
+
+    .table td {
+      padding: 1rem;
+      vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: rgba(30, 144, 255, 0.05);
+      transition: var(--transition);
+    }
+
+    .badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 500;
     }
 
     .pagination {
       justify-content: center;
-      margin-top: 2rem;
+      margin-top: 2.5rem;
     }
 
     .pagination .page-link {
       color: var(--secondary-color);
-      border-radius: 20px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 5px;
+      border: 1px solid var(--light-gray);
+      transition: var(--transition);
     }
 
     .pagination .page-item.active .page-link {
       background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: var(--white);
+    }
+
+    .pagination .page-link:hover {
+      background-color: var(--primary-color);
+      color: var(--white);
       border-color: var(--primary-color);
     }
 
@@ -91,6 +180,19 @@
       color: var(--danger-color);
       font-size: 0.875rem;
       margin-top: 0.25rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .content-main {
+        padding: 1.5rem;
+      }
+      .input-group {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
     }
   </style>
 </head>

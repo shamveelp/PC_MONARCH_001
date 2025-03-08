@@ -481,7 +481,8 @@ const editAddress = async (req,res) => {
     try {
         
         const addressId = req.query.id;
-        const user = req.session.user;
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
         const currAddress = await Address.findOne({
             "address._id":addressId,
 
@@ -501,7 +502,7 @@ const editAddress = async (req,res) => {
 
         res.render("edit-address",{
             address:addressData,
-            user:user
+            user:userData
         })
 
     } catch (error) {

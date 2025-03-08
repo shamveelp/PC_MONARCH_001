@@ -161,12 +161,9 @@ router.get("/about",staticController.loadAbout)
 
 
 
-// Comment routes
 router.post('/api/comments', userAuth, commentController.addComment);
 router.get('/api/products/:productId/comments', commentController.getProductComments);
 router.delete('/api/comments/:commentId', userAuth, commentController.deleteComment);
-
-
 
 // router.use((req, res) => {
 //     res.status(404).redirect("/pageNotFound");
