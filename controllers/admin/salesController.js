@@ -5,11 +5,10 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 
 
- const loadSalesPage = async (req, res) => {
+const loadSalesPage = async (req, res) => {
   try {
       const { reportType, startDate, endDate, format } = req.query;
       let query = {};
-      
       
       const now = new Date();
       switch (reportType) {
@@ -21,7 +20,6 @@ const ExcelJS = require('exceljs');
               break;
           case 'weekly':
               const weekStart = new Date(now.setDate(now.getDate()));
-      
               query.createdOn = {
                   $gte: new Date(weekStart.setHours(0, 0, 0, 0)),
                   $lt: new Date(now)
@@ -43,49 +41,67 @@ const ExcelJS = require('exceljs');
               break;
       }
   
-      
       query.status = 'delivered';
   
-      // Fetch orders data
-      const orders = await Order.find(query).sort({ createdOn: 1 });
-      
+      // Fetch orders with populated product details
+      const orders = await Order.find(query)
+          .populate('orderedItems.product')
+          .sort({ createdOn: 1 });
       
       let totalRegularPrice = 0;
       let totalFinalAmount = 0;
   
       const sales = orders.map(order => {
-          const orderRegularPrice = order.orderedItems.reduce((sum, item) => sum + item.regularPrice, 0);
+          // Calculate regular price considering quantity
+          const orderRegularPrice = order.orderedItems.reduce((sum, item) => {
+              return sum + (item.regularPrice * item.quantity);
+          }, 0);
+
+          // Calculate final amount excluding delivery charge
+          const finalAmountWithoutDelivery = order.finalAmount - 50;
+          
+          // Track totals
           totalRegularPrice += orderRegularPrice;
-          totalFinalAmount += order.finalAmount;
+          totalFinalAmount += finalAmountWithoutDelivery;
+          
+          // Calculate actual discount (considering quantity)
+          const actualDiscount = orderRegularPrice - finalAmountWithoutDelivery;
+          
+          // Calculate coupon discount if applied
+          const couponDiscount = order.couponApplied ? 
+              (order.totalPrice - order.finalAmount) : 0;
           
           return {
               orderId: order.orderId,
-              amount: order.finalAmount,
+              amount: finalAmountWithoutDelivery,
               discount: order.discount || 0,
-              coupon: order.couponApplied ? (order.totalPrice - order.finalAmount - order.discount) : 0,
-              lessPrice: orderRegularPrice - order.finalAmount +50, 
-              date: order.createdOn
+              coupon: couponDiscount,
+              lessPrice: actualDiscount,
+              date: order.createdOn,
+              items: order.orderedItems.map(item => ({
+                  name: item.product.name,
+                  quantity: item.quantity,
+                  regularPrice: item.regularPrice,
+                  finalPrice: item.finalPrice
+              }))
           };
       });
-  
       
       const salesData = {
           sales,
-          totalSales: sales.reduce((sum, sale) => sum + sale.amount, 0),
+          totalSales: totalFinalAmount,
           orderCount: sales.length,
           discounts: sales.reduce((sum, sale) => sum + sale.discount, 0),
           coupons: sales.reduce((sum, sale) => sum + sale.coupon, 0),
-          lessPrices: totalRegularPrice - totalFinalAmount // Total difference
+          lessPrices: totalRegularPrice - totalFinalAmount
       };
   
-     
       if (format === 'pdf') {
           return generatePDF(res, salesData);
       } else if (format === 'excel') {
           return generateExcel(res, salesData);
       }
   
-      
       res.render('sales-report', { salesData });
   } catch (error) {
       console.error('Error in loadSalesPage:', error);
@@ -95,6 +111,8 @@ const ExcelJS = require('exceljs');
       });
   }
 };
+
+
 
   
 const generatePDF = async (res, salesData) => {
