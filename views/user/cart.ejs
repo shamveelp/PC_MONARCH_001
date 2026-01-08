@@ -1,3 +1,4 @@
+
 <%- include("../../views/partials/user/header") %>
 
 <style>
@@ -295,7 +296,7 @@
                             <tbody>
                                 <% if (cartItems && cartItems.length > 0) { %>
                                     <% cartItems.forEach(function(item) { %>
-                                        <tr>
+                                        <tr id="cart-item-<%= item.product._id %>" data-product-id="<%= item.product._id %>">
                                             <td class="image product-thumbnail" data-title="Image">
                                                 <img src="<%= item.product.productImage[0] %>" alt="#" />
                                             </td>
@@ -315,14 +316,14 @@
                                             <td class="text-center" data-title="Stock">
                                                 <div class="detail-qty border radius m-auto">
                                                     <div class="quantity-control">
-                                                        <button class="btn btn-sm increment-button" onclick="changeQuantity('<%= item.product._id %>', 'increase', <%= item.product.quantity %>)">+</button>
+                                                        <button class="btn btn-sm increment-button" data-product-id="<%= item.product._id %>" data-max-stock="<%= item.product.quantity %>">+</button>
                                                         <input class="quantity-input" id="cartProductQuantity<%= item.product._id %>" value="<%= item.quantity %>" style="width: 45px;" type="text" readonly>
-                                                        <button class="btn btn-sm decrement-button" onclick="changeQuantity('<%= item.product._id %>', 'decrease', <%= item.product.quantity %>)">-</button>
+                                                        <button class="btn btn-sm decrement-button" data-product-id="<%= item.product._id %>" data-max-stock="<%= item.product.quantity %>">-</button>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="action" data-title="Remove">
-                                                <a class="btn btn-sm" href="#" onclick="confirmRemove('<%= item.product._id %>')">
+                                                <a class="btn btn-sm remove-item" href="#" data-product-id="<%= item.product._id %>">
                                                     <i class="fi-rs-trash">Remove</i>
                                                 </a>
                                             </td>
@@ -345,7 +346,7 @@
                         <hr>
                         <div class="flex">
                             <span>Subtotal</span>
-                            <span class="font-semibold">₹ <%= grandTotal %></span>
+                            <span class="font-semibold">₹ <span id="grand-total"><%= grandTotal %></span></span>
                         </div>
                         <div class="flex">
                             <span>Coupon Discount</span>
@@ -361,7 +362,7 @@
                         </div>
                         <div class="flex mb-4">
                             <span>Total</span>
-                            <span class="font-semibold text-blue">₹ <%= Math.round(grandTotal)+50 %></span>
+                            <span class="font-semibold text-blue">₹ <span id="final-total"><%= Math.round(grandTotal)+50 %></span></span>
                         </div>
                         <a href="/checkout" class="w-full bg-yellow text-white py-2 px-2 rounded mb-4">Proceed To Checkout</a>
                         <br>
@@ -376,77 +377,194 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function changeQuantity(productId, action, maxStock) {
-        const quantityElement = document.getElementById(`cartProductQuantity${productId}`);
-        let currentQuantity = parseInt(quantityElement.value);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners to all increment buttons
+        document.querySelectorAll('.increment-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const maxStock = parseInt(this.getAttribute('data-max-stock'));
+                updateQuantity(productId, 'increase', maxStock);
+            });
+        });
 
-        if (action === 'increase') {
-            if (currentQuantity >= 5) {
-                Swal.fire('Error', 'Maximum 5 quantity per user', 'error');
-                return;
-            }
-            if (currentQuantity >= maxStock) {
-                Swal.fire('Error', 'Stock limit exceeded', 'error');
-                return;
-            }
-            currentQuantity++;
-        } else if (action === 'decrease') {
-            if (currentQuantity > 1) {
-                currentQuantity--;
-            } else {
+        // Add event listeners to all decrement buttons
+        document.querySelectorAll('.decrement-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const maxStock = parseInt(this.getAttribute('data-max-stock'));
+                updateQuantity(productId, 'decrease', maxStock);
+            });
+        });
+
+        // Add event listeners to all remove buttons
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                confirmRemove(productId);
+            });
+        });
+
+        // Function to update quantity without page reload
+        function updateQuantity(productId, action, maxStock) {
+            const quantityElement = document.getElementById(`cartProductQuantity${productId}`);
+            const currentQuantity = parseInt(quantityElement.value);
+            
+            // Validate quantity changes client-side first
+            if (action === 'increase') {
+                if (currentQuantity >= 5) {
+                    Swal.fire('Error', 'Maximum 5 quantity per user', 'error');
+                    return;
+                }
+                if (currentQuantity >= maxStock) {
+                    Swal.fire('Error', 'Stock limit exceeded', 'error');
+                    return;
+                }
+            } else if (action === 'decrease' && currentQuantity <= 1) {
                 confirmRemove(productId);
                 return;
             }
+
+            // Show loading indicator
+            const cartItem = document.getElementById(`cart-item-${productId}`);
+            if (cartItem) {
+                cartItem.style.opacity = '0.6';
+            }
+
+            // Make AJAX request to update quantity
+            $.ajax({
+                url: '/changeQuantity',
+                method: 'POST',
+                data: { productId: productId, action: action },
+                success: (response) => {
+                    // Reset opacity
+                    if (cartItem) {
+                        cartItem.style.opacity = '1';
+                    }
+
+                    if (response.status) {
+                        // Update quantity display
+                        quantityElement.value = response.quantity;
+                        
+                        // Update subtotal for this item
+                        const priceElement = document.getElementById(`price${productId}`);
+                        const subtotalElement = document.getElementById(`subTotal${productId}`);
+                        
+                        if (priceElement && subtotalElement) {
+                            const price = parseFloat(priceElement.textContent);
+                            const newSubtotal = price * response.quantity;
+                            subtotalElement.textContent = newSubtotal.toFixed(2);
+                        }
+                        
+                        // Update cart totals
+                        updateCartTotals();
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: (error) => {
+                    console.error("AJAX Error:", error);
+                    if (cartItem) {
+                        cartItem.style.opacity = '1';
+                    }
+                    Swal.fire('Error', 'An error occurred while updating the cart', 'error');
+                }
+            });
         }
 
-        $.ajax({
-            url: '/changeQuantity',
-            method: 'POST',
-            data: { productId: productId, action: action },
-            success: (response) => {
-                if (response.status) {
-                    location.reload(); // Reload the page to update all totals
-                } else {
-                    Swal.fire('Error', response.message, 'error');
-                }
-            },
-            error: (error) => {
-                console.error("AJAX Error:", error);
-                Swal.fire('Error', 'An error occurred while updating the cart', 'error');
+        // Function to update cart totals
+        function updateCartTotals() {
+            let subtotal = 0;
+            
+            // Calculate subtotal from all items
+            document.querySelectorAll('[id^="subTotal"]').forEach(element => {
+                subtotal += parseFloat(element.textContent);
+            });
+            
+            // Update subtotal display
+            const grandTotalElement = document.getElementById('grand-total');
+            if (grandTotalElement) {
+                grandTotalElement.textContent = subtotal.toFixed(2);
             }
-        });
-    }
+            
+            // Update total (subtotal + shipping)
+            const finalTotalElement = document.getElementById('final-total');
+            if (finalTotalElement) {
+                const total = Math.round(subtotal) + 50; // Adding shipping cost
+                finalTotalElement.textContent = total.toFixed(2);
+            }
+        }
 
-    function confirmRemove(productId) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, remove it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/deleteItem?id=${productId}`,
-                    method: 'GET',
-                    success: (response) => {
-                        if (response.status) {
-                            Swal.fire('Removed!', response.message, 'success');
-                            location.reload(); // Refresh the page after removing the item
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: (error) => {
-                        console.error("AJAX Error:", error);
-                        Swal.fire('Error', 'There was an error removing the item from the cart', 'error');
-                    }
-                });
+        // Function to confirm removal
+        function confirmRemove(productId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    removeItem(productId);
+                }
+            });
+        }
+
+        // Function to remove item
+        function removeItem(productId) {
+            const cartItem = document.getElementById(`cart-item-${productId}`);
+            if (cartItem) {
+                cartItem.style.opacity = '0.6';
             }
-        });
-    }
+
+            $.ajax({
+                url: `/deleteItem?id=${productId}`,
+                method: 'GET',
+                success: (response) => {
+                    if (response.status) {
+                        // Remove the item from DOM
+                        if (cartItem) {
+                            cartItem.remove();
+                        }
+                        
+                        // Update cart totals
+                        updateCartTotals();
+                        
+                        // Check if cart is empty
+                        const cartItems = document.querySelectorAll('[id^="cart-item-"]');
+                        if (cartItems.length === 0) {
+                            const tableBody = document.querySelector('.shopping-summery tbody');
+                            if (tableBody) {
+                                tableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <p class="lead mb-4">No item found in Cart</p>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        }
+                        
+                        Swal.fire('Removed!', response.message, 'success');
+                    } else {
+                        if (cartItem) {
+                            cartItem.style.opacity = '1';
+                        }
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: (error) => {
+                    console.error("AJAX Error:", error);
+                    if (cartItem) {
+                        cartItem.style.opacity = '1';
+                    }
+                    Swal.fire('Error', 'There was an error removing the item from the cart', 'error');
+                }
+            });
+        }
+    });
 
     function viewShippingCharge() {
         Swal.fire({
