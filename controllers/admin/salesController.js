@@ -52,22 +52,22 @@ const loadSalesPage = async (req, res) => {
       let totalFinalAmount = 0;
   
       const sales = orders.map(order => {
-          // Calculate regular price considering quantity
+          
           const orderRegularPrice = order.orderedItems.reduce((sum, item) => {
               return sum + (item.regularPrice * item.quantity);
           }, 0);
 
-          // Calculate final amount excluding delivery charge
+          
           const finalAmountWithoutDelivery = order.finalAmount - 50;
           
-          // Track totals
+          
           totalRegularPrice += orderRegularPrice;
           totalFinalAmount += finalAmountWithoutDelivery;
           
-          // Calculate actual discount (considering quantity)
+          
           const actualDiscount = orderRegularPrice - finalAmountWithoutDelivery;
           
-          // Calculate coupon discount if applied
+          
           const couponDiscount = order.couponApplied ? 
               (order.totalPrice - order.finalAmount) : 0;
           
@@ -124,11 +124,11 @@ const generatePDF = async (res, salesData) => {
 
   doc.pipe(res);
 
-  // Add content to PDF
+  
   doc.fontSize(20).text("Sales Report", { align: "center" });
   doc.moveDown();
 
-  // Add summary
+  
   doc.fontSize(14).text("Summary");
   doc.fontSize(12)
       .text(`Total Sales: Rs. ${salesData.totalSales.toLocaleString()}`)
@@ -142,7 +142,7 @@ const generatePDF = async (res, salesData) => {
   doc.fontSize(14).text("Detailed Sales");
   let y = doc.y + 20;
 
-  // Table headers
+  
   const headers = ["Date", "Order ID", "Amount", "Discounts", "Coupons"];
   let x = 50;
   headers.forEach((header) => {
@@ -150,14 +150,14 @@ const generatePDF = async (res, salesData) => {
       x += 100;
   });
 
-  // Table rows
+  
   y += 20;
   salesData.sales.forEach((sale) => {
       x = 50;
       doc.text(new Date(sale.date).toLocaleDateString(), x, y);
       x += 100;
       
-      // Extract only the last 12 characters of orderId
+      
       const shortOrderId = sale.orderId.toString().slice(-12);
       doc.text(shortOrderId, x, y);
       x += 100;
@@ -179,7 +179,7 @@ const generateExcel = async (res, salesData) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Sales Report');
   
-  // Add headers
+  
   worksheet.columns = [
     { header: 'Date', key: 'date', width: 15 },
     { header: 'Order ID', key: 'orderId', width: 30 },

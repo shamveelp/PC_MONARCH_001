@@ -2,7 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 
-// Clean cart by removing blocked, unlisted, or zero-quantity items and adjusting quantities
+
 const removeBlockedOrUnlistedItems = async (user) => {
   const updatedCart = [];
   for (const item of user.cart) {
@@ -33,7 +33,7 @@ const getCartPage = async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    // Adjust cart based on current product stock, removing zero-quantity items
+    
     for (let i = user.cart.length - 1; i >= 0; i--) {
       const item = user.cart[i];
       if (item.productId && (item.productId.quantity === 0 || item.quantity > item.productId.quantity)) {
@@ -46,7 +46,6 @@ const getCartPage = async (req, res) => {
     }
     await user.save();
 
-    // Filter out blocked products, unlisted categories, or products with quantity <= 0
     const cartItems = user.cart
       .filter(item => 
         item.productId && 
@@ -94,7 +93,6 @@ const addToCart = async (req, res) => {
     let newQuantity;
 
     if (cartItemIndex > -1) {
-      // Product already in cart, check limits before increasing quantity
       const currentQuantity = user.cart[cartItemIndex].quantity;
 
       if (currentQuantity >= 5) {
@@ -116,7 +114,6 @@ const addToCart = async (req, res) => {
       user.cart[cartItemIndex].quantity += 1;
       newQuantity = user.cart[cartItemIndex].quantity;
     } else {
-      // Add new product to cart
       user.cart.push({ productId: productId, quantity: 1 });
       newQuantity = 1;
     }
@@ -153,7 +150,6 @@ const changeQuantity = async (req, res) => {
     }
 
     if (product.quantity === 0) {
-      // Remove item if stock is zero
       user.cart.splice(cartItemIndex, 1);
       await user.save();
       return res.json({
@@ -188,7 +184,6 @@ const changeQuantity = async (req, res) => {
       return res.status(400).json({ status: false, message: "Invalid action" });
     }
 
-    // Adjust quantity if product stock is lower
     if (newQuantity > product.quantity) {
       newQuantity = product.quantity;
     }
@@ -196,7 +191,6 @@ const changeQuantity = async (req, res) => {
     user.cart[cartItemIndex].quantity = newQuantity;
     await user.save();
 
-    // Recalculate cart total
     const updatedUser = await User.findById(userId).populate({
       path: 'cart.productId',
       model: 'Product'

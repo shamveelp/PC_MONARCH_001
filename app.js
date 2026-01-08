@@ -56,9 +56,11 @@ app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'view
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+app.use('/admin', adminRouter);
+
 app.use('/',userRouter);
 
-app.use('/admin', adminRouter);
+
 
 
 app.use(async (req, res, next) => {

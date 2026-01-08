@@ -29,7 +29,6 @@ const loadCheckoutPage = async (req, res) => {
           return res.status(404).send("User not found");
       }
 
-      // Adjust cart quantities based on current product stock
       for (let item of user.cart) {
           if (item.productId && item.quantity > item.productId.quantity) {
               item.quantity = item.productId.quantity;
@@ -40,7 +39,6 @@ const loadCheckoutPage = async (req, res) => {
       }
       await user.save();
 
-      // Filter out blocked products, unlisted categories, and products with quantity <= 0
       const cartItems = user.cart
           .filter(item => 
               item.productId && 
@@ -172,7 +170,6 @@ const checkStock = async (req, res) => {
             };
         });
 
-        // Update cart quantities if needed
         for (const item of stockChanges) {
             if (item.stockChanged) {
                 await User.updateOne(

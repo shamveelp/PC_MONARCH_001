@@ -14,8 +14,8 @@ const fs = require("fs")
 const path = require("path")
 const ejs = require("ejs")
 const puppeteer = require("puppeteer")
+const PDFDocument = require('pdfkit')
 
-// Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -417,72 +417,141 @@ const cancelReturnRequest = async (req, res) => {
 
 const generateInvoice = async (req, res) => {
   try {
-    const userId = req.session.user
-    const orderId = req.query.orderId
+    const userId = req.session.user;
+    const orderId = req.query.orderId;
 
-    const order = await Order.findOne({ orderId: orderId, userId })
+    const order = await Order.findOne({ orderId: orderId, userId });
     if (!order) {
-      return res.status(404).send("Order not found")
+      return res.status(404).send("Order not found");
     }
 
     if (order.status !== "delivered") {
-      return res.status(400).send("Invoice is only available for delivered orders")
+      return res.status(400).send("Invoice is only available for delivered orders");
     }
 
     if (!order.invoiceDate) {
-      order.invoiceDate = new Date()
-      await order.save()
+      order.invoiceDate = new Date();
+      await order.save();
     }
 
-    const templatePath = path.join(__dirname, "../../views/user/invoice-template.ejs")
-    const html = await ejs.renderFile(templatePath, { order })
-
-    const browser = await puppeteer.launch({ headless: true })
-    const page = await browser.newPage()
-
-    // Set content and generate PDF
-    await page.setContent(html, { waitUntil: "networkidle0" })
-
-    // Create directory if it doesn't exist
-    const invoiceDir = path.join(__dirname, "../../public/invoices")
+    
+    const invoiceDir = path.join(__dirname, "../../public/invoices");
     if (!fs.existsSync(invoiceDir)) {
-      fs.mkdirSync(invoiceDir, { recursive: true })
+      fs.mkdirSync(invoiceDir, { recursive: true });
     }
 
-    // Generate PDF file name
-    const fileName = `invoice-${order.orderId}.pdf`
-    const filePath = path.join(invoiceDir, fileName)
+    
+    const fileName = `invoice-${order.orderId}.pdf`;
+    const filePath = path.join(invoiceDir, fileName);
 
-    // Generate PDF
-    await page.pdf({
-      path: filePath,
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
-      },
-    })
+    
+    const doc = new PDFDocument({ margin: 50 });
+    const stream = fs.createWriteStream(filePath);
 
-    await browser.close()
+    doc.pipe(stream);
 
-    // Send the PDF file
-    res.download(filePath, fileName, (err) => {
-      if (err) {
-        console.error("Error sending file:", err)
-        res.status(500).send("Error generating invoice")
-      }
+   
+    doc.fontSize(20).text('PC MONARCH', { align: 'center' });
+    doc.fontSize(12).text('Invoice', { align: 'center' });
+    doc.moveDown();
 
-      // Optionally delete the file after sending
-      // fs.unlinkSync(filePath);
-    })
+   
+    doc.fontSize(12).text(`Invoice #: ${order.orderId}`);
+    doc.text(`Date: ${new Date(order.invoiceDate || order.createdOn).toLocaleDateString()}`);
+    doc.moveDown();
+
+   
+    doc.fontSize(10);
+    const companyX = 50;
+    const customerX = 300;
+    
+    doc.text('From:', companyX);
+    doc.text('PC Monarch', companyX);
+    doc.text('Calicut, Kakkanchery', companyX);
+    doc.text('Brototype, Kinfra', companyX);
+    doc.text('Phone: +00 000 0000 000', companyX);
+    doc.text('Email: pcmonarch@gmail.com', companyX);
+
+    
+    doc.text('Bill To:', customerX);
+    doc.text(order.address.name, customerX);
+    doc.text(order.address.email, customerX);
+    doc.text(order.address.phone, customerX);
+    doc.text(order.address.streetAddress, customerX);
+    doc.text(`${order.address.city}, ${order.address.state} ${order.address.pincode}`, customerX);
+
+    doc.moveDown();
+
+    
+    const tableTop = 300;
+    let currentY = tableTop;
+
+  
+    doc.fontSize(10);
+    doc.text('Product', 50, currentY);
+    doc.text('Quantity', 250, currentY);
+    doc.text('Price', 350, currentY);
+    doc.text('Total', 450, currentY);
+
+    currentY += 20;
+
+    
+    order.orderedItems.forEach(item => {
+
+      const productName = item.productName.split('|')[0].trim();
+
+      doc.text(productName, 50, currentY);
+      doc.text(item.quantity.toString(), 250, currentY);
+      doc.text(`Rs. ${item.price.toFixed(2)}`, 350, currentY);
+      doc.text(`Rs. ${(item.price * item.quantity).toFixed(2)}`, 450, currentY);
+      currentY += 20;
+    });
+
+    doc.moveDown();
+    currentY += 20;
+
+   
+    doc.text(`Subtotal: Rs. ${order.totalPrice.toFixed(2)}`, 350, currentY);
+    currentY += 20;
+    
+    if (order.discount > 0) {
+      doc.text(`Discount: -Rs. ${order.discount.toFixed(2)}`, 350, currentY);
+      currentY += 20;
+    }
+    
+    doc.text(`Delivery Charge: Rs. ${order.deliveryCharge.toFixed(2)}`, 350, currentY);
+    currentY += 20;
+    
+    doc.fontSize(12).text(`Grand Total: Rs. ${order.finalAmount.toFixed(2)}`, 350, currentY);
+
+    
+    doc.fontSize(10).text('Thank you for your purchase!', 50, 700, { align: 'center' });
+    doc.text('For any questions or concerns regarding this invoice, please contact our customer support.', { align: 'center' });
+
+    doc.end();
+
+   
+    stream.on('finish', () => {
+    
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error("Error sending file:", err);
+          res.status(500).send("Error generating invoice");
+        }
+        
+        
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Error deleting temporary file:", err);
+        });
+      });
+    });
+
   } catch (error) {
-    console.error("Error generating invoice:", error)
-    res.status(500).send("Error generating invoice")
+    console.error("Error generating invoice:", error);
+    res.status(500).send("Error generating invoice");
   }
-}
+};
+
 
 const createRazorpayOrder = async (req, res) => {
   try {

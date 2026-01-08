@@ -5,7 +5,6 @@ const addComment = async (req, res) => {
     const { productId, comment } = req.body;
     const userId = req.session.user;
 
-    // Check if comment is empty
     if (!comment || comment.trim().length === 0) {
       return res.status(400).json({
         status: false,
@@ -13,7 +12,6 @@ const addComment = async (req, res) => {
       });
     }
 
-    // Check comment length
     if (comment.length > 500) {
       return res.status(400).json({
         status: false,
@@ -21,7 +19,6 @@ const addComment = async (req, res) => {
       });
     }
 
-    // Check daily comment limit
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
