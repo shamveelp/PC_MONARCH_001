@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 
 connectDB();
 
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

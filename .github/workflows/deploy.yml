@@ -1,0 +1,50 @@
+name: Deploy PC Monarch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "📦 Moving to apps folder"
+            cd ~/apps
+
+            echo "📁 Check if pcmonarch exists"
+            if [ ! -d "pcmonarch/.git" ]; then
+              echo "🚀 First time setup - cloning repo"
+              rm -rf pcmonarch/*
+              git clone https://github.com/shamveelp/PC_MONARCH_001.git pcmonarch
+            fi
+
+            echo "📂 Entering project"
+            cd pcmonarch
+
+            echo "🔄 Pull latest code"
+            git pull origin main
+
+            echo "📥 Installing dependencies"
+            npm install
+
+            echo "⚙️ Building project (if exists)"
+            npm run build || true
+
+            echo "🚀 Restarting app with PM2"
+            pm2 describe pcmonarch > /dev/null \
+              && pm2 restart pcmonarch \
+              || pm2 start app.js --name pcmonarch
+
+            echo "💾 Saving PM2 process"
+            pm2 save
