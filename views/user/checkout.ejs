@@ -193,7 +193,7 @@
                                 <div class="d-flex justify-content-between mb-2">
                                     <div class="d-flex align-items-center">
                                         <a style="all: unset; display: contents;" href="/productDetails?id=<%=item.product._id%>">
-                                        <img src="<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>">
+                                        <img src="<%= item.product.productImage[0].startsWith('http') ? item.product.productImage[0] : '/' + item.product.productImage[0] %>" alt="<%= item.product.productName %>">
                                         <div class="ml-2">
                                             <p class="product-name mb-0"><%= item.product.productName.split('|')[0].trim() %> (x<%= item.quantity %>)</p>
                                             <p class="product-mn mb-0"><%= item.product.category.name %></p>

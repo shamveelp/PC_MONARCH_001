@@ -8,6 +8,7 @@ import multer from "multer";
 import sharp from "sharp";
 import fs from "fs";
 import path from "path";
+import { uploadBuffer, cloudinary } from "../../config/cloudinary.js";
 
 
 function generateOtp(){
@@ -588,6 +589,58 @@ const deleteAddress = async (req,res) => {
 }
 
 
+const updateProfileImage = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ success: false, message: 'No image provided' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Process image with sharp
+        const processedBuffer = await sharp(file.buffer)
+            .resize(400, 400, { fit: 'cover' })
+            .webp({ quality: 80 })
+            .toBuffer();
+
+        // Upload to Cloudinary
+        const uploadResult = await uploadBuffer(processedBuffer, 'profile-pictures');
+
+        // Delete old image from Cloudinary if it exists
+        if (user.profilePicture && user.profilePicture.startsWith('http')) {
+            try {
+                const publicId = user.profilePicture.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`profile-pictures/${publicId}`);
+            } catch (err) {
+                console.error('Error deleting old profile image:', err);
+            }
+        }
+
+        // Update user profile
+        user.profilePicture = uploadResult.secure_url;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Profile image updated successfully',
+            imageUrl: uploadResult.secure_url
+        });
+    } catch (error) {
+        console.error('Error updating profile image:', error);
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while updating your profile image'
+        });
+    }
+};
+
+
 export default {
     getForgotPassPage,
     forgotEmailValid,
@@ -608,4 +661,5 @@ export default {
     verifyEmailOtp,
     updateEmail,
     changePassword,
+    updateProfileImage,
 }

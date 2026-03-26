@@ -275,7 +275,7 @@
                         <div class="order-body">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
-                                    <img src="<%= order.orderedItems[0].productImages[0] %>" 
+                                    <img src="<%= order.orderedItems[0].productImages[0].startsWith('http') ? order.orderedItems[0].productImages[0] : '/' + order.orderedItems[0].productImages[0] %>" 
                                          alt="<%= order.orderedItems[0].productName %>"
                                          class="product-image">
                                 </div>

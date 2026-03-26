@@ -13,6 +13,9 @@ import walletController from "../controllers/user/walletController.js";
 import staticController from "../controllers/user/staticController.js";
 import commentController from "../controllers/user/commentController.js";
 import multer from "multer";
+const memoryStorage = multer.memoryStorage();
+const memoryUpload = multer({ storage: memoryStorage });
+
 import upload from '../config/multer.js';
 
 import { userAuth, addCartWishlist, checkUserAuthWish, ajaxAuth } from '../middlewares/auth.js';
@@ -97,6 +100,7 @@ router.post("/addAddressCheckout",userAuth,checkoutController.postAddAddressChec
 
 // Profile Management
 router.post("/update-profile",userAuth,profileController.updateProfile)
+router.post("/update-profile-image", userAuth, memoryUpload.single('profileImage'), profileController.updateProfileImage)
 router.get("/change-email",userAuth,profileController.changeEmail)
 router.post("/change-email",userAuth,profileController.changeEmailValid)
 router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp)

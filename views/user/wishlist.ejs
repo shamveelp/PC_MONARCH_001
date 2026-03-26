@@ -46,7 +46,7 @@
                              
                                        <tr>
                                            <td class="image product-thumbnail">
-                                               <img src="<%= product.productImage[0] %>" />
+                                               <img src="<%= product.productImage[0].startsWith('http') ? product.productImage[0] : '/' + product.productImage[0] %>" />
                                            </td>
                                            <td class="product-des product-name">
                                                <h5 class="product-name">

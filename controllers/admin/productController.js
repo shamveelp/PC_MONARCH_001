@@ -4,6 +4,7 @@ import sharp from "sharp";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
+import { uploadBuffer, uploadBase64, cloudinary } from "../../config/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,17 +42,15 @@ const saveImage = async (req, res) => {
       return res.status(400).json({ success: false, message: "No image file provided" });
     }
 
-    // Generate unique filename
-    const filename = Date.now() + '-' + file.originalname.replace(/\s/g, "");
-    const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
-
-    // Resize & convert to WebP
-    await sharp(file.buffer)
+    // Resize & convert to WebP before uploading to Cloudinary
+    const processedBuffer = await sharp(file.buffer)
       .resize(800, 800, { fit: "inside", withoutEnlargement: true })
       .webp({ quality: 80 })
-      .toFile(filepath);
+      .toBuffer();
 
-    return res.status(200).json({ success: true, message: "Image saved successfully", filename });
+    const uploadResult = await uploadBuffer(processedBuffer, "product-images");
+
+    return res.status(200).json({ success: true, message: "Image saved successfully", filename: uploadResult.secure_url });
   } catch (error) {
     console.error("Error saving image:", error);
     return res.status(500).json({ success: false, message: "Error saving image" });
@@ -70,50 +69,28 @@ const addProducts = async (req, res) => {
     }
 
    
-    const uploadDir = path.join(__dirname, "../../public/uploads/product-images");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    const imageURLs = [];
 
-   
-    const imageFilenames = [];
-
-    
     for (let i = 1; i <= 4; i++) {
       const croppedImageData = req.body[`croppedImage${i}`];
       
       if (croppedImageData && croppedImageData.startsWith('data:image')) {
-        
-        const base64Data = croppedImageData.replace(/^data:image\/\w+;base64,/, '');
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-      
-        const filename = Date.now() + "-" + `cropped-image-${i}` + ".webp";
-        const filepath = path.join(uploadDir, filename);
-
-        
-        await sharp(imageBuffer)
-          .webp({ quality: 80 })
-          .toFile(filepath);
-
-        imageFilenames.push(`uploads/product-images/${filename}`);
+        const uploadResult = await uploadBase64(croppedImageData, "product-images");
+        imageURLs.push(uploadResult.secure_url);
       } else if (req.files && req.files[`image${i}`]) {
-       
         const file = req.files[`image${i}`][0];
-        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp";
-        const filepath = path.join(uploadDir, filename);
-
-        await sharp(file.buffer)
+        
+        const processedBuffer = await sharp(file.buffer)
           .resize(800, 800, { fit: "inside", withoutEnlargement: true })
           .webp({ quality: 80 })
-          .toFile(filepath);
+          .toBuffer();
 
-        imageFilenames.push(`uploads/product-images/${filename}`);
+        const uploadResult = await uploadBuffer(processedBuffer, "product-images");
+        imageURLs.push(uploadResult.secure_url);
       }
     }
 
-   
-    if (imageFilenames.length < 4) {
+    if (imageURLs.length < 4) {
       return res.status(400).json({ success: false, message: "Please upload all 4 product images" });
     }
 
@@ -140,7 +117,7 @@ const addProducts = async (req, res) => {
       display,
       operatingSystem,
       boxContains,
-      productImage: imageFilenames,
+      productImage: imageURLs,
       status: "available",
     });
 
@@ -348,47 +325,48 @@ const editProduct = async (req, res) => {
       const croppedImageData = req.body[`croppedImage${i}`];
       
       if (croppedImageData && croppedImageData.startsWith('data:image')) {
-        
-        const base64Data = croppedImageData.replace(/^data:image\/\w+;base64,/, '');
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-        
-       
-        const filename = Date.now() + "-" + `cropped-image-${i}` + ".webp";
-        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
+        const uploadResult = await uploadBase64(croppedImageData, "product-images");
+        const imageURL = uploadResult.secure_url;
 
-      
-        await sharp(imageBuffer)
-          .webp({ quality: 80 })
-          .toFile(filepath);
-
-        const imagePath = `uploads/product-images/${filename}`;
-
-        
+        // Optionally delete old image from Cloudinary here
         if (product.productImage[i - 1]) {
-          product.productImage[i - 1] = imagePath;
+          const oldPublicId = product.productImage[i - 1].split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`product-images/${oldPublicId}`);
+          product.productImage[i - 1] = imageURL;
         } else {
-          product.productImage.push(imagePath);
+          product.productImage.push(imageURL);
         }
       } else if (req.files && req.files[`image${i}`]) {
-        
         const file = req.files[`image${i}`][0];
-        const filename = Date.now() + "-" + file.originalname.replace(/\s/g, "") + ".webp";
-        const filepath = path.join(__dirname, "../../public/uploads/product-images", filename);
-
-        await sharp(file.buffer)
+        const processedBuffer = await sharp(file.buffer)
           .resize(800, 800, { fit: "inside", withoutEnlargement: true })
           .webp({ quality: 80 })
-          .toFile(filepath);
+          .toBuffer();
 
-        const imagePath = `uploads/product-images/${filename}`;
+        const uploadResult = await uploadBuffer(processedBuffer, "product-images");
+        const imageURL = uploadResult.secure_url;
 
-        if (product.productImage[i - 1]) {
-          product.productImage[i - 1] = imagePath;
-        } else {
-          product.productImage.push(imagePath);
+            // Delete old image if it exists
+            if (product.productImage[i - 1]) {
+              const oldImage = product.productImage[i - 1];
+              if (oldImage.startsWith('http')) {
+                const oldPublicId = oldImage.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`product-images/${oldPublicId}`);
+              } else {
+                // Should we delete local too? Maybe not necessary for this task, but good practice
+                try {
+                  const fullPath = path.join(process.cwd(), 'public', oldImage);
+                  if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+                } catch (e) {
+                  console.error('Local unlink error:', e);
+                }
+              }
+              product.productImage[i - 1] = imageURL;
+            } else {
+              product.productImage.push(imageURL);
+            }
+          }
         }
-      }
-    }
 
     Object.assign(product, updateFields);
     await product.save();
@@ -415,13 +393,11 @@ const deleteSingleImage = async (req, res) => {
     product.productImage.splice(imageIndex, 1);
     await product.save();
 
-    const imagePath = path.join(__dirname, "../../public", imageNameToServer);
-
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-      console.log(`Image ${imageNameToServer} deleted successfully`);
-    } else {
-      console.log(`Image ${imageNameToServer} not found`);
+    // Delete from Cloudinary
+    if (imageNameToServer && imageNameToServer.startsWith('http')) {
+      const publicId = imageNameToServer.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`product-images/${publicId}`);
+      console.log(`Image ${publicId} deleted from Cloudinary successfully`);
     }
 
     res.json({ status: true, message: "Image deleted successfully" });

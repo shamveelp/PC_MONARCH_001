@@ -297,7 +297,7 @@
                                     <% cartItems.forEach(function(item) { %>
                                         <tr id="cart-item-<%= item.product._id %>" data-product-id="<%= item.product._id %>">
                                             <td class="image product-thumbnail" data-title="Image">
-                                                <img src="<%= item.product.productImage[0] %>" alt="#" />
+                                                <img src="<%= item.product.productImage[0].startsWith('http') ? item.product.productImage[0] : '/' + item.product.productImage[0] %>" alt="#" />
                                             </td>
                                             <td class="product-des product-name" data-title="Name">
                                                 <h5 class="product-name">

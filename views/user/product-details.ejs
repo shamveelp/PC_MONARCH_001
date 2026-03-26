@@ -37,16 +37,16 @@
 				<div class="col-lg-6">
 					<div class="s_Product_carousel">
 						<div class="single-prd-item zoom-container">
-							<img class="img-fluid zoom-image" src="/<%= product.productImage[0] %>" alt="">
+							<img class="img-fluid zoom-image" src="<%= product.productImage[0].startsWith('http') ? product.productImage[0] : '/' + product.productImage[0] %>" alt="">
 						</div>
 						<div class="single-prd-item zoom-container">
-							<img class="img-fluid zoom-image" src="/<%= product.productImage[1] %>" alt="">
+							<img class="img-fluid zoom-image" src="<%= product.productImage[1].startsWith('http') ? product.productImage[1] : '/' + product.productImage[1] %>" alt="">
 						</div>
 						<div class="single-prd-item zoom-container">
-							<img class="img-fluid zoom-image" src="/<%= product.productImage[2] %>" alt="">
+							<img class="img-fluid zoom-image" src="<%= product.productImage[2].startsWith('http') ? product.productImage[2] : '/' + product.productImage[2] %>" alt="">
 						</div>
                         <div class="single-prd-item zoom-container">
-							<img class="img-fluid zoom-image" src="/<%= product.productImage[3] %>" alt="">
+							<img class="img-fluid zoom-image" src="<%= product.productImage[3].startsWith('http') ? product.productImage[3] : '/' + product.productImage[3] %>" alt="">
 						</div>
 					</div>
 				</div>
@@ -371,7 +371,7 @@
 						<%for(let i=0;i< products.length; i++){%>
 						<div class="col-lg-4 col-md-4 col-sm-6 col-6 mb-20">
 							<div class="single-related-product d-flex">
-								<a href="#"><img src="<%= products[i].productImage[0] %>" alt=""></a>
+								<a href="#"><img src="<%= products[i].productImage[0].startsWith('http') ? products[i].productImage[0] : '/' + products[i].productImage[0] %>" alt=""></a>
 								<div class="desc">
 									<a href="#" class="title"><%= products[i].productName.split('|')[0] %></a>
 									<div class="price">

@@ -163,7 +163,7 @@
                             <div class="col-md-3 mb-3">
                                 <div class="card">
                                     <% if(product.productImage[i]) { %>
-                                        <img src="/<%= product.productImage[i] %>" class="card-img-top" alt="Product Image">
+                                        <img src="<%= product.productImage[i].startsWith('http') ? product.productImage[i] : '/' + product.productImage[i] %>" class="card-img-top" alt="Product Image">
                                         <div class="card-body">
                                             <button type="button" class="btn btn-danger btn-sm" onclick="deleteSingleImage('<%= product.productImage[i] %>', '<%= product._id %>', <%= i %>)">Delete</button>
                                         </div>

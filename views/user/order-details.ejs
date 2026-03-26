@@ -198,7 +198,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex">
-                                    <img src="<%= order.orderedItems[0].productImages[0] %>" 
+                                    <img src="<%= order.orderedItems[0].productImages[0].startsWith('http') ? order.orderedItems[0].productImages[0] : '/' + order.orderedItems[0].productImages[0] %>" 
                                          alt="<%= order.orderedItems[0].productName %>"
                                          class="product-image me-3">
                                     <div>

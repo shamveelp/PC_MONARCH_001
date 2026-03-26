@@ -152,11 +152,17 @@
     <div class="container">
         <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-between">
             <div class="col-left d-flex align-items-center">
-                
+                <div class="profile-image-container position-relative">
+                    <img id="profileImage" src="<%= user.profilePicture ? user.profilePicture : '/img/default-profile.png' %>" 
+                         alt="Profile Picture" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                    <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" 
+                            onclick="document.getElementById('imageUpload').click()">
+                        <i class="bi bi-camera"></i>
+                    </button>
+                </div>
                 <div class="ml-3">
                     <h5 id="fullName" style="color: #121311;"><%= user.name || 'John Doe' %></h5>
                     <p id="email" style="color: #121311;"><%= user.email || 'johndoe@example.com' %></p>
-                    
                 </div>
             </div>
             <div class="col-first">
@@ -522,6 +528,60 @@ function confirmLogout(event) {
                 }
             });
         }
+
+        async function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show preview locally
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('profileImage').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to server
+            const formData = new FormData();
+            formData.append('profileImage', file);
+
+            try {
+                Swal.fire({
+                    title: 'Uploading...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await fetch('/update-profile-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Uploaded!',
+                        text: 'Profile picture updated successfully',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    document.getElementById('profileImage').src = result.imageUrl;
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error uploading profile picture:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload Failed',
+                    text: error.message || 'An error occurred while uploading. Please try again.'
+                });
+            }
+        }
+
 
     </script>
 

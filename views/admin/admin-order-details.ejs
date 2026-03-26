@@ -163,7 +163,7 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="/<%= order.orderedItems[0].productImages[0] %>" 
+                                            <img src="<%= order.orderedItems[0].productImages[0].startsWith('http') ? order.orderedItems[0].productImages[0] : '/' + order.orderedItems[0].productImages[0] %>" 
                                                  alt="<%= order.orderedItems[0].productName %>"
                                                  style="width: 50px; height: 50px; object-fit: cover;"
                                                  class="me-2">
