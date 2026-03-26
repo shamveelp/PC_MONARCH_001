@@ -1,6 +1,6 @@
-const User = require("../../models/userSchema")
-const Wishlist = require("../../models/wishlistSchema")
-const Product = require("../../models/productSchema")
+import User from "../../models/userSchema.js";
+import Wishlist from "../../models/wishlistSchema.js";
+import Product from "../../models/productSchema.js";
 
 
 const loadWishlist = async (req,res) => {
@@ -85,14 +85,8 @@ const removeProduct = async (req,res) => {
 
 
 
-
-
-
-module.exports = {
+export default {
     loadWishlist,
     addToWishlist,
     removeProduct,
-
-
-
 }

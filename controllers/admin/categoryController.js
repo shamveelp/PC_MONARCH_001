@@ -1,6 +1,6 @@
-const Category = require("../../models/categorySchema")
-const Product = require("../../models/productSchema")
-const { calculateEffectivePrice } = require("./productController");
+import Category from "../../models/categorySchema.js";
+import Product from "../../models/productSchema.js";
+import { calculateEffectivePrice } from "./productController.js";
 
 
 
@@ -229,7 +229,7 @@ const deleteCategory = async (req, res) => {
     }
   }
 
-module.exports = {
+export default {
   categoryInfo,
   addCategory,
   addCategoryOffer,
@@ -240,6 +240,4 @@ module.exports = {
   getEditCategory,
   editCategory,
   deleteCategory,
-  
 }
-

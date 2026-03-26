@@ -1,6 +1,6 @@
-const Banner = require("../../models/bannerSchema")
-const path = require("path")
-const fs = require("fs")
+import Banner from "../../models/bannerSchema.js";
+import path from "path";
+import fs from "fs";
 
 
 const getBannerPage = async (req,res) => {
@@ -17,6 +17,6 @@ const getBannerPage = async (req,res) => {
 }
 
 
-module.exports = {
+export default {
     getBannerPage
 }

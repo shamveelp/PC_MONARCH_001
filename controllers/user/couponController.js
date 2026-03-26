@@ -1,5 +1,5 @@
-const Coupon = require("../../models/couponSchema")
-const User = require("../../models/userSchema")
+import Coupon from "../../models/couponSchema.js";
+import User from "../../models/userSchema.js";
 
 const loadCoupons = async (req, res) => {
   try {
@@ -32,7 +32,6 @@ const loadCoupons = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   loadCoupons,
 }
-

@@ -1,6 +1,6 @@
-const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
 
 
 const removeBlockedOrUnlistedItems = async (user) => {
@@ -236,9 +236,9 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   getCartPage,
   addToCart,
   changeQuantity,
   deleteProduct
-};
+}

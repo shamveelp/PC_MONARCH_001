@@ -1,13 +1,10 @@
-const User = require('../../models/userSchema');
-const Category = require("../../models/categorySchema");
-const Product = require("../../models/productSchema")
-const Brand = require("../../models/brandSchema")
-const env = require('dotenv').config();
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcrypt');
-
-
-
+import User from '../../models/userSchema.js';
+import Category from "../../models/categorySchema.js";
+import Product from "../../models/productSchema.js";
+import Brand from "../../models/brandSchema.js";
+import 'dotenv/config';
+import nodemailer from 'nodemailer';
+import bcrypt from 'bcrypt';
 
 
 const pageNotFound = async (req, res) => {
@@ -58,8 +55,6 @@ const loadSignUpPage = async (req, res) => {
         res.status(500).send('Server Error')
     }
 }
-
-
 
 
 
@@ -542,9 +537,7 @@ const searchProducts = async (req, res) => {
 };
 
 
-
-
-module.exports = {
+export default {
     loadHomePage,
     pageNotFound,
     loadLoginPage,
@@ -557,9 +550,4 @@ module.exports = {
     loadShoppingPage,
     filterProduct,
     searchProducts
-
-
-
-
-    
 }

@@ -1,9 +1,9 @@
-const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const Address = require("../../models/addressSchema");
-const Coupon = require("../../models/couponSchema");
-const Wallet = require("../../models/walletSchema");
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
+import Address from "../../models/addressSchema.js";
+import Coupon from "../../models/couponSchema.js";
+import Wallet from "../../models/walletSchema.js";
 
 const loadCheckoutPage = async (req, res) => {
   try {
@@ -199,11 +199,10 @@ const checkStock = async (req, res) => {
     }
 };
 
-module.exports = {
+export default {
     loadCheckoutPage,
     postAddAddressCheckout,
     addAddressCheckout,
     applyCoupon,
     checkStock,
-
-};
+}

@@ -1,20 +1,24 @@
-const Order = require("../../models/orderSchema")
-const User = require("../../models/userSchema")
-const Product = require("../../models/productSchema")
-const Category = require("../../models/categorySchema")
-const Coupon = require("../../models/couponSchema")
-const Address = require("../../models/addressSchema")
-const Wallet = require("../../models/walletSchema")
-const Transaction = require("../../models/transactionSchema")
-const Razorpay = require("razorpay")
-const crypto = require("crypto")
-const env = require("dotenv").config()
+import Order from "../../models/orderSchema.js";
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
+import Coupon from "../../models/couponSchema.js";
+import Address from "../../models/addressSchema.js";
+import Wallet from "../../models/walletSchema.js";
+import Transaction from "../../models/transactionSchema.js";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import 'dotenv/config';
 
-const fs = require("fs")
-const path = require("path")
-const ejs = require("ejs")
-const puppeteer = require("puppeteer")
-const PDFDocument = require('pdfkit')
+import fs from "fs";
+import path from "path";
+import ejs from "ejs";
+import puppeteer from "puppeteer";
+import PDFDocument from 'pdfkit';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -827,7 +831,21 @@ const placeWalletOrder = async (req, res) => {
   }
 }
 
-module.exports = {
+export {
+  placeOrder,
+  getOrders,
+  loadOrderDetails,
+  cancelOrder,
+  createRazorpayOrder,
+  verifyPayment,
+  placeWalletOrder,
+  requestReturn,
+  processRefund,
+  cancelReturnRequest,
+  generateInvoice,
+};
+
+export default {
   placeOrder,
   getOrders,
   loadOrderDetails,
@@ -840,4 +858,3 @@ module.exports = {
   cancelReturnRequest,
   generateInvoice,
 }
-

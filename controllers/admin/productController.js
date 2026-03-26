@@ -1,10 +1,12 @@
-const Product = require("../../models/productSchema")
-const Category = require("../../models/categorySchema")
-const sharp = require("sharp")
-const path = require("path")
-const fs = require("fs")
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from 'url';
 
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 const calculateEffectivePrice = async (product) => {
@@ -170,15 +172,6 @@ const getAllProducts = async (req, res) => {
       .populate("category")
       .exec();
 
-    // if (page === 1) {
-    //   console.log("First page products (newest to oldest):", 
-    //     productData.map(p => ({
-    //       name: p.productName,
-    //       createdAt: new Date(p.createdAt).toISOString()
-    //     }))
-    //   );
-    // }
-
     const count = await Product.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
     const category = await Category.find({ isListed: true });
@@ -205,8 +198,6 @@ const getAllProducts = async (req, res) => {
     res.render("admin-error");
   }
 };
-
-
 
 
 
@@ -465,7 +456,7 @@ const deleteProduct = async (req, res) => {
 }
 
 
-module.exports = {
+export {
   getProductAddPage,
   saveImage,
   addProducts,
@@ -478,10 +469,21 @@ module.exports = {
   editProduct,
   deleteSingleImage,
   deleteProduct,
-  calculateEffectivePrice
+  calculateEffectivePrice,
+};
 
-
-
-
-} 
-
+export default {
+  getProductAddPage,
+  saveImage,
+  addProducts,
+  getAllProducts,
+  addProductOffer,
+  removeProductOffer,
+  blockProduct,
+  unblockProduct,
+  getEditProduct,
+  editProduct,
+  deleteSingleImage,
+  deleteProduct,
+  calculateEffectivePrice,
+};

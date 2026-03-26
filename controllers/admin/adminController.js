@@ -1,9 +1,8 @@
-const User = require('../../models/userSchema');
-const Product = require('../../models/productSchema');
-const Order = require('../../models/orderSchema');
-
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+import User from '../../models/userSchema.js';
+import Product from '../../models/productSchema.js';
+import Order from '../../models/orderSchema.js';
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 
 const pageError = async (req, res) => {
@@ -365,7 +364,7 @@ const getSalesData = async (req, res) => {
 
 
 
-module.exports = {
+export default {
     loadLogin,
     login,
     loadDashboard,
@@ -373,7 +372,4 @@ module.exports = {
     logout,
     getTopSelling,
     getSalesData,
-    
-    
-
 }

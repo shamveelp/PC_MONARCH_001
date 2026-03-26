@@ -1,7 +1,7 @@
-const Transaction = require("../../models/transactionSchema")
-const Order = require("../../models/orderSchema")
-const User = require("../../models/userSchema")
-const Wallet = require("../../models/walletSchema")
+import Transaction from "../../models/transactionSchema.js";
+import Order from "../../models/orderSchema.js";
+import User from "../../models/userSchema.js";
+import Wallet from "../../models/walletSchema.js";
 
 
 const getAllTransactions = async (req, res) => {
@@ -327,11 +327,10 @@ const createManualTransaction = async (req, res) => {
   }
 }
 
-module.exports = {
+export default {
   getAllTransactions,
   getTransactionDetails,
   createTransaction,
   getTransactionStats,
   createManualTransaction,
 }
-

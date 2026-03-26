@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 const transactionSchema = new Schema({
     transactionId: {
@@ -83,4 +83,4 @@ transactionSchema.index({ userId: 1, createdAt: -1 });
 transactionSchema.index({ 'orders.orderId': 1 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
-module.exports = Transaction;
+export default Transaction;

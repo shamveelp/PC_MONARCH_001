@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
 const orderSchema = new Schema({
     orderId: {
@@ -122,4 +122,4 @@ const orderSchema = new Schema({
 });
 
 const Order = mongoose.model('Order', orderSchema);
-module.exports = Order;
+export default Order;

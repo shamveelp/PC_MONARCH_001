@@ -1,7 +1,7 @@
-const EventEmitter = require("events")
-const userBlockedEmitter = new EventEmitter()
+import EventEmitter from "events";
+export const userBlockedEmitter = new EventEmitter();
 
-const User = require("../../models/userSchema");
+import User from "../../models/userSchema.js";
 
 
 const customerInfo = async (req, res) => {
@@ -76,11 +76,9 @@ const customerUnblocked = async (req,res) => {
 
 
 
-module.exports = {
+export default {
     customerInfo,
     customerBlocked,
     customerUnblocked,
     userBlockedEmitter,
-    
-
 }

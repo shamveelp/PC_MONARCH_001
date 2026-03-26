@@ -1,18 +1,18 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const adminController = require('../controllers/admin/adminController');
-const customerController = require('../controllers/admin/customerController');
-const categoryController = require('../controllers/admin/categoryController');
-const productController = require('../controllers/admin/productController');
-const bannerController = require("../controllers/admin/bannerController");
-const orderController = require("../controllers/admin/orderController");
-const couponController = require('../controllers/admin/couponController');
-const salesController = require('../controllers/admin/salesController');
-const commentController = require('../controllers/admin/commentController');
-const transactionController = require('../controllers/admin/transactionController');
+import adminController from '../controllers/admin/adminController.js';
+import customerController from '../controllers/admin/customerController.js';
+import categoryController from '../controllers/admin/categoryController.js';
+import productController from '../controllers/admin/productController.js';
+import bannerController from "../controllers/admin/bannerController.js";
+import orderController from "../controllers/admin/orderController.js";
+import couponController from '../controllers/admin/couponController.js';
+import salesController from '../controllers/admin/salesController.js';
+import commentController from '../controllers/admin/commentController.js';
+import transactionController from '../controllers/admin/transactionController.js';
 
-const { adminAuth } = require('../middlewares/auth');
-const multer = require("multer");
+import { adminAuth } from '../middlewares/auth.js';
+import multer from "multer";
 const upload = multer();
 
 router.get('/pageerror', adminController.pageError);
@@ -129,7 +129,4 @@ router.use((req, res) => {
 });
 
 
-
-
-
-module.exports = router;
+export default router;

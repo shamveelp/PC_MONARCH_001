@@ -1,14 +1,13 @@
-const User = require("../../models/userSchema");
-const Address = require("../../models/addressSchema");
-const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
-// const securePassword = require("../../utils/securePassword");
-const env = require("dotenv").config();
-const session = require("express-session")
-const multer = require("multer")
-const sharp = require("sharp")
-const fs = require("fs")
-const path = require("path")
+import User from "../../models/userSchema.js";
+import Address from "../../models/addressSchema.js";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+import 'dotenv/config';
+import session from "express-session";
+import multer from "multer";
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
 
 
 function generateOtp(){
@@ -109,7 +108,7 @@ const forgotEmailValid = async (req,res) => {
 
     } catch (error) {
 
-        res.redirec("/pageNotFound")
+        res.redirect("/pageNotFound")
         
     }
 }
@@ -589,11 +588,7 @@ const deleteAddress = async (req,res) => {
 }
 
 
-
-
-
-
-module.exports = {
+export default {
     getForgotPassPage,
     forgotEmailValid,
     verifyForgotPassOtp,
@@ -613,12 +608,4 @@ module.exports = {
     verifyEmailOtp,
     updateEmail,
     changePassword,
-
-
-
-
-
-
-
-
 }

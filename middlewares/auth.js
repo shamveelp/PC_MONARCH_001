@@ -1,6 +1,5 @@
-const { userBlockedEmitter } = require("../controllers/admin/customerController")
-
-const User = require("../models/userSchema");
+import { userBlockedEmitter } from "../controllers/admin/customerController.js";
+import User from "../models/userSchema.js";
 
 const userAuth = (req, res, next) => {
     if (req.session.user) {
@@ -29,12 +28,7 @@ const userAuth = (req, res, next) => {
     }
   }
 
-
-  
-  module.exports = { userAuth}
-  
   userBlockedEmitter.on("userBlocked", (userId) => {
-    
     console.log(`User ${userId} has been blocked. Their session should be cleared.`)
   })
   
@@ -100,14 +94,10 @@ const ajaxAuth = (req, res, next) => {
 };
 
 
-
-
-
-module.exports = {
+export {
     userAuth,
     adminAuth,
     addCartWishlist,
     checkUserAuthWish,
     ajaxAuth
-    
 }

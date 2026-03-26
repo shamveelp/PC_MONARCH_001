@@ -1,22 +1,22 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const passport = require('passport');
-const userController = require('../controllers/user/userController');
-const profileController = require("../controllers/user/profileController")
-const productController = require("../controllers/user/productController")
-const cartController = require("../controllers/user/cartController")
-const wishlistController = require("../controllers/user/wishlistController")
-const checkoutController = require("../controllers/user/checkoutController")
-const orderController = require("../controllers/user/orderController")
-const couponController = require("../controllers/user/couponController")
-const walletController = require("../controllers/user/walletController")
-const staticController = require("../controllers/user/staticController")
-const commentController = require("../controllers/user/commentController")
-const multer = require("multer")
-const upload = require('../config/multer');
+import passport from 'passport';
+import userController from '../controllers/user/userController.js';
+import profileController from "../controllers/user/profileController.js";
+import productController from "../controllers/user/productController.js";
+import cartController from "../controllers/user/cartController.js";
+import wishlistController from "../controllers/user/wishlistController.js";
+import checkoutController from "../controllers/user/checkoutController.js";
+import orderController from "../controllers/user/orderController.js";
+import couponController from "../controllers/user/couponController.js";
+import walletController from "../controllers/user/walletController.js";
+import staticController from "../controllers/user/staticController.js";
+import commentController from "../controllers/user/commentController.js";
+import multer from "multer";
+import upload from '../config/multer.js';
 
-const { userAuth,addCartWishlist,checkUserAuthWish,ajaxAuth } = require('../middlewares/auth');
-const {resetPasswordMiddleware,blockLoggedInUsers, checkBlockedUser,checkLoggedIn,forgotPassLogout} = require("../middlewares/profileAuth")
+import { userAuth, addCartWishlist, checkUserAuthWish, ajaxAuth } from '../middlewares/auth.js';
+import { resetPasswordMiddleware, blockLoggedInUsers, checkBlockedUser, checkLoggedIn, forgotPassLogout } from "../middlewares/profileAuth.js";
 
 
 router.get('/pagenotfound', userController.pageNotFound);
@@ -30,11 +30,6 @@ router.post('/verify-otp', userController.verifyOtp);
 
 router.post('/resend-otp', userController.resendOtp);
 
-// router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/signup' }), (req, res) => {
-//     res.redirect('/');
-// });
 
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -169,4 +164,4 @@ router.use((req, res) => {
     res.status(404).redirect("/pageNotFound");
 });
 
-module.exports = router;
+export default router;

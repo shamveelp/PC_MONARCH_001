@@ -1,7 +1,7 @@
-const Order = require("../../models/orderSchema")
-const User = require("../../models/userSchema")
-const Product = require("../../models/productSchema")
-const processRefund = require("../user/orderController").processRefund
+import Order from "../../models/orderSchema.js";
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import { processRefund } from "../user/orderController.js";
 
 const getOrders = async (req, res) => {
   try {
@@ -191,7 +191,7 @@ const updateReturnStatus = async (req, res) => {
   }
 }
 
-module.exports = {
+export default {
   getOrders,
   getOrderDetails,
   updateOrderStatus,
@@ -199,4 +199,3 @@ module.exports = {
   handleReturnRequest,
   updateReturnStatus,
 }
-

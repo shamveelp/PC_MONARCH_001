@@ -1,8 +1,8 @@
-const Sale = require("../../models/salesSchema");
-const Order = require("../../models/orderSchema");
-const Product = require("../../models/productSchema");
-const PDFDocument = require('pdfkit');
-const ExcelJS = require('exceljs');
+import Sale from "../../models/salesSchema.js";
+import Order from "../../models/orderSchema.js";
+import Product from "../../models/productSchema.js";
+import PDFDocument from 'pdfkit';
+import ExcelJS from 'exceljs';
 
 
 const loadSalesPage = async (req, res) => {
@@ -113,8 +113,6 @@ const loadSalesPage = async (req, res) => {
 };
 
 
-
-  
 const generatePDF = async (res, salesData) => {
   const doc = new PDFDocument();
   
@@ -174,7 +172,6 @@ const generatePDF = async (res, salesData) => {
 };
 
 
-  
 const generateExcel = async (res, salesData) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Sales Report');
@@ -235,7 +232,12 @@ const createSaleRecord = async (order) => {
   }
 };
 
-module.exports = {
+export {
+    loadSalesPage,
+    createSaleRecord
+};
+
+export default {
   loadSalesPage,
   createSaleRecord
 };

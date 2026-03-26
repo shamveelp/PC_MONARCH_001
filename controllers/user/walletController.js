@@ -1,14 +1,16 @@
-const Wallet = require("../../models/walletSchema")
-const Transaction = require("../../models/transactionSchema")
-const User = require("../../models/userSchema")
-const Razorpay = require("razorpay")
-const crypto = require("crypto")
-const env = require("dotenv").config()
+import Wallet from "../../models/walletSchema.js";
+import Transaction from "../../models/transactionSchema.js";
+import User from "../../models/userSchema.js";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import 'dotenv/config';
+
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
+
 
 const loadWallet = async (req, res) => {
   try {
@@ -191,10 +193,9 @@ const withdrawMoney = async (req, res) => {
   }
 }
 
-module.exports = {
+export default {
   loadWallet,
   createRazorpayOrder,
   verifyPayment,
   withdrawMoney,
 }
-

@@ -1,20 +1,20 @@
-const express = require('express');
+import express from 'express';
 const app = express();
-const path = require('path');
-const session = require('express-session');
-const passport = require('./config/passport');
-const env = require('dotenv').config();
-const connectDB = require('./config/db');
-const userRouter = require('./routes/userRoutes');
-const adminRouter = require('./routes/adminRoutes');
-const hbs = require('hbs');
-const MongoStore = require("connect-mongo")
-const checkBlockedUser = require("./middlewares/profileAuth");
-const User = require("./models/userSchema")
+import path from 'path';
+import session from 'express-session';
+import passport from './config/passport.js';
+import 'dotenv/config';
+import connectDB from './config/db.js';
+import userRouter from './routes/userRoutes.js';
+import adminRouter from './routes/adminRoutes.js';
+import hbs from 'hbs';
+import MongoStore from "connect-mongo";
+import { checkBlockedUser } from "./middlewares/profileAuth.js";
+import User from "./models/userSchema.js";
+import { fileURLToPath } from 'url';
 
-
-
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 connectDB();
 
@@ -87,4 +87,4 @@ app.listen(PORT, () => {
 })
 
 
-module.exports = app;
+export default app;

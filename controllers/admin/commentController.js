@@ -1,4 +1,4 @@
-const Comment = require("../../models/commentSchema")
+import Comment from "../../models/commentSchema.js";
 
 const getAllComments = async (req, res) => {
   try {
@@ -89,13 +89,9 @@ const unblockComment  = async (req, res) => {
 }
 
 
-
-
-
-module.exports = {
+export default {
   getAllComments,
   deleteComment,
   blockComment,
   unblockComment,
-
 };

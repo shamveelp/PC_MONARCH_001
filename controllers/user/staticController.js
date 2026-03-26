@@ -1,4 +1,4 @@
-const User = require("../../models/userSchema");
+import User from "../../models/userSchema.js";
 
 
 const loadContact = async (req,res) => {
@@ -35,7 +35,7 @@ const loadAbout = async (req,res) => {
     }
 }
 
-module.exports = {
+export default {
     loadContact,
     loadAbout
 }
