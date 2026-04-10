@@ -58,6 +58,11 @@ const loadCheckoutPage = async (req, res) => {
       const shippingCharge = 0; // Free shipping
       const grandTotal = subtotal + shippingCharge;
 
+      const availableCoupons = await Coupon.find({ 
+          isList: true, 
+          expireOn: { $gt: new Date() } 
+      });
+
       res.render("checkout", {
           user,
           cartItems,
@@ -66,6 +71,7 @@ const loadCheckoutPage = async (req, res) => {
           grandTotal,
           userAddress: addressData,
           wallet: wallet || { balance: 0, refundAmount: 0, totalDebited: 0 },
+          availableCoupons,
       });
   } catch (error) {
       logger.error("Error in loadCheckoutPage:", error);
