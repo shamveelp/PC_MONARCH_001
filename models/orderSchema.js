@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
-import { v4 as uuidv4 } from 'uuid';
+import { generateOrderId } from '../utils/generateOrderId.js';
 
 const orderSchema = new Schema({
     orderId: {
         type: String,
-        default: () => uuidv4(),
+        default: generateOrderId,
         unique: true
     },
     userId: {
@@ -119,6 +119,21 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     }
+});
+
+orderSchema.pre('save', async function(next) {
+    if (this.isNew) {
+        let isUnique = false;
+        while (!isUnique) {
+            const existingOrder = await mongoose.models.Order.findOne({ orderId: this.orderId });
+            if (existingOrder) {
+                this.orderId = generateOrderId();
+            } else {
+                isUnique = true;
+            }
+        }
+    }
+    next();
 });
 
 const Order = mongoose.model('Order', orderSchema);
