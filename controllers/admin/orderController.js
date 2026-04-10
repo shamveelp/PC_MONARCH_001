@@ -50,6 +50,14 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cannot update cancelled order" })
     }
 
+    const statuses = ['pending', 'confirmed', 'shipped', 'delivered'];
+    const currentIndex = statuses.indexOf(order.status);
+    const newIndex = statuses.indexOf(status);
+
+    if (newIndex !== -1 && currentIndex !== -1 && newIndex < currentIndex) {
+      return res.status(400).json({ success: false, message: "Cannot revert order to a previous status" })
+    }
+
     order.status = status
     order.orderedItems[0].status = status
 

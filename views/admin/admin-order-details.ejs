@@ -204,7 +204,7 @@
                             <% } else if (!['cancelled', 'returned', 'return_requested', 'returning', 'delivered'].includes(order.status)) { %>
                                 <div class="mb-4">
                                     <h6>Order Status Actions</h6>
-                                    <button onclick="updateStatus('<%= order._id %>')" class="btn btn-primary me-2">
+                                    <button onclick="updateStatus('<%= order._id %>', '<%= order.status %>')" class="btn btn-primary me-2">
                                         Update Status
                                     </button>
                                     <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
@@ -340,16 +340,21 @@
 <script>
 let currentOrderId = null;
 
-async function updateStatus(orderId) {
+async function updateStatus(orderId, currentStatus) {
+    const statuses = ['pending', 'confirmed', 'shipped', 'delivered'];
+    const currentIndex = statuses.indexOf(currentStatus);
+    const availableStatuses = {};
+    
+    statuses.forEach((s, idx) => {
+        if (idx >= currentIndex) {
+            availableStatuses[s] = s.charAt(0).toUpperCase() + s.slice(1);
+        }
+    });
+
     const { value: status } = await Swal.fire({
         title: 'Update Order Status',
         input: 'select',
-        inputOptions: {
-            'pending': 'Pending',
-            'confirmed': 'Confirmed',
-            'shipped': 'Shipped',
-            'delivered': 'Delivered'
-        },
+        inputOptions: availableStatuses,
         inputPlaceholder: 'Select status',
         showCancelButton: true,
         inputValidator: (value) => {
