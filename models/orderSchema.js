@@ -81,6 +81,11 @@ const orderSchema = new Schema({
         enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returning', 'returned'],
         default: 'pending'
     },
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Success', 'Failed'],
+        default: 'Pending'
+    },
     cancelReason: {
         type: String
     },

@@ -650,8 +650,8 @@ function processCODOrder(orderData) {
 }
 
 function processRazorpayOrder(orderData) {
-    // First create order on server
-    fetch('/create-razorpay-order', {
+    // Hit placeOrder to save order to DB with pending status
+    fetch('/placeOrder', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -668,10 +668,10 @@ function processRazorpayOrder(orderData) {
                 name: 'PC Monarch',
                 image: 'img/pc-logo.png',
                 description: 'Purchase Description',
-                order_id: data.orderId,
+                order_id: data.orderId, // Razorpay Order ID
                 handler: function (response) {
                     // Handle successful payment
-                    verifyPayment(response, orderData);
+                    verifyPayment(response, data.dbOrderIds);
                 },
                 prefill: {
                     name: data.customerName,
@@ -683,6 +683,32 @@ function processRazorpayOrder(orderData) {
                 }
             };
             const rzp = new Razorpay(options);
+            
+            rzp.on('payment.failed', function (response){
+                fetch('/payment-failed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dbOrderIds: data.dbOrderIds })
+                }).then(() => {
+                    window.location.href = '/payment-failed';
+                });
+            });
+
+            // If user closes modal
+            var modalClosed = false;
+            options.modal = {
+                ondismiss: function() {
+                    modalClosed = true;
+                    fetch('/payment-failed', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dbOrderIds: data.dbOrderIds })
+                    }).then(() => {
+                        window.location.href = '/payment-failed';
+                    });
+                }
+            };
+
             rzp.open();
         } else {
             Swal.fire('Error', data.message || 'An error occurred while creating the order', 'error');
@@ -694,7 +720,7 @@ function processRazorpayOrder(orderData) {
     });
 }
 
-function verifyPayment(paymentResponse, orderData) {
+function verifyPayment(paymentResponse, dbOrderIds) {
     fetch('/verify-payment', {
         method: 'POST',
         headers: {
@@ -702,7 +728,7 @@ function verifyPayment(paymentResponse, orderData) {
         },
         body: JSON.stringify({
             paymentResponse,
-            orderData
+            dbOrderIds
         })
     })
     .then(response => response.json())

@@ -128,6 +128,10 @@ router.get("/order-details", userAuth, orderController.loadOrderDetails);
 
 router.post('/create-razorpay-order', userAuth, orderController.createRazorpayOrder);
 router.post('/verify-payment', userAuth, orderController.verifyPayment);
+router.post('/payment-failed', userAuth, orderController.paymentFailure);
+router.post('/repay-order', userAuth, orderController.repayOrder);
+router.get('/payment-success', userAuth, orderController.loadPaymentSuccess);
+router.get('/payment-failed', userAuth, orderController.loadPaymentFailed);
 
 router.get('/check-stock',userAuth, checkoutController.checkStock);
 

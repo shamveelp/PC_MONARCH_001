@@ -43,7 +43,11 @@ const distributeDiscount = (cartItems, totalDiscount) => {
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user
-    const { addressId, paymentMethod, couponCode } = req.body
+    let { addressId, paymentMethod, couponCode } = req.body
+
+    if (paymentMethod === "razorpay") {
+        paymentMethod = "online";
+    }
 
     const user = await User.findById(userId).populate({
       path: "cart.productId",
@@ -121,7 +125,7 @@ const placeOrder = async (req, res) => {
           discount: item.price * item.quantity - item.discountedPrice * item.quantity,
           finalAmount: item.discountedPrice * item.quantity + DELIVERY_CHARGE / discountedItems.length,
           address: selectedAddress,
-          status: "pending",
+          status: (paymentMethod === "cod" || paymentMethod === "wallet") ? "confirmed" : "pending",
           paymentMethod: paymentMethod,
           couponApplied: couponApplied,
           deliveryCharge: DELIVERY_CHARGE / discountedItems.length,
@@ -177,6 +181,26 @@ const placeOrder = async (req, res) => {
 
     // Clear cart
     await User.findByIdAndUpdate(userId, { $set: { cart: [] } })
+
+    if (paymentMethod === "online") {
+      const razorpayOrder = await razorpay.orders.create({
+        amount: finalAmount * 100,
+        currency: "INR",
+        receipt: `order_${Date.now()}`,
+      })
+
+      return res.json({
+        success: true,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+        orderId: razorpayOrder.id,
+        amount: finalAmount * 100,
+        currency: "INR",
+        customerName: user.name,
+        customerEmail: user.email,
+        customerPhone: user.phone,
+        dbOrderIds: orders.map(o => o._id),
+      })
+    }
 
     res.json({
       success: true,
@@ -614,71 +638,63 @@ const createRazorpayOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   try {
-    const { paymentResponse, orderData } = req.body
+    const { paymentResponse, dbOrderIds } = req.body
     const userId = req.session.user
 
     const sign = paymentResponse.razorpay_order_id + "|" + paymentResponse.razorpay_payment_id
     const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(sign).digest("hex")
 
     if (expectedSign !== paymentResponse.razorpay_signature) {
+      await Order.updateMany(
+        { _id: { $in: dbOrderIds } },
+        { $set: { paymentStatus: "Failed" } }
+      )
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
       })
     }
 
-    orderData.paymentMethod = "online"
+    const orders = await Order.find({ _id: { $in: dbOrderIds } });
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: "Orders not found" });
+    }
 
+    // Update orders to confirmed and paymentStatus to Success
+    for (const order of orders) {
+      order.status = "confirmed";
+      order.paymentStatus = "Success";
+      order.orderedItems[0].status = "confirmed";
+      await order.save();
+    }
 
-    const result = await placeOrder(
-      {
-        session: { user: userId },
-        body: orderData,
-      },
-      {
-        json: (data) => {
-          if (data.success) {
-            
-            const createTransactionRecord = async () => {
-              try {
-                const orders = await Order.find({
-                  orderId: { $in: data.orderIds },
-                })
+    const totalAmount = orders.reduce((sum, order) => sum + order.finalAmount, 0)
 
-                const totalAmount = orders.reduce((sum, order) => sum + order.finalAmount, 0)
+    try {
+      await Transaction.create({
+        userId: userId,
+        amount: totalAmount,
+        transactionType: "debit",
+        paymentMethod: "online",
+        paymentGateway: "razorpay",
+        gatewayTransactionId: paymentResponse.razorpay_payment_id,
+        status: "completed",
+        purpose: "purchase",
+        description: "Online payment for order",
+        orders: orders.map((order) => ({
+          orderId: order.orderId,
+          amount: order.finalAmount,
+        })),
+      })
+    } catch (txnError) {
+      logger.error("Error creating transaction record:", txnError);
+    }
 
-                await Transaction.create({
-                  userId: userId,
-                  amount: totalAmount,
-                  transactionType: "debit",
-                  paymentMethod: "online",
-                  paymentGateway: "razorpay",
-                  gatewayTransactionId: paymentResponse.razorpay_payment_id,
-                  status: "completed",
-                  purpose: "purchase",
-                  description: "Online payment for order",
-                  orders: orders.map((order) => ({
-                    orderId: order.orderId,
-                    amount: order.finalAmount,
-                  })),
-                })
-              } catch (error) {
-                logger.error("Error creating transaction record:", error)
-              }
-            }
-
-            createTransactionRecord()
-          }
-
-          res.json(data)
-        },
-        status: (code) => {
-          return {
-            json: (data) => res.status(code).json(data),
-          }
-        },
-      },
-    )
+    res.json({
+      success: true,
+      orderIds: orders.map(o => o.orderId),
+      message: "Payment verified successfully"
+    })
   } catch (error) {
     logger.error("Error in verifyPayment:", error)
     res.status(500).json({
@@ -686,6 +702,90 @@ const verifyPayment = async (req, res) => {
       message: "Payment verification failed",
     })
   }
+}
+
+const paymentFailure = async (req, res) => {
+  try {
+      const { dbOrderIds } = req.body;
+      if (dbOrderIds && dbOrderIds.length > 0) {
+        await Order.updateMany(
+          { _id: { $in: dbOrderIds } },
+          { $set: { paymentStatus: "Failed" } }
+        )
+      }
+      res.json({ success: true, message: "Updated payment status to Failed" });
+  } catch (error) {
+      logger.error("Error in paymentFailure:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+const repayOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const userId = req.session.user;
+
+    const order = await Order.findOne({ _id: orderId, userId: userId });
+    
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Order cannot be repaid" });
+    }
+
+    const timePassedMs = Date.now() - new Date(order.createdOn).getTime();
+    if (timePassedMs > 15 * 60 * 1000) {
+      // Past 15 minutes
+      // Let's cancel the order to free stock
+      order.status = "cancelled";
+      order.cancelReason = "Payment timeout";
+      order.orderedItems[0].status = "cancelled";
+      await order.save();
+      
+      // return stock
+      await Product.findByIdAndUpdate(order.orderedItems[0].product, {
+        $inc: { quantity: order.orderedItems[0].quantity },
+      })
+      return res.status(400).json({ success: false, message: "Payment time limit exceeded (15 mins). Order cancelled." });
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.finalAmount * 100,
+      currency: "INR",
+      receipt: `repay_${order.orderId}`,
+    })
+
+    const user = await User.findById(userId);
+
+    res.json({
+      success: true,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      razorpayOrderId: razorpayOrder.id,
+      amount: order.finalAmount * 100,
+      currency: "INR",
+      customerName: user.name,
+      customerEmail: user.email,
+      customerPhone: user.phone,
+      dbOrderId: order._id
+    })
+
+  } catch (error) {
+    logger.error("Error in repayOrder:", error)
+    res.status(500).json({
+      success: false,
+      message: "Failed to initiate payment",
+    })
+  }
+}
+
+const loadPaymentSuccess = async (req, res) => {
+    res.render("payment-success");
+}
+
+const loadPaymentFailed = async (req, res) => {
+    res.render("payment-failed");
 }
 
 const placeWalletOrder = async (req, res) => {
@@ -755,14 +855,15 @@ const placeWalletOrder = async (req, res) => {
               quantity: item.quantity,
               price: item.discountedPrice,
               regularPrice: product.regularPrice,
-              status: "pending",
+              status: "confirmed",
             },
           ],
           totalPrice: item.price * item.quantity,
           discount: item.price * item.quantity - item.discountedPrice * item.quantity,
           finalAmount: item.discountedPrice * item.quantity + DELIVERY_CHARGE / discountedItems.length,
           address: selectedAddress,
-          status: "pending",
+          status: "confirmed",
+          paymentStatus: "Success",
           paymentMethod: "wallet",
           couponApplied: couponApplied,
           deliveryCharge: DELIVERY_CHARGE / discountedItems.length,
@@ -844,6 +945,10 @@ export {
   processRefund,
   cancelReturnRequest,
   generateInvoice,
+  repayOrder,
+  loadPaymentSuccess,
+  loadPaymentFailed,
+  paymentFailure
 };
 
 export default {
@@ -858,4 +963,8 @@ export default {
   processRefund,
   cancelReturnRequest,
   generateInvoice,
+  repayOrder,
+  loadPaymentSuccess,
+  loadPaymentFailed,
+  paymentFailure
 }

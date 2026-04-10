@@ -1,0 +1,40 @@
+<%- include("../../views/partials/user/header") %>
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+   <div class="container">
+       <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+           <div class="col-first">
+               <h1>Payment Failed</h1>
+               <nav class="d-flex align-items-center">
+                   <a href="/">Home<span class="lnr lnr-arrow-right"></span></a>
+                   <a href="/orders">Orders</a>
+               </nav>
+           </div>
+       </div>
+   </div>
+</section>
+<!-- End Banner Area -->
+
+<div class="container my-5 text-center">
+   <div class="row justify-content-center">
+       <div class="col-md-8">
+           <div class="card shadow border-0">
+               <div class="card-body p-5">
+                   <i class="fa fa-times-circle text-danger" style="font-size: 80px;"></i>
+                   <h2 class="mt-4 mb-3 text-danger">Payment Failed!</h2>
+                   <p class="lead text-muted mb-4">
+                       Unfortunately, we couldn't process your payment. Don't worry, your order is saved. 
+                       You have exactly 15 minutes to complete the payment for this order from the orders page, or it will be abandoned.
+                   </p>
+                   <div class="d-flex justify-content-center gap-3">
+                       <a href="/orders" class="btn btn-primary btn-lg mt-3 mx-2">Go to My Orders</a>
+                       <a href="/shop" class="btn btn-outline-danger btn-lg mt-3 mx-2">Back to Shop</a>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
