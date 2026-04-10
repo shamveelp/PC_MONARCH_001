@@ -18,6 +18,7 @@ const __dirname = path.dirname(__filename);
 
 connectDB();
 
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
