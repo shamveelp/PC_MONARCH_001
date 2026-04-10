@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Product from "../../models/productSchema.js";
 import Category from "../../models/categorySchema.js";
 import User from "../../models/userSchema.js";
@@ -41,7 +42,7 @@ const productDetails = async (req,res) => {
 
     } catch (error) {
         
-        console.error("Error for fetching product details",error)
+        logger.error("Error for fetching product details",error)
         res.redirect("/pageNotFound")
     }
 }

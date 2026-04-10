@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 import User from "../models/userSchema.js";
 
 const resetPasswordMiddleware = (req, res, next) => {
@@ -26,7 +27,7 @@ const checkBlockedUser = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        console.error("Error checking blocked user:", error);
+        logger.error("Error checking blocked user:", error);
         res.status(500).send('Server Error');
     }
 };

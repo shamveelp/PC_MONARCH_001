@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Sale from "../../models/salesSchema.js";
 import Order from "../../models/orderSchema.js";
 import Product from "../../models/productSchema.js";
@@ -104,7 +105,7 @@ const loadSalesPage = async (req, res) => {
   
       res.render('sales-report', { salesData });
   } catch (error) {
-      console.error('Error in loadSalesPage:', error);
+      logger.error('Error in loadSalesPage:', error);
       res.status(500).render('admin/pageerror', { 
           message: 'Error loading sales report', 
           error: error.message 
@@ -227,7 +228,7 @@ const createSaleRecord = async (order) => {
     await sale.save();
     return sale;
   } catch (error) {
-    console.error('Error creating sale record:', error);
+    logger.error('Error creating sale record:', error);
     throw error;
   }
 };

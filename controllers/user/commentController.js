@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Comment from '../../models/commentSchema.js';
 
 const addComment = async (req, res) => {
@@ -52,7 +53,7 @@ const addComment = async (req, res) => {
       message: 'Comment added successfully'
     });
   } catch (error) {
-    console.error('Error in addComment:', error);
+    logger.error('Error in addComment:', error);
     res.status(500).json({
       status: false,
       message: 'Internal server error'
@@ -93,7 +94,7 @@ const getProductComments = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in getProductComments:', error);
+    logger.error('Error in getProductComments:', error);
     res.status(500).json({
       status: false,
       message: 'Internal server error'
@@ -122,7 +123,7 @@ const deleteComment = async (req, res) => {
       message: 'Comment deleted successfully'
     });
   } catch (error) {
-    console.error('Error in deleteComment:', error);
+    logger.error('Error in deleteComment:', error);
     res.status(500).json({
       status: false,
       message: 'Internal server error'

@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Product from "../../models/productSchema.js";
 import Category from "../../models/categorySchema.js";
 import sharp from "sharp";
@@ -30,7 +31,7 @@ const getProductAddPage = async (req, res) => {
       cat: category,
     })
   } catch (error) {
-    console.error("Error loading product add page:", error)
+    logger.error("Error loading product add page:", error)
     res.status(500).json({ success: false, message: "Error loading product add page" })
   }
 }
@@ -52,7 +53,7 @@ const saveImage = async (req, res) => {
 
     return res.status(200).json({ success: true, message: "Image saved successfully", filename: uploadResult.secure_url });
   } catch (error) {
-    console.error("Error saving image:", error);
+    logger.error("Error saving image:", error);
     return res.status(500).json({ success: false, message: "Error saving image" });
   }
 };
@@ -124,7 +125,7 @@ const addProducts = async (req, res) => {
     await newProduct.save();
     return res.status(200).json({ success: true, message: "Product added successfully" });
   } catch (error) {
-    console.error("Error saving product:", error);
+    logger.error("Error saving product:", error);
     return res.status(500).json({ success: false, message: "Error saving product" });
   }
 };
@@ -171,7 +172,7 @@ const getAllProducts = async (req, res) => {
       res.render("admin-error");
     }
   } catch (error) {
-    console.error("Error fetching products:", error);
+    logger.error("Error fetching products:", error);
     res.render("admin-error");
   }
 };
@@ -193,7 +194,7 @@ const addProductOffer = async (req, res) => {
 
     res.json({ status: true, message: "Offer added successfully" });
   } catch (error) {
-    console.error("Error in addProductOffer:", error);
+    logger.error("Error in addProductOffer:", error);
     res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
@@ -213,7 +214,7 @@ const removeProductOffer = async (req, res) => {
 
     res.json({ status: true, message: "Offer removed successfully" });
   } catch (error) {
-    console.error("Error in removeProductOffer:", error);
+    logger.error("Error in removeProductOffer:", error);
     res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
@@ -260,7 +261,7 @@ const getEditProduct = async (req, res) => {
       cat: categories,
     })
   } catch (error) {
-    console.error("Error in getEditProduct:", error)
+    logger.error("Error in getEditProduct:", error)
     res.redirect("/pageerror")
   }
 }
@@ -358,7 +359,7 @@ const editProduct = async (req, res) => {
                   const fullPath = path.join(process.cwd(), 'public', oldImage);
                   if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
                 } catch (e) {
-                  console.error('Local unlink error:', e);
+                  logger.error('Local unlink error:', e);
                 }
               }
               product.productImage[i - 1] = imageURL;
@@ -373,7 +374,7 @@ const editProduct = async (req, res) => {
 
     res.json({ success: true, message: "Product updated successfully" });
   } catch (error) {
-    console.error("Error in editProduct:", error);
+    logger.error("Error in editProduct:", error);
     res.status(500).json({ success: false, message: "An error occurred while updating the product" });
   }
 };
@@ -397,12 +398,12 @@ const deleteSingleImage = async (req, res) => {
     if (imageNameToServer && imageNameToServer.startsWith('http')) {
       const publicId = imageNameToServer.split('/').pop().split('.')[0];
       await cloudinary.uploader.destroy(`product-images/${publicId}`);
-      console.log(`Image ${publicId} deleted from Cloudinary successfully`);
+      logger.info(`Image ${publicId} deleted from Cloudinary successfully`);
     }
 
     res.json({ status: true, message: "Image deleted successfully" });
   } catch (error) {
-    console.error("Error in deleteSingleImage:", error);
+    logger.error("Error in deleteSingleImage:", error);
     res.status(500).json({ status: false, message: "An error occurred while deleting the image" });
   }
 };
@@ -426,7 +427,7 @@ const deleteProduct = async (req, res) => {
 
       res.redirect('/admin/products'); 
   } catch (err) {
-      console.error(err);
+      logger.error(err);
       res.status(500).json({ status: false, message: 'Server Error' });
   }
 }

@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 // Image handling and cropping functionality
 let croppers = {};
 
@@ -129,7 +130,7 @@ async function handleFormSubmit(formElement, isEdit = false) {
             });
         }
     } catch (error) {
-        console.error('Error:', error);
+        logger.error('Error:', error);
         Swal.fire({
             title: 'Error!',
             text: 'An unexpected error occurred',

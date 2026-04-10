@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Comment from "../../models/commentSchema.js";
 
 const getAllComments = async (req, res) => {
@@ -23,7 +24,7 @@ const getAllComments = async (req, res) => {
       totalComments: total
     });
   } catch (error) {
-    console.error('Error in getAllComments:', error);
+    logger.error('Error in getAllComments:', error);
     res.redirect('/admin/pageerror');
   }
 };
@@ -38,7 +39,7 @@ const deleteComment = async (req, res) => {
       message: 'Comment deleted successfully'
     });
   } catch (error) {
-    console.error('Error in deleteComment:', error);
+    logger.error('Error in deleteComment:', error);
     res.status(500).json({
       status: false,
       message: 'Internal server error'
@@ -58,7 +59,7 @@ const blockComment = async (req, res) => {
       message: 'Comment blocked successfully'
     });
   } catch (error) {
-    console.error('Error in blockComment:', error);
+    logger.error('Error in blockComment:', error);
     res.status(500).json({
       status: false,
       message: 'Internal server error'
@@ -79,7 +80,7 @@ const unblockComment  = async (req, res) => {
         })
         
     } catch (error) {
-        console.error('Error in unblockComment:', error);
+        logger.error('Error in unblockComment:', error);
         res.status(500).json({
             status: false,
             message: 'Internal server error'

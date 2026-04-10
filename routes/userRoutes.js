@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 import express from 'express';
 const router = express.Router();
 import passport from 'passport';
@@ -41,7 +42,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
         req.session.user = req.user._id;
         res.redirect('/');
     } catch (error) {
-        console.log("Google login error:", error);
+        logger.info("Google login error:", error);
         res.redirect('/signup');
     }
 });

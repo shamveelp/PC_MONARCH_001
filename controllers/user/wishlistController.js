@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from "../../models/userSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
 import Product from "../../models/productSchema.js";
@@ -20,7 +21,7 @@ const loadWishlist = async (req,res) => {
 
     } catch (error) {
 
-        console.error('Error:',error)
+        logger.error('Error:',error)
         res.redirect("/pageNotFound")
         
     }
@@ -57,7 +58,7 @@ const addToWishlist = async (req, res) => {
         return res.status(200).json({ status: true, message: "Product Added to Wishlist" });
 
     } catch (error) {
-        console.error("Error in addToWishlist:", error);
+        logger.error("Error in addToWishlist:", error);
         return res.status(500).json({ status: false, message: "Server error" });
     }
 };
@@ -77,7 +78,7 @@ const removeProduct = async (req,res) => {
         
     } catch (error) {
 
-        console.error(error);
+        logger.error(error);
         return res.status(500).json({status:false,message:"Server Error"})
         
     }

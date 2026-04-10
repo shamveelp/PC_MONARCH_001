@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from "../../models/userSchema.js";
 import Address from "../../models/addressSchema.js";
 import nodemailer from "nodemailer";
@@ -44,13 +45,13 @@ const sendVerificationEmail = async (email,otp) => {
         }
 
         const info = await transporter.sendMail(mailOption);
-        console.log("Email sent:",info.messageId)
+        logger.info("Email sent:",info.messageId)
 
         return true;
 
     } catch (error) {
 
-        console.error("error sending email",error);
+        logger.error("error sending email",error);
         return false
         
     }
@@ -96,7 +97,7 @@ const forgotEmailValid = async (req,res) => {
                 req.session.email = email;
                 res.render("forgotPass-otp");
                 
-                console.log("OTP: ",otp)
+                logger.info("OTP: ",otp)
             } else{
                 res.json({success:false,message:"Failed to send OTP. PLease try again"})
             }
@@ -150,10 +151,10 @@ const resendOtp = async (req,res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
         const email = req.session.email;
-        console.log("Resending otp to email",email);
+        logger.info("Resending otp to email",email);
         const emailSent = await sendVerificationEmail(email,otp);
         if(emailSent){
-            console.log("Resend Otp: ",otp);
+            logger.info("Resend Otp: ",otp);
             res.status(200).json({success:true,message:"Resend OTP Successful"})
 
             
@@ -161,7 +162,7 @@ const resendOtp = async (req,res) => {
 
     } catch (error) {
 
-        console.error("Error in rend otp",error);
+        logger.error("Error in rend otp",error);
         res.status(500).json({success:false,message:"Internal server errro"})
         
     }
@@ -208,12 +209,12 @@ const userProfile = async (req,res) => {
 
         })
 
-        // console.log(userData.email);
+        // logger.info(userData.email);
         
 
     } catch (error) {
 
-        console.error('Error:',error)
+        logger.error('Error:',error)
         res.redirect("/pageNotFound")
         
     }
@@ -248,7 +249,7 @@ const changeEmailValid = async (req,res) => {
                 req.session.userdata = req.body;
                 req.session.email = email;
                 res.render("change-email-otp");
-                console.log(`Email Sent : ${email}, Otp: ${otp}`)
+                logger.info(`Email Sent : ${email}, Otp: ${otp}`)
             }else {
                 res.json("email-error")
             }
@@ -353,7 +354,7 @@ const updateEmail = async (req,res) => {
             message: 'Profile updated successfully'
         });
     } catch (error) {
-        console.error('Error updating profile:', error);
+        logger.error('Error updating profile:', error);
         res.status(500).json({
             success: false,
             message: 'An error occurred while updating your profile'
@@ -399,7 +400,7 @@ const changePassword = async (req, res) => {
 
         res.json({ success: true, message: 'Password changed successfully.' });
     } catch (error) {
-        console.error('Error changing password:', error);
+        logger.error('Error changing password:', error);
         res.status(500).json({ success: false, message: 'An error occurred while changing the password.' });
     }
 };
@@ -421,7 +422,7 @@ const loadAddressPage = async (req,res) => {
 
     } catch (error) {
 
-        console.error("Error in Address loading",error);
+        logger.error("Error in Address loading",error);
         res.redirect("/pageNotFound");
         
     }
@@ -470,7 +471,7 @@ const postAddAddress = async (req,res) => {
 
     } catch (error) {
 
-        console.error("Error adding address",error)
+        logger.error("Error adding address",error)
 
         res.redirect("/pageNotFound")
         
@@ -507,7 +508,7 @@ const editAddress = async (req,res) => {
 
     } catch (error) {
 
-        console.error("Error in edit Address",error)
+        logger.error("Error in edit Address",error)
         res.redirect("/pageNotFound")
         
     }
@@ -550,7 +551,7 @@ const postEditAddress = async (req,res) => {
         
     } catch (error) {
 
-        console.error("Error in editing address",error)
+        logger.error("Error in editing address",error)
         res.redirect("/pageNotFound")
         
     }
@@ -582,7 +583,7 @@ const deleteAddress = async (req,res) => {
 
     } catch (error) {
 
-        console.error("Error in deleting in address",error)
+        logger.error("Error in deleting in address",error)
         res.redirect("/pageNotFound")
         
     }
@@ -618,7 +619,7 @@ const updateProfileImage = async (req, res) => {
                 const publicId = user.profilePicture.split('/').pop().split('.')[0];
                 await cloudinary.uploader.destroy(`profile-pictures/${publicId}`);
             } catch (err) {
-                console.error('Error deleting old profile image:', err);
+                logger.error('Error deleting old profile image:', err);
             }
         }
 
@@ -632,7 +633,7 @@ const updateProfileImage = async (req, res) => {
             imageUrl: uploadResult.secure_url
         });
     } catch (error) {
-        console.error('Error updating profile image:', error);
+        logger.error('Error updating profile image:', error);
         res.status(500).json({
             success: false,
             message: 'An error occurred while updating your profile image'

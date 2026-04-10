@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Transaction from "../../models/transactionSchema.js";
 import Order from "../../models/orderSchema.js";
 import User from "../../models/userSchema.js";
@@ -112,7 +113,7 @@ const getAllTransactions = async (req, res) => {
         title: "Transaction Management",
       })
   } catch (error) {
-    console.error("Error fetching transactions:", error)
+    logger.error("Error fetching transactions:", error)
     res.status(500).send("Internal Server Error")
   }
 }
@@ -141,7 +142,7 @@ const getTransactionDetails = async (req, res) => {
       title: "Transaction Details",
     })
   } catch (error) {
-    console.error("Error fetching transaction details:", error)
+    logger.error("Error fetching transaction details:", error)
     res.status(500).send("Internal Server Error")
   }
 }
@@ -153,7 +154,7 @@ const createTransaction = async (transactionData) => {
     await transaction.save()
     return transaction
   } catch (error) {
-    console.error("Error creating transaction:", error)
+    logger.error("Error creating transaction:", error)
     throw error
   }
 }
@@ -266,7 +267,7 @@ const getTransactionStats = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Error getting transaction stats:", error)
+    logger.error("Error getting transaction stats:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -322,7 +323,7 @@ const createManualTransaction = async (req, res) => {
 
     res.json({ success: true, message: "Transaction created successfully", transaction })
   } catch (error) {
-    console.error("Error creating manual transaction:", error)
+    logger.error("Error creating manual transaction:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }

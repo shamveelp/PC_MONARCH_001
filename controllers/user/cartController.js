@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from "../../models/userSchema.js";
 import Product from "../../models/productSchema.js";
 import Category from "../../models/categorySchema.js";
@@ -68,7 +69,7 @@ const getCartPage = async (req, res) => {
       grandTotal
     });
   } catch (error) {
-    console.error('Error in getCartPage:', error);
+    logger.error('Error in getCartPage:', error);
     res.status(500).send('An error occurred while loading the cart');
   }
 };
@@ -126,7 +127,7 @@ const addToCart = async (req, res) => {
       cartLength: user.cart.length 
     });
   } catch (error) {
-    console.error('Error in addToCart:', error);
+    logger.error('Error in addToCart:', error);
     return res.status(500).json({ status: false, message: "An error occurred while adding to cart" });
   }
 };
@@ -204,7 +205,7 @@ const changeQuantity = async (req, res) => {
       grandTotal: grandTotal 
     });
   } catch (error) {
-    console.error('Error in changeQuantity:', error);
+    logger.error('Error in changeQuantity:', error);
     return res.status(500).json({ status: false, message: "An error occurred while updating the cart" });
   }
 };
@@ -231,7 +232,7 @@ const deleteProduct = async (req, res) => {
 
     return res.json({ status: true, message: "Product removed from cart" });
   } catch (error) {
-    console.error('Error in deleteProduct:', error);
+    logger.error('Error in deleteProduct:', error);
     return res.status(500).json({ status: false, message: "An error occurred while removing the product from cart" });
   }
 };

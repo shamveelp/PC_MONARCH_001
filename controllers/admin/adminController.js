@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from '../../models/userSchema.js';
 import Product from '../../models/productSchema.js';
 import Order from '../../models/orderSchema.js';
@@ -35,7 +36,7 @@ const login = async (req, res) => {
             return res.redirect('/admin/login');
         }
     } catch (error) {
-        console.log("Login Error", error);
+        logger.info("Login Error", error);
         return res.redirect('/pageerror');
     }
 };
@@ -74,7 +75,7 @@ const loadDashboard = async (req, res) => {
 
       res.render("dashboard", { dashboardData })
     } catch (error) {
-      console.error("Dashboard Error:", error)
+      logger.error("Dashboard Error:", error)
       res.redirect("/pageerror")
     }
   } else {
@@ -116,7 +117,7 @@ const getTopSellingProducts = async (limit = 5) => {
 
     return enrichedProducts
   } catch (error) {
-    console.error("Error getting top products:", error)
+    logger.error("Error getting top products:", error)
     return []
   }
 }
@@ -139,7 +140,7 @@ const getRecentOrders = async (limit = 5) => {
 
     return ordersWithCustomers
   } catch (error) {
-    console.error("Error getting recent orders:", error)
+    logger.error("Error getting recent orders:", error)
     return []
   }
 }
@@ -211,7 +212,7 @@ const getSalesDataHelper = async (period = "yearly") => {
 
     return { labels, data }
   } catch (error) {
-    console.error("Error getting sales data:", error)
+    logger.error("Error getting sales data:", error)
     return { labels: [], data: [] }
   }
 }
@@ -239,7 +240,7 @@ const getOrderStatusCounts = async () => {
 
     return statusCounts
   } catch (error) {
-    console.error("Error getting order status counts:", error)
+    logger.error("Error getting order status counts:", error)
     return { Delivered: 0, Pending: 0, Shipped: 0, Cancelled: 0, Returned: 0 }
   }
 }
@@ -253,7 +254,7 @@ const logout = async (req, res) => {
         }
         res.redirect('/admin/login'); 
     } catch (error) {
-        console.log('Logout Error', error);
+        logger.info('Logout Error', error);
         res.redirect('/pageerror');
     }
 };
@@ -343,7 +344,7 @@ const getTopSelling = async (req, res) => {
       res.json({ products: enrichedProducts })
     }
   } catch (error) {
-    console.error("Error in getTopSelling API:", error)
+    logger.error("Error in getTopSelling API:", error)
     res.status(500).json({ error: "Internal server error" })
   }
 }
@@ -355,7 +356,7 @@ const getSalesData = async (req, res) => {
     const salesData = await getSalesDataHelper(period)
     res.json(salesData)
   } catch (error) {
-    console.error("Error in getSalesData API:", error)
+    logger.error("Error in getSalesData API:", error)
     res.status(500).json({ error: "Internal server error" })
   }
 }

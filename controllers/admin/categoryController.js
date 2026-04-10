@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Category from "../../models/categorySchema.js";
 import Product from "../../models/productSchema.js";
 import { calculateEffectivePrice } from "./productController.js";
@@ -32,7 +33,7 @@ const addCategory = async (req, res) => {
     
     res.status(201).json({ success: true, message: "Category added successfully", category: savedCategory })
   } catch (error) {
-    console.error("Error in addCategory:", error)
+    logger.error("Error in addCategory:", error)
     res.status(500).json({ success: false, message: "Failed to add category", error: error.message })
   }
 }
@@ -58,7 +59,7 @@ const addCategoryOffer = async (req, res) => {
 
     res.json({ status: true, message: "Offer added successfully" });
   } catch (error) {
-    console.error("Error in addCategoryOffer:", error);
+    logger.error("Error in addCategoryOffer:", error);
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
@@ -102,7 +103,7 @@ const categoryInfo = async (req, res) => {
       })
     }
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     if (req.xhr || req.headers.accept.indexOf("json") > -1) {
       res.status(500).json({ error: "An error occurred while fetching categories" })
     } else {
@@ -129,7 +130,7 @@ const removeCategoryOffer = async (req, res) => {
 
     res.json({ status: true, message: "Offer removed successfully" });
   } catch (error) {
-    console.error("Error in removeCategoryOffer:", error);
+    logger.error("Error in removeCategoryOffer:", error);
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
@@ -140,7 +141,7 @@ const getListCategory = async (req, res) => {
     await Category.findByIdAndUpdate(id, { isListed: false })
     res.json({ success: true, message: "Category unlisted successfully" })
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     res.status(500).json({ success: false, message: "Failed to unlist category" })
   }
 }
@@ -151,7 +152,7 @@ const getUnlistCategory = async (req, res) => {
     await Category.findByIdAndUpdate(id, { isListed: true })
     res.json({ success: true, message: "Category listed successfully" })
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     res.status(500).json({ success: false, message: "Failed to list category" })
   }
 }
@@ -165,7 +166,7 @@ const getEditCategory = async (req, res) => {
     }
     res.json({ success: true, category })
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     res.status(500).json({ success: false, message: "Failed to fetch category" })
   }
 }
@@ -180,7 +181,7 @@ const editCategory = async (req, res) => {
     }
     res.json({ success: true, message: "Category updated successfully" })
   } catch (error) {
-    console.error(error)
+    logger.error(error)
     res.status(500).json({ success: false, message: "Failed to update category" })
   }
 }
@@ -209,7 +210,7 @@ const editCategoryOffer = async (req, res) => {
 
     res.json({ status: true, message: "Offer updated successfully" });
   } catch (error) {
-    console.error("Error in editCategoryOffer:", error);
+    logger.error("Error in editCategoryOffer:", error);
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
@@ -224,7 +225,7 @@ const deleteCategory = async (req, res) => {
       }
       res.json({ success: true, message: "Category deleted successfully" })
     } catch (error) {
-      console.error("Error in deleteCategory:", error)
+      logger.error("Error in deleteCategory:", error)
       res.status(500).json({ success: false, message: "Failed to delete category" })
     }
   }

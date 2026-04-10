@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from "../../models/userSchema.js";
 import Product from "../../models/productSchema.js";
 import Category from "../../models/categorySchema.js";
@@ -67,7 +68,7 @@ const loadCheckoutPage = async (req, res) => {
           wallet: wallet || { balance: 0, refundAmount: 0, totalDebited: 0 },
       });
   } catch (error) {
-      console.error("Error in loadCheckoutPage:", error);
+      logger.error("Error in loadCheckoutPage:", error);
       res.redirect("/pageNotFound");
   }
 };
@@ -106,7 +107,7 @@ const postAddAddressCheckout = async (req, res) => {
 
         res.redirect("/checkout");
     } catch (error) {
-        console.error("Error adding address", error);
+        logger.error("Error adding address", error);
         res.redirect("/pageNotFound");
     }
 };
@@ -136,7 +137,7 @@ const applyCoupon = async (req, res) => {
 
         res.json({ success: true, coupon: coupon });
     } catch (error) {
-        console.error('Error applying coupon:', error);
+        logger.error('Error applying coupon:', error);
         res.status(500).json({ success: false, message: 'An error occurred while applying the coupon' });
     }
 };
@@ -191,7 +192,7 @@ const checkStock = async (req, res) => {
             items: stockChanges
         });
     } catch (error) {
-        console.error("Error checking stock:", error);
+        logger.error("Error checking stock:", error);
         res.status(500).json({
             success: false,
             message: "Error checking stock availability"

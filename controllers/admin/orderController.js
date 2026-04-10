@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Order from "../../models/orderSchema.js";
 import User from "../../models/userSchema.js";
 import Product from "../../models/productSchema.js";
@@ -12,7 +13,7 @@ const getOrders = async (req, res) => {
       title: "Order Management",
     })
   } catch (error) {
-    console.error("Error fetching orders:", error)
+    logger.error("Error fetching orders:", error)
     res.status(500).send("Internal Server Error")
   }
 }
@@ -31,7 +32,7 @@ const getOrderDetails = async (req, res) => {
       title: "Order Details",
     })
   } catch (error) {
-    console.error("Error fetching order details:", error)
+    logger.error("Error fetching order details:", error)
     res.status(500).send("Internal Server Error")
   }
 }
@@ -61,7 +62,7 @@ const updateOrderStatus = async (req, res) => {
     await order.save()
     res.json({ success: true, message: "Order status updated successfully" })
   } catch (error) {
-    console.error("Error updating order status:", error)
+    logger.error("Error updating order status:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -101,7 +102,7 @@ const cancelOrder = async (req, res) => {
       res.status(400).json({ success: false, message: "Order cannot be cancelled" })
     }
   } catch (error) {
-    console.error("Error cancelling order:", error)
+    logger.error("Error cancelling order:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -136,7 +137,7 @@ const handleReturnRequest = async (req, res) => {
       message: `Return request ${action}d successfully`,
     })
   } catch (error) {
-    console.error("Error handling return request:", error)
+    logger.error("Error handling return request:", error)
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -183,7 +184,7 @@ const updateReturnStatus = async (req, res) => {
       message: "Return status updated successfully",
     })
   } catch (error) {
-    console.error("Error updating return status:", error)
+    logger.error("Error updating return status:", error)
     res.status(500).json({
       success: false,
       message: "Internal server error",

@@ -1,3 +1,4 @@
+import logger from './utils/logger.js';
 import express from 'express';
 const app = express();
 import path from 'path';
@@ -77,7 +78,7 @@ app.use(async (req, res, next) => {
       }
       next();
   } catch (error) {
-      console.error("Error checking blocked user:", error);
+      logger.error("Error checking blocked user:", error);
       res.status(500).send('Server Error');
   }
 });
@@ -86,7 +87,7 @@ app.use(async (req, res, next) => {
 
 const PORT = process.env.PORT || 3999;
 app.listen(PORT, () => {
-    console.log('Server is running on port http://localhost:3999');
+    logger.info('Server is running on port http://localhost:3999');
 })
 
 

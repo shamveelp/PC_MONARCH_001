@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Coupon from "../../models/couponSchema.js";
 import mongoose from "mongoose";
 
@@ -102,7 +103,7 @@ const updateCoupon = async (req, res) => {
 
         res.json({ message: "Coupon updated successfully", coupon: updatedCoupon });
     } catch (error) {
-        console.error("Error updating coupon:", error);
+        logger.error("Error updating coupon:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -115,7 +116,7 @@ const deleteCoupon = async (req,res) => {
         res.status(200).send({success:true,message:"Coupon deleted successfully"})
 
     } catch (error) {
-        console.error("Error Deleting Coupon",error)
+        logger.error("Error Deleting Coupon",error)
         res.status(500).send({success:false,message:"Internal Server Error"})
     }
 }

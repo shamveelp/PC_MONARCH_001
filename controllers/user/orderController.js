@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Order from "../../models/orderSchema.js";
 import User from "../../models/userSchema.js";
 import Product from "../../models/productSchema.js";
@@ -183,7 +184,7 @@ const placeOrder = async (req, res) => {
       message: "Orders placed successfully",
     })
   } catch (error) {
-    console.error("Error in placeOrder:", error)
+    logger.error("Error in placeOrder:", error)
     res.status(500).json({
       success: false,
       message: "Failed to place order",
@@ -210,7 +211,7 @@ const getOrders = async (req, res) => {
       product: productData,
     })
   } catch (error) {
-    console.error("Error in getOrders:", error)
+    logger.error("Error in getOrders:", error)
     res.status(500).json({ error: "Internal server error" })
   }
 }
@@ -232,7 +233,7 @@ const loadOrderDetails = async (req, res) => {
       user,
     })
   } catch (error) {
-    console.error("Error in loadOrderDetails:", error)
+    logger.error("Error in loadOrderDetails:", error)
     res.status(500).send("Internal server error")
   }
 }
@@ -276,7 +277,7 @@ const cancelOrder = async (req, res) => {
       res.status(400).json({ success: false, message: "Order cannot be cancelled" })
     }
   } catch (error) {
-    console.error("Error in cancelOrder:", error)
+    logger.error("Error in cancelOrder:", error)
     res.status(500).json({ success: false, message: "Internal server error" })
   }
 }
@@ -324,7 +325,7 @@ const requestReturn = async (req, res) => {
       message: "Return request submitted successfully",
     })
   } catch (error) {
-    console.error("Error in requestReturn:", error)
+    logger.error("Error in requestReturn:", error)
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -372,7 +373,7 @@ const processRefund = async (userId, order) => {
 
     return true
   } catch (error) {
-    console.error("Error processing refund:", error)
+    logger.error("Error processing refund:", error)
     return false
   }
 }
@@ -411,7 +412,7 @@ const cancelReturnRequest = async (req, res) => {
       message: "Return request cancelled successfully",
     })
   } catch (error) {
-    console.error("Error in cancelReturnRequest:", error)
+    logger.error("Error in cancelReturnRequest:", error)
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -539,19 +540,19 @@ const generateInvoice = async (req, res) => {
     
       res.download(filePath, fileName, (err) => {
         if (err) {
-          console.error("Error sending file:", err);
+          logger.error("Error sending file:", err);
           res.status(500).send("Error generating invoice");
         }
         
         
         fs.unlink(filePath, (err) => {
-          if (err) console.error("Error deleting temporary file:", err);
+          if (err) logger.error("Error deleting temporary file:", err);
         });
       });
     });
 
   } catch (error) {
-    console.error("Error generating invoice:", error);
+    logger.error("Error generating invoice:", error);
     res.status(500).send("Error generating invoice");
   }
 };
@@ -603,7 +604,7 @@ const createRazorpayOrder = async (req, res) => {
       customerPhone: user.phone,
     })
   } catch (error) {
-    console.error("Error in createRazorpayOrder:", error)
+    logger.error("Error in createRazorpayOrder:", error)
     res.status(500).json({
       success: false,
       message: "Failed to create order",
@@ -662,7 +663,7 @@ const verifyPayment = async (req, res) => {
                   })),
                 })
               } catch (error) {
-                console.error("Error creating transaction record:", error)
+                logger.error("Error creating transaction record:", error)
               }
             }
 
@@ -679,7 +680,7 @@ const verifyPayment = async (req, res) => {
       },
     )
   } catch (error) {
-    console.error("Error in verifyPayment:", error)
+    logger.error("Error in verifyPayment:", error)
     res.status(500).json({
       success: false,
       message: "Payment verification failed",
@@ -823,7 +824,7 @@ const placeWalletOrder = async (req, res) => {
       message: "Orders placed successfully",
     })
   } catch (error) {
-    console.error("Error in placeWalletOrder:", error)
+    logger.error("Error in placeWalletOrder:", error)
     res.status(500).json({
       success: false,
       message: "Failed to place order",

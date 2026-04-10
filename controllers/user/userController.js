@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import User from '../../models/userSchema.js';
 import Category from "../../models/categorySchema.js";
 import Product from "../../models/productSchema.js";
@@ -42,7 +43,7 @@ const loadHomePage = async (req, res) => {
             
         
     } catch (error) {
-        console.log('Home Page Not Found')
+        logger.info('Home Page Not Found')
         res.status(500).send('Server Error')
     }
 }
@@ -51,7 +52,7 @@ const loadSignUpPage = async (req, res) => {
     try {
         res.render('signup')
     } catch (error) {
-        console.log('Sign Up Page Not Found')
+        logger.info('Sign Up Page Not Found')
         res.status(500).send('Server Error')
     }
 }
@@ -89,7 +90,7 @@ async function sendVerificationEmail(email,otp){
 
 
     } catch (error) {
-        console.error("Error for sending email",error)
+        logger.error("Error for sending email",error)
         return false
     }
 }
@@ -123,11 +124,11 @@ const signUp = async (req, res) => {
         req.session.userData = {name,phone,email,password};
 
         res.render('verify-otp');
-        console.log("OTP Send",otp);
+        logger.info("OTP Send",otp);
         
 
     } catch (error) {
-        console.error('signup error',error)
+        logger.error('signup error',error)
         res.redirect('/pagenotfound')
     }
 }
@@ -149,7 +150,7 @@ const verifyOtp = async (req, res) => {
     try{
         const {otp} = req.body;
 
-        console.log('OTP',otp)
+        logger.info('OTP',otp)
 
         if(otp===req.session.userOtp){
             const user = req.session.userData;
@@ -173,7 +174,7 @@ const verifyOtp = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Error verifying OTP',error)
+        logger.error('Error verifying OTP',error)
         res.status(500).json({success:false,message:'Server Error'})
     }
 }
@@ -193,10 +194,10 @@ const resendOtp = async (req, res) => {
 
         const emailSent = await sendVerificationEmail(email,otp);
 
-        console.log("Resended OTP:",otp)
+        logger.info("Resended OTP:",otp)
 
         if(!emailSent){
-            console.log("Resend OTP",otp);
+            logger.info("Resend OTP",otp);
             res.status(200).json({success:true,message:'OTP Resend Successfully'})
             
         } else{
@@ -205,7 +206,7 @@ const resendOtp = async (req, res) => {
 
     } catch (error) {
 
-        console.error('Error Resending OTP',error)
+        logger.error('Error Resending OTP',error)
         res.status(500).json({success:false,message:'INternal Server Error, Please try again'})
         
     }
@@ -249,7 +250,7 @@ const login = async (req, res) => {
 
     } catch (error) {
 
-        console.error('Login Error',error);
+        logger.error('Login Error',error);
         res.render('login',{message:'Login Failed Try again'})
         
         
@@ -264,7 +265,7 @@ const logout = async (req, res) => {
         }
         res.redirect('/login'); 
     } catch (error) {
-        console.log('Logout Error', error);
+        logger.info('Logout Error', error);
         res.redirect('/pagenotfound');
     }
 };
@@ -387,7 +388,7 @@ const loadShoppingPage = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error loading shopping page:", error);
+        logger.error("Error loading shopping page:", error);
         res.status(500).redirect("/pageNotFound");
     }
 };
@@ -475,7 +476,7 @@ const filterProduct = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error while filtering products:", error);
+        logger.error("Error while filtering products:", error);
         res.redirect("/pageNotFound");
     }
 };
@@ -531,7 +532,7 @@ const searchProducts = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error searching products:", error);
+        logger.error("Error searching products:", error);
         res.redirect("/pageNotFound");
     }
 };

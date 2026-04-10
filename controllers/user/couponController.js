@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Coupon from "../../models/couponSchema.js";
 import User from "../../models/userSchema.js";
 
@@ -27,7 +28,7 @@ const loadCoupons = async (req, res) => {
       user: userData,
     });
   } catch (error) {
-    console.error("Error in loadCoupons:", error);
+    logger.error("Error in loadCoupons:", error);
     res.redirect("/pageerror");
   }
 };

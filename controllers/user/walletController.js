@@ -1,3 +1,4 @@
+import logger from '../../utils/logger.js';
 import Wallet from "../../models/walletSchema.js";
 import Transaction from "../../models/transactionSchema.js";
 import User from "../../models/userSchema.js";
@@ -41,7 +42,7 @@ const loadWallet = async (req, res) => {
       totalPages: totalPages,
     })
   } catch (error) {
-    console.error("Error loading wallet:", error)
+    logger.error("Error loading wallet:", error)
     res.status(500).send("Internal Server Error")
   }
 }
@@ -69,7 +70,7 @@ const createRazorpayOrder = async (req, res) => {
       key_id: process.env.RAZORPAY_KEY_ID,
     })
   } catch (error) {
-    console.error("Error creating Razorpay order:", error)
+    logger.error("Error creating Razorpay order:", error)
     res.status(500).json({ success: false, message: "Failed to create order" })
   }
 }
@@ -135,7 +136,7 @@ const verifyPayment = async (req, res) => {
       message: "Payment verified and wallet updated successfully",
     })
   } catch (error) {
-    console.error("Error verifying payment:", error)
+    logger.error("Error verifying payment:", error)
     res.status(500).json({ success: false, message: "Payment verification failed" })
   }
 }
@@ -188,7 +189,7 @@ const withdrawMoney = async (req, res) => {
       newBalance: wallet.balance,
     })
   } catch (error) {
-    console.error("Error withdrawing money:", error)
+    logger.error("Error withdrawing money:", error)
     res.status(500).json({ success: false, message: "Internal Server Error" })
   }
 }

@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 import { userBlockedEmitter } from "../controllers/admin/customerController.js";
 import User from "../models/userSchema.js";
 
@@ -13,7 +14,7 @@ const userAuth = (req, res, next) => {
           }
         })
         .catch((error) => {
-          console.log("User Auth Error", error)
+          logger.info("User Auth Error", error)
           res.status(500).send("Internal Server Error")
         })
     } else {
@@ -29,7 +30,7 @@ const userAuth = (req, res, next) => {
   }
 
   userBlockedEmitter.on("userBlocked", (userId) => {
-    console.log(`User ${userId} has been blocked. Their session should be cleared.`)
+    logger.info(`User ${userId} has been blocked. Their session should be cleared.`)
   })
   
   
@@ -46,7 +47,7 @@ const adminAuth = (req, res, next) => {
             }
         })
         .catch(error => {
-            console.error("Admin Auth Error", error);
+            logger.error("Admin Auth Error", error);
             res.redirect('/admin/login');
         });
     } else {
@@ -79,7 +80,7 @@ const ajaxAuth = (req, res, next) => {
         }
       })
       .catch((error) => {
-        console.log("Ajax Auth Error", error);
+        logger.info("Ajax Auth Error", error);
         res.status(500).json({ 
           status: false, 
           message: "Internal server error" 
