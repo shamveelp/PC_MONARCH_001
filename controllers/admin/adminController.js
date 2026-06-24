@@ -21,7 +21,7 @@ const loadLogin = (req, res) => {
     if(req.session.admin){
         return res.redirect('/admin')
     }
-    res.render('admin-login',{message:null})
+    res.render('admin-login', { message: null, successMessage: null })
 }
 
 const login = async (req, res) => {
@@ -34,16 +34,16 @@ const login = async (req, res) => {
             if (passwordMatch) {
                 
                 req.session.admin = admin._id;
-                return res.redirect('/admin');
+                return res.render('admin-login', { message: null, successMessage: 'Login successful' });
             } else {
-                return res.redirect('/admin/login');
+                return res.render('admin-login', { message: 'Invalid credentials', successMessage: null });
             }
         } else {
-            return res.redirect('/admin/login');
+            return res.render('admin-login', { message: 'Invalid credentials', successMessage: null });
         }
     } catch (error) {
-        logger.info(MESSAGES.LOGIN_ERROR, error);
-        return res.redirect('/pageerror');
+        logger.error(MESSAGES.LOGIN_ERROR, error);
+        return res.render('admin-login', { message: 'An error occurred during login', successMessage: null });
     }
 };
 

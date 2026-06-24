@@ -1,5 +1,7 @@
 <%- include('../partials/admin/header') %>
 
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
      :root {
       --primary-color: #1e90ff;
@@ -140,15 +142,12 @@
                         <div class="card">
                             <div class="card-header">
                                 <p class="mb-0"><strong>Delivered On:</strong> <%= new Date(order.deliveredOn).toLocaleDateString() %></p>
-
                             </div>
-
                         </div>
-                        
                     <% } %>
 
                     <!-- Product Details -->
-                    <h5 class="mb-3">Product Information</h5>
+                    <h5 class="mb-3 mt-4">Product Information</h5>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
@@ -265,10 +264,10 @@
                             </div>
                             <div class="mt-3">
                                 <span class="text-muted">Payment Method:</span>
-                                <span class="badge <%= 
-                                    order.paymentMethod === 'online' ? 'bg-success' :
-                                    order.paymentMethod === 'wallet' ? 'bg-info' :
-                                    'bg-warning'
+                                <span class="badge bg-<%= 
+                                    order.paymentMethod === 'online' ? 'success' :
+                                    order.paymentMethod === 'wallet' ? 'info' :
+                                    'warning'
                                 %>">
                                     <%= order.paymentMethod.toUpperCase() %>
                                 </span>
@@ -283,19 +282,15 @@
                         <% if (order.status === 'confirmed') { %>
                             <p class="mb-0"><strong>Confirmed On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
                         <% } %>
-                        
                         <% if (order.status === 'shipped') { %>
                             <p class="mb-0"><strong>Shipped On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
                         <% } %>
-                        
                         <% if (order.status === 'delivered') { %>
                             <p class="mb-0"><strong>Delivered On:</strong> <%= new Date(order.deliveredOn).toLocaleDateString() %></p>
                         <% } %>
-                        
                         <% if (order.status === 'returned') { %>
                             <p class="mb-0"><strong>Returned On:</strong> <%= new Date(order.updatedOn).toLocaleDateString() %></p>
                         <% } %>
-                        
                     </div>
                 </div>
             </div>
@@ -336,7 +331,11 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 let currentOrderId = null;
 
@@ -344,158 +343,44 @@ async function updateStatus(orderId, currentStatus) {
     const statuses = ['pending', 'confirmed', 'shipped', 'delivered'];
     const currentIndex = statuses.indexOf(currentStatus);
     const availableStatuses = {};
-    
-    statuses.forEach((s, idx) => {
-        if (idx >= currentIndex) {
-            availableStatuses[s] = s.charAt(0).toUpperCase() + s.slice(1);
-        }
-    });
+    statuses.forEach((s, idx) => { if (idx >= currentIndex) availableStatuses[s] = s.charAt(0).toUpperCase() + s.slice(1); });
 
-    const { value: status } = await Swal.fire({
-        title: 'Update Order Status',
-        input: 'select',
-        inputOptions: availableStatuses,
-        inputPlaceholder: 'Select status',
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to select a status!';
-            }
-        }
-    });
+    const { value: status } = await Swal.fire({ title: 'Update Order Status', input: 'select', inputOptions: availableStatuses, inputPlaceholder: 'Select status', showCancelButton: true, inputValidator: (value) => { if (!value) return 'You need to select a status!'; } });
 
     if (status) {
         try {
-            const response = await fetch('/admin/orders/update-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, status }),
-            });
-
+            const response = await fetch('/admin/orders/update-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId, status }) });
             const data = await response.json();
-            
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order status updated successfully',
-                    timer: 1500
-                });
-                location.reload();
-            } else {
-                throw new Error(data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to update status'
-            });
-        }
+            if (data.success) { await Swal.fire({ icon: 'success', title: 'Success', text: 'Order status updated successfully', timer: 1500 }); location.reload(); }
+            else throw new Error(data.message);
+        } catch (error) { await Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to update status' }); }
     }
 }
 
 async function cancelOrder(orderId) {
-    const result = await Swal.fire({
-        title: 'Cancel Order',
-        text: 'Are you sure you want to cancel this order?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!'
-    });
-
+    const result = await Swal.fire({ title: 'Cancel Order', text: 'Are you sure you want to cancel this order?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Yes, cancel it!' });
     if (result.isConfirmed) {
         try {
-            const response = await fetch('/admin/orders/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId }),
-            });
-
+            const response = await fetch('/admin/orders/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId }) });
             const data = await response.json();
-            
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Order cancelled successfully',
-                    timer: 1500
-                });
-                location.reload();
-            } else {
-                throw new Error(data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to cancel order'
-            });
-        }
+            if (data.success) { await Swal.fire({ icon: 'success', title: 'Success', text: 'Order cancelled successfully', timer: 1500 }); location.reload(); }
+            else throw new Error(data.message);
+        } catch (error) { await Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to cancel order' }); }
     }
 }
 
 async function handleReturn(action, orderId) {
     currentOrderId = orderId;
-    
-    if (action === 'reject') {
-        const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-        modal.show();
-        return;
-    }
-
+    if (action === 'reject') { const modal = new bootstrap.Modal(document.getElementById('rejectModal')); modal.show(); return; }
     if (action === 'approve') {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You are about to approve this return request!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, approve it!'
-        }).then(async (result) => {
+        Swal.fire({ title: 'Are you sure?', text: "You are about to approve this return request!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Yes, approve it!' }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch('/admin/orders/handle-return', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            orderId: orderId,
-                            action: action
-                        })
-                    });
-
+                    const response = await fetch('/admin/orders/handle-return', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: orderId, action: action }) });
                     const data = await response.json();
-                    
-                    if (data.success) {
-                        Swal.fire(
-                            'Approved!',
-                            'Return request has been approved.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    } else {
-                        throw new Error(data.message);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire(
-                        'Error!',
-                        error.message || 'Failed to approve return request',
-                        'error'
-                    );
-                }
+                    if (data.success) Swal.fire('Approved!', 'Return request has been approved.', 'success').then(() => { location.reload(); });
+                    else throw new Error(data.message);
+                } catch (error) { Swal.fire('Error!', error.message || 'Failed to approve return request', 'error'); }
             }
         });
     }
@@ -504,99 +389,27 @@ async function handleReturn(action, orderId) {
 async function submitRejection() {
     const category = document.getElementById('rejectionCategory').value;
     const reason = document.getElementById('rejectionReason').value;
-    
-    if (!category || !reason) {
-        alert('Please select a category and provide a detailed explanation');
-        return;
-    }
-
+    if (!category || !reason) { alert('Please select a category and provide a detailed explanation'); return; }
     try {
-        const response = await fetch('/admin/orders/handle-return', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                orderId: currentOrderId,
-                action: 'reject',
-                category: category,
-                message: reason
-            })
-        });
-
+        const response = await fetch('/admin/orders/handle-return', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: currentOrderId, action: 'reject', category: category, message: reason }) });
         const data = await response.json();
-        
         if (data.success) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
             modal.hide();
-            Swal.fire(
-                'Rejected!',
-                'Return request has been rejected.',
-                'success'
-            ).then(() => {
-                location.reload();
-            });
-        } else {
-            throw new Error(data.message);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        Swal.fire(
-            'Error!',
-            error.message || 'Failed to reject return request',
-            'error'
-        );
-    }
+            Swal.fire('Rejected!', 'Return request has been rejected.', 'success').then(() => { location.reload(); });
+        } else throw new Error(data.message);
+    } catch (error) { Swal.fire('Error!', error.message || 'Failed to reject return request', 'error'); }
 }
 
 async function updateReturnStatus(orderId) {
-    const { value: status } = await Swal.fire({
-        title: 'Update Return Status',
-        input: 'select',
-        inputOptions: {
-            'returning': 'Returning',
-            'returned': 'Returned'
-        },
-        inputPlaceholder: 'Select status',
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to select a status!';
-            }
-        }
-    });
-
+    const { value: status } = await Swal.fire({ title: 'Update Return Status', input: 'select', inputOptions: { 'returning': 'Returning', 'returned': 'Returned' }, inputPlaceholder: 'Select status', showCancelButton: true, inputValidator: (value) => { if (!value) return 'You need to select a status!'; } });
     if (status) {
         try {
-            const response = await fetch('/admin/orders/update-return-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ orderId, status }),
-            });
-
+            const response = await fetch('/admin/orders/update-return-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId, status }) });
             const data = await response.json();
-            
-            if (data.success) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Return status updated successfully',
-                    timer: 1500
-                });
-                location.reload();
-            } else {
-                throw new Error(data.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Failed to update status'
-            });
-        }
+            if (data.success) { await Swal.fire({ icon: 'success', title: 'Success', text: 'Return status updated successfully', timer: 1500 }); location.reload(); }
+            else throw new Error(data.message);
+        } catch (error) { await Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to update status' }); }
     }
 }
 </script>

@@ -1,193 +1,231 @@
 <%- include("../../views/partials/admin/header") %>
 
 <style>
-   :root {
-      --primary-color: #1e90ff;
-      --secondary-color: #2d3436;
-      --success-color: #00b894;
-      --danger-color: #d63031;
-      --info-color: #0984e3;
-      --light-gray: #dfe6e9;
-      --background-color: #f5f6fa;
-      --white: #ffffff;
-      --shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-      --transition: all 0.3s ease;
-    }
+.page-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.page-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: rgba(99,102,241,0.15);
+    border-radius: 50%;
+}
+.page-hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.page-hero p { color: rgba(255,255,255,0.6); font-size: 13px; }
+.hero-stat {
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 22px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+.hero-stat .val { font-size: 28px; font-weight: 700; }
+.hero-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
 
-  body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
-  }
+.search-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.search-card .form-control { max-width: 340px; }
 
-  .content-main {
-    padding: 2rem;
-  }
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.table-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.table-card-header h3 { font-size: 15px; font-weight: 600; }
 
-  .card {
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.user-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.user-name { font-weight: 600; font-size: 13.5px; }
+.user-email { font-size: 12px; color: var(--text-muted); }
+
+.status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+.status-active-dot { background: #22c55e; }
+.status-blocked-dot { background: #ef4444; }
+
+.action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px;
     border-radius: 8px;
-  }
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+.btn-block-user { background: #fee2e2; color: #dc2626; }
+.btn-block-user:hover { background: #fecaca; }
+.btn-unblock-user { background: #dcfce7; color: #16a34a; }
+.btn-unblock-user:hover { background: #bbf7d0; }
 
-  .card-header {
-    background-color: var(--secondary-color);
-    color: white;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .form-control {
-    border-radius: 20px;
-  }
-
-  .btn {
-    border-radius: 20px;
-    padding: 0.5rem 1.5rem;
-  }
-
-  .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-
-  .btn-success {
-    background-color: var(--success-color);
-    border-color: var(--success-color);
-  }
-
-  .btn-danger {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
-  }
-
-  .table {
-    background-color: white;
-  }
-
-  .table th {
-    background-color: var(--secondary-color);
-    color: white;
-  }
-
-  .pagination {
-    justify-content: center;
-    margin-top: 2rem;
-  }
-
-  .pagination .page-link {
-    color: var(--secondary-color);
-    border-radius: 20px;
-    margin: 0 5px;
-  }
-
-  .pagination .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
+.table-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 </style>
 
-<section class="content-main">
-  <div class="content-header">
-    <div class="d-flex justify-content-between align-items-center">
-      <h2 class="content-title">Customers Management</h2>
+<!-- Hero -->
+<div class="page-hero">
+    <div>
+        <h1>Customer Management</h1>
+        <p>View, search, and manage all registered customers</p>
     </div>
-  </div>
+    <div class="hero-stat">
+        <div class="val"><%= data.length %></div>
+        <div class="lbl">Total Customers</div>
+    </div>
+</div>
 
-  <div class="card mb-4">
-    <div class="card-header">
-      <h4 class="card-title mb-0">Search Customers</h4>
-    </div>
-    <div class="card-body">
-      <form action="/admin/users/" method="get">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search customers..." name="search">
-          <button class="btn btn-primary" type="submit">Search</button>
-        </div>
-      </form>
-    </div>
-  </div>
+<!-- Search -->
+<div class="search-card">
+    <i class="fas fa-search" style="color:var(--text-muted);"></i>
+    <form action="/admin/users/" method="get" style="display:flex;gap:10px;align-items:center;flex:1;">
+        <input type="text" class="form-control" placeholder="Search by name or email..." name="search" style="flex:1;max-width:400px;">
+        <button class="btn btn-primary" type="submit">Search</button>
+        <a href="/admin/users" class="btn btn-secondary">Reset</a>
+    </form>
+</div>
 
-  <div class="card">
-    <div class="card-header">
-      <h4 class="card-title mb-0">Customer List</h4>
+<!-- Table -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3><i class="fas fa-users" style="color:#6366f1;margin-right:8px;"></i>Customer List</h3>
+        <span style="font-size:12px;color:var(--text-muted);background:#f1f5f9;padding:4px 12px;border-radius:20px;"><%= data.length %> records</span>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Email</th>
-              <th scope="col">Phone No</th>
-              <th scope="col">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% for(let i=0; i < data.length; i++) { %>
-              <tr>
-                <td><%= data[i].name %></td>
-                <td><%= data[i].email %></td>
-                <td><%= data[i].phone %></td>
-                <td>
-                  <% if(data[i].isBlocked == false) { %>
-                    <a href="#" onclick="confirmBlock(event, '<%= data[i]._id %>')" class="btn btn-sm btn-danger">Block</a>
-                  <% } else { %>
-                    <a href="#" onclick="confirmUnblock(event, '<%= data[i]._id %>')" class="btn btn-sm btn-success">Unblock</a>
-                  <% } %>
-                </td>
-              </tr>
-            <% } %>
-          </tbody>
+    <div class="table-responsive">
+        <table class="data-table" style="min-width:700px;">
+            <thead>
+                <tr>
+                    <th style="padding-left:20px;">#</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th style="text-align:right;padding-right:20px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i=0; i < data.length; i++) { %>
+                <tr style="transition: background 0.15s;">
+                    <td style="padding-left:20px;color:var(--text-muted);font-size:12px;width:50px;"><%= i + 1 %></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div class="user-avatar"><%= data[i].name ? data[i].name.charAt(0).toUpperCase() : 'U' %></div>
+                            <div>
+                                <div class="user-name"><%= data[i].name || '—' %></div>
+                                <div class="user-email"><%= data[i].email %></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:var(--text-secondary);"><%= data[i].phone || '—' %></td>
+                    <td>
+                        <% if(data[i].isBlocked) { %>
+                            <span style="display:inline-flex;align-items:center;background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+                                <span class="status-dot status-blocked-dot"></span> Blocked
+                            </span>
+                        <% } else { %>
+                            <span style="display:inline-flex;align-items:center;background:#dcfce7;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+                                <span class="status-dot status-active-dot"></span> Active
+                            </span>
+                        <% } %>
+                    </td>
+                    <td style="text-align:right;padding-right:20px;">
+                        <% if(data[i].isBlocked == false) { %>
+                            <button onclick="confirmBlock(event, '<%= data[i]._id %>')" class="action-btn btn-block-user">
+                                <i class="fas fa-ban"></i> Block
+                            </button>
+                        <% } else { %>
+                            <button onclick="confirmUnblock(event, '<%= data[i]._id %>')" class="action-btn btn-unblock-user">
+                                <i class="fas fa-check-circle"></i> Unblock
+                            </button>
+                        <% } %>
+                    </td>
+                </tr>
+                <% } %>
+                <% if (data.length === 0) { %>
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:48px 20px;color:var(--text-muted);">
+                        <i class="fas fa-users" style="font-size:28px;margin-bottom:12px;display:block;opacity:0.3;"></i>
+                        No customers found
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
         </table>
-      </div>
     </div>
-  </div>
+    <div class="table-footer">
+        <span style="font-size:13px;color:var(--text-muted);">Showing <%= data.length %> customers</span>
+        <nav>
+            <ul class="pagination" style="padding:0;margin:0;">
+                <% for(let i=1; i <= totalPages; i++) { %>
+                <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</div>
 
-  <nav aria-label="Page navigation" class="mt-4">
-    <ul class="pagination justify-content-center">
-      <% for(let i=1; i <= totalPages; i++) { %>
-        <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
-          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
-        </li>
-      <% } %>
-    </ul>
-  </nav>
-</section>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function confirmBlock(event, userId) {
-    event.preventDefault(); // Prevent default link action
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You are about to block this user!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, Block!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/admin/blockCustomer?id=" + userId;
-      }
-    });
-  }
-
-  function confirmUnblock(event, userId) {
+function confirmBlock(event, userId) {
     event.preventDefault();
     Swal.fire({
-      title: "Are you sure?",
-      text: "You are about to unblock this user!",
-      icon: "info",
-      showCancelButton: true,
-      confirmButtonColor: "#28a745",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, Unblock!",
+        title: "Block this customer?",
+        text: "They won't be able to log in until unblocked.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#e2e8f0",
+        confirmButtonText: "Yes, Block",
+        cancelButtonText: "Cancel",
+        customClass: { cancelButton: 'swal-cancel-btn' }
     }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/admin/unblockCustomer?id=" + userId;
-      }
+        if (result.isConfirmed) window.location.href = "/admin/blockCustomer?id=" + userId;
     });
-  }
+}
+function confirmUnblock(event, userId) {
+    event.preventDefault();
+    Swal.fire({
+        title: "Unblock this customer?",
+        text: "This will restore their access.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#6366f1",
+        confirmButtonText: "Yes, Unblock"
+    }).then((result) => {
+        if (result.isConfirmed) window.location.href = "/admin/unBlockCustomer?id=" + userId;
+    });
+}
 </script>
 
 <%- include("../../views/partials/admin/footer") %>

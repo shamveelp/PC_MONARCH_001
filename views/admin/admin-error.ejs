@@ -1,45 +1,22 @@
 <%- include("../../views/partials/admin/header") %>
-<style>
-  body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      text-align: center;
-      padding: 20px;
-  }
 
-  h1 {
-      color: #333;
-  }
+<div class="page-header">
+    <div>
+        <h1>Error</h1>
+        <p>Something went wrong</p>
+    </div>
+</div>
 
-  p {
-      color: #666;
-      margin-bottom: 20px;
-  }
-
-  button {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-  }
-
-  button:hover {
-      background-color: #b30000;
-  }
-</style>
-
-
-  <h1>Error Page Admin</h1>
-  <p>An error occurred.</p>
-  <button onclick="godashboard()">Go to Home Page</button>
-
-  <script>
-      function godashboard() {
-          window.location.href = "/admin";
-      }
-  </script>
+<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 20px; text-align:center;">
+    <div style="width:80px;height:80px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
+        <i class="fas fa-exclamation-triangle" style="font-size:32px;color:#dc2626;"></i>
+    </div>
+    <h2 style="font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Page Error</h2>
+    <p style="color:var(--text-muted);margin-bottom:28px;">An unexpected error occurred. Please try going back or reloading.</p>
+    <div style="display:flex;gap:12px;">
+        <a href="/admin" class="btn btn-primary"><i class="fas fa-home"></i> Back to Dashboard</a>
+        <button class="btn btn-secondary" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Go Back</button>
+    </div>
+</div>
 
 <%- include("../../views/partials/admin/footer") %>
