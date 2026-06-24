@@ -16,11 +16,13 @@ import { fileURLToPath } from 'url';
 
 import STATUS_CODES from './enums/statusCodes.js';
 import MESSAGES from './enums/constants.js';
+import startCronJobs from './utils/cronJobs.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 connectDB();
+startCronJobs();
 
 app.set('trust proxy', 1);
 

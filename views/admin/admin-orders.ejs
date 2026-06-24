@@ -77,7 +77,9 @@
                             <% } else if (order.status === 'returning' && order.requestStatus === 'approved') { %>
                                 <button onclick="updateReturnStatus('<%= order._id %>')" class="btn btn-sm btn-secondary">Return Status</button>
                             <% } else if (!['cancelled','delivered','returned','return_requested','returning'].includes(order.status)) { %>
-                                <button onclick="updateStatus('<%= order._id %>', '<%= order.status %>')" class="btn btn-sm btn-secondary">Update</button>
+                                <% if (order.status !== 'pending') { %>
+                                    <button onclick="updateStatus('<%= order._id %>', '<%= order.status %>')" class="btn btn-sm btn-secondary">Update</button>
+                                <% } %>
                                 <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-sm btn-danger">Cancel</button>
                             <% } %>
                         </div>
