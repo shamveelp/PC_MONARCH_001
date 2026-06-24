@@ -1,6 +1,9 @@
 import logger from '../../utils/logger.js';
 import Comment from "../../models/commentSchema.js";
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const getAllComments = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -24,7 +27,7 @@ const getAllComments = async (req, res) => {
       totalComments: total
     });
   } catch (error) {
-    logger.error('Error in getAllComments:', error);
+    logger.error(MESSAGES.ERROR_IN_GETALLCOMMENTS, error);
     res.redirect('/admin/pageerror');
   }
 };
@@ -34,15 +37,15 @@ const deleteComment = async (req, res) => {
     const { commentId } = req.params;
     await Comment.findByIdAndDelete(commentId);
     
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       status: true,
-      message: 'Comment deleted successfully'
+      message: MESSAGES.COMMENT_DELETED_SUCCESSFULLY
     });
   } catch (error) {
-    logger.error('Error in deleteComment:', error);
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_IN_DELETECOMMENT, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: false,
-      message: 'Internal server error'
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1
     });
   }
 };
@@ -54,15 +57,15 @@ const blockComment = async (req, res) => {
       isBlocked: true
     });
     
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       status: true,
-      message: 'Comment blocked successfully'
+      message: MESSAGES.COMMENT_BLOCKED_SUCCESSFULLY
     });
   } catch (error) {
-    logger.error('Error in blockComment:', error);
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_IN_BLOCKCOMMENT, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: false,
-      message: 'Internal server error'
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1
     });
   }
 };
@@ -74,16 +77,16 @@ const unblockComment  = async (req, res) => {
         await Comment.findByIdAndUpdate(commentId, {
             isBlocked: false
         });
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             status: true,
-            message: 'Comment unblocked successfully'
+            message: MESSAGES.COMMENT_UNBLOCKED_SUCCESSFULLY
         })
         
     } catch (error) {
-        logger.error('Error in unblockComment:', error);
-        res.status(500).json({
+        logger.error(MESSAGES.ERROR_IN_UNBLOCKCOMMENT, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             status: false,
-            message: 'Internal server error'
+            message: MESSAGES.INTERNAL_SERVER_ERROR_1
         });
         
     }

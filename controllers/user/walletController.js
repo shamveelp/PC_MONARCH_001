@@ -7,6 +7,11 @@ import crypto from "crypto";
 import 'dotenv/config';
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
+import TRANSACTION_STATUS from '../../enums/transactionStatus.js';
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -42,8 +47,8 @@ const loadWallet = async (req, res) => {
       totalPages: totalPages,
     })
   } catch (error) {
-    logger.error("Error loading wallet:", error)
-    res.status(500).send("Internal Server Error")
+    logger.error(MESSAGES.ERROR_LOADING_WALLET, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -53,7 +58,7 @@ const createRazorpayOrder = async (req, res) => {
     const userId = req.session.user
 
     if (!amount || amount < 1) {
-      return res.status(400).json({ success: false, message: "Invalid amount" })
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.INVALID_AMOUNT })
     }
 
     const options = {
@@ -70,8 +75,8 @@ const createRazorpayOrder = async (req, res) => {
       key_id: process.env.RAZORPAY_KEY_ID,
     })
   } catch (error) {
-    logger.error("Error creating Razorpay order:", error)
-    res.status(500).json({ success: false, message: "Failed to create order" })
+    logger.error(MESSAGES.ERROR_CREATING_RAZORPAY_ORDER, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.FAILED_TO_CREATE_ORDER })
   }
 }
 
@@ -88,7 +93,7 @@ const verifyPayment = async (req, res) => {
       .digest("hex")
 
     if (razorpay_signature !== expectedSign) {
-      return res.status(400).json({ success: false, message: "Invalid signature" })
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.INVALID_SIGNATURE })
     }
 
     // Get payment details from Razorpay
@@ -125,7 +130,7 @@ const verifyPayment = async (req, res) => {
       paymentMethod: "online",
       paymentGateway: "razorpay",
       gatewayTransactionId: razorpay_payment_id,
-      status: "completed",
+      status: TRANSACTION_STATUS.COMPLETED,
       purpose: "wallet_add",
       description: "Added money to wallet",
       walletBalanceAfter: wallet.balance,
@@ -133,11 +138,11 @@ const verifyPayment = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Payment verified and wallet updated successfully",
+      message: MESSAGES.PAYMENT_VERIFIED_AND_WALLET_UPDATED_SUCCESSFULLY,
     })
   } catch (error) {
-    logger.error("Error verifying payment:", error)
-    res.status(500).json({ success: false, message: "Payment verification failed" })
+    logger.error(MESSAGES.ERROR_VERIFYING_PAYMENT, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.PAYMENT_VERIFICATION_FAILED })
   }
 }
 
@@ -147,15 +152,15 @@ const withdrawMoney = async (req, res) => {
     const { amount } = req.body
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid amount" })
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.INVALID_AMOUNT })
     }
 
     const wallet = await Wallet.findOne({ userId: userId })
 
     if (!wallet || wallet.balance < amount) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "Insufficient balance",
+        message: MESSAGES.INSUFFICIENT_BALANCE,
       })
     }
 
@@ -177,7 +182,7 @@ const withdrawMoney = async (req, res) => {
       transactionType: "debit",
       paymentMethod: "wallet",
       paymentGateway: "wallet",
-      status: "completed",
+      status: TRANSACTION_STATUS.COMPLETED,
       purpose: "wallet_withdraw",
       description: "Withdrawn from wallet",
       walletBalanceAfter: wallet.balance,
@@ -185,12 +190,12 @@ const withdrawMoney = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Money withdrawn successfully",
+      message: MESSAGES.MONEY_WITHDRAWN_SUCCESSFULLY,
       newBalance: wallet.balance,
     })
   } catch (error) {
-    logger.error("Error withdrawing money:", error)
-    res.status(500).json({ success: false, message: "Internal Server Error" })
+    logger.error(MESSAGES.ERROR_WITHDRAWING_MONEY, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR })
   }
 }
 

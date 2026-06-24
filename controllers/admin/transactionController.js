@@ -5,6 +5,11 @@ import User from "../../models/userSchema.js";
 import Wallet from "../../models/walletSchema.js";
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
+import TRANSACTION_STATUS from '../../enums/transactionStatus.js';
+
 const getAllTransactions = async (req, res) => {
   try {
     const page = Number.parseInt(req.query.page) || 1
@@ -113,8 +118,8 @@ const getAllTransactions = async (req, res) => {
         title: "Transaction Management",
       })
   } catch (error) {
-    logger.error("Error fetching transactions:", error)
-    res.status(500).send("Internal Server Error")
+    logger.error(MESSAGES.ERROR_FETCHING_TRANSACTIONS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -142,8 +147,8 @@ const getTransactionDetails = async (req, res) => {
       title: "Transaction Details",
     })
   } catch (error) {
-    logger.error("Error fetching transaction details:", error)
-    res.status(500).send("Internal Server Error")
+    logger.error(MESSAGES.ERROR_FETCHING_TRANSACTION_DETAILS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -154,7 +159,7 @@ const createTransaction = async (transactionData) => {
     await transaction.save()
     return transaction
   } catch (error) {
-    logger.error("Error creating transaction:", error)
+    logger.error(MESSAGES.ERROR_CREATING_TRANSACTION, error)
     throw error
   }
 }
@@ -267,8 +272,8 @@ const getTransactionStats = async (req, res) => {
       },
     })
   } catch (error) {
-    logger.error("Error getting transaction stats:", error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    logger.error(MESSAGES.ERROR_GETTING_TRANSACTION_STATS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 })
   }
 }
 
@@ -279,7 +284,7 @@ const createManualTransaction = async (req, res) => {
 
     const user = await User.findById(userId)
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" })
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.USER_NOT_FOUND })
     }
 
     const transaction = await Transaction.create({
@@ -288,7 +293,7 @@ const createManualTransaction = async (req, res) => {
       transactionType,
       paymentMethod: "admin",
       paymentGateway: "admin",
-      status: "completed",
+      status: TRANSACTION_STATUS.COMPLETED,
       purpose,
       description,
     })
@@ -321,10 +326,10 @@ const createManualTransaction = async (req, res) => {
       await wallet.save()
     }
 
-    res.json({ success: true, message: "Transaction created successfully", transaction })
+    res.json({ success: true, message: MESSAGES.TRANSACTION_CREATED_SUCCESSFULLY, transaction })
   } catch (error) {
-    logger.error("Error creating manual transaction:", error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    logger.error(MESSAGES.ERROR_CREATING_MANUAL_TRANSACTION, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 })
   }
 }
 

@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 import { generateOrderId } from '../utils/generateOrderId.js';
 
+import ORDER_STATUS from '../enums/orderStatus.js';
+import PAYMENT_STATUS from '../enums/paymentStatus.js';
+
 const orderSchema = new Schema({
     orderId: {
         type: String,
@@ -40,8 +43,8 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returning', 'returned'],
-            default: 'pending'
+            enum: [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED, ORDER_STATUS.SHIPPED, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED, ORDER_STATUS.RETURN_REQUESTED, ORDER_STATUS.RETURNING, ORDER_STATUS.RETURNED],
+            default: ORDER_STATUS.PENDING
         },
         cancelReason: {
             type: String
@@ -78,13 +81,13 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returning', 'returned'],
-        default: 'pending'
+        enum: [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED, ORDER_STATUS.SHIPPED, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED, ORDER_STATUS.RETURN_REQUESTED, ORDER_STATUS.RETURNING, ORDER_STATUS.RETURNED],
+        default: ORDER_STATUS.PENDING
     },
     paymentStatus: {
         type: String,
-        enum: ['Pending', 'Success', 'Failed'],
-        default: 'Pending'
+        enum: [PAYMENT_STATUS.PENDING, PAYMENT_STATUS.SUCCESS, PAYMENT_STATUS.FAILED],
+        default: PAYMENT_STATUS.PENDING
     },
     cancelReason: {
         type: String
@@ -100,8 +103,8 @@ const orderSchema = new Schema({
     }],
     requestStatus: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending'
+        enum: [ORDER_STATUS.PENDING, 'approved', 'rejected'],
+        default: ORDER_STATUS.PENDING
     },
     rejectionCategory: {
         type: String

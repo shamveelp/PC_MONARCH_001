@@ -4,6 +4,9 @@ import Wishlist from "../../models/wishlistSchema.js";
 import Product from "../../models/productSchema.js";
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const loadWishlist = async (req,res) => {
     try {
         
@@ -21,7 +24,7 @@ const loadWishlist = async (req,res) => {
 
     } catch (error) {
 
-        logger.error('Error:',error)
+        logger.error(MESSAGES.ERROR,error)
         res.redirect("/pageNotFound")
         
     }
@@ -35,12 +38,12 @@ const addToWishlist = async (req, res) => {
         const userId = req.session.user;
 
         if (!productId || !userId) {
-            return res.status(400).json({ status: false, message: "Invalid request data" });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ status: false, message: MESSAGES.INVALID_REQUEST_DATA });
         }
 
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ status: false, message: "User not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.USER_NOT_FOUND });
         }
 
         // Ensure wishlist is an array before modifying
@@ -49,17 +52,17 @@ const addToWishlist = async (req, res) => {
         }
 
         if (user.wishlist.includes(productId)) {
-            return res.status(200).json({ status: false, message: "Product Already in Wishlist" });
+            return res.status(STATUS_CODES.OK).json({ status: false, message: MESSAGES.PRODUCT_ALREADY_IN_WISHLIST });
         }
 
         user.wishlist.push(productId);
         await user.save();
 
-        return res.status(200).json({ status: true, message: "Product Added to Wishlist" });
+        return res.status(STATUS_CODES.OK).json({ status: true, message: MESSAGES.PRODUCT_ADDED_TO_WISHLIST });
 
     } catch (error) {
-        logger.error("Error in addToWishlist:", error);
-        return res.status(500).json({ status: false, message: "Server error" });
+        logger.error(MESSAGES.ERROR_IN_ADDTOWISHLIST, error);
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.SERVER_ERROR_3 });
     }
 };
 
@@ -79,7 +82,7 @@ const removeProduct = async (req,res) => {
     } catch (error) {
 
         logger.error(error);
-        return res.status(500).json({status:false,message:"Server Error"})
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({status:false,message: MESSAGES.SERVER_ERROR})
         
     }
 }

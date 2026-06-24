@@ -14,6 +14,9 @@ import { checkBlockedUser } from "./middlewares/profileAuth.js";
 import User from "./models/userSchema.js";
 import { fileURLToPath } from 'url';
 
+import STATUS_CODES from './enums/statusCodes.js';
+import MESSAGES from './enums/constants.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -78,8 +81,8 @@ app.use(async (req, res, next) => {
       }
       next();
   } catch (error) {
-      logger.error("Error checking blocked user:", error);
-      res.status(500).send('Server Error');
+      logger.error(MESSAGES.ERROR_CHECKING_BLOCKED_USER, error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
   }
 });
 
@@ -87,7 +90,7 @@ app.use(async (req, res, next) => {
 
 const PORT = process.env.PORT || 3999;
 app.listen(PORT, () => {
-    logger.info('Server is running on port http://localhost:3999');
+    logger.info(MESSAGES.SERVER_IS_RUNNING_ON_PORT_HTTP_LOCALHOST_3999);
 })
 
 

@@ -4,6 +4,8 @@ import Category from "../../models/categorySchema.js";
 import User from "../../models/userSchema.js";
 
 
+import MESSAGES from '../../enums/constants.js';
+
 const productDetails = async (req,res) => {
 
     try {
@@ -42,7 +44,7 @@ const productDetails = async (req,res) => {
 
     } catch (error) {
         
-        logger.error("Error for fetching product details",error)
+        logger.error(MESSAGES.ERROR_FOR_FETCHING_PRODUCT_DETAILS,error)
         res.redirect("/pageNotFound")
     }
 }

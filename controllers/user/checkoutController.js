@@ -6,6 +6,9 @@ import Address from "../../models/addressSchema.js";
 import Coupon from "../../models/couponSchema.js";
 import Wallet from "../../models/walletSchema.js";
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const loadCheckoutPage = async (req, res) => {
   try {
       const userId = req.session.user;
@@ -27,7 +30,7 @@ const loadCheckoutPage = async (req, res) => {
       const addressData = await Address.findOne({ userId: userId });
 
       if (!user) {
-          return res.status(404).send("User not found");
+          return res.status(STATUS_CODES.NOT_FOUND).send(MESSAGES.USER_NOT_FOUND);
       }
 
       for (let item of user.cart) {
@@ -74,7 +77,7 @@ const loadCheckoutPage = async (req, res) => {
           availableCoupons,
       });
   } catch (error) {
-      logger.error("Error in loadCheckoutPage:", error);
+      logger.error(MESSAGES.ERROR_IN_LOADCHECKOUTPAGE, error);
       res.redirect("/pageNotFound");
   }
 };
@@ -113,7 +116,7 @@ const postAddAddressCheckout = async (req, res) => {
 
         res.redirect("/checkout");
     } catch (error) {
-        logger.error("Error adding address", error);
+        logger.error(MESSAGES.ERROR_ADDING_ADDRESS, error);
         res.redirect("/pageNotFound");
     }
 };
@@ -126,11 +129,11 @@ const applyCoupon = async (req, res) => {
         const coupon = await Coupon.findOne({ name: couponCode, isList: true });
 
         if (!coupon) {
-            return res.json({ success: false, message: 'Invalid coupon code' });
+            return res.json({ success: false, message: MESSAGES.INVALID_COUPON_CODE });
         }
 
         if (new Date() > coupon.expireOn) {
-            return res.json({ success: false, message: 'Coupon has expired' });
+            return res.json({ success: false, message: MESSAGES.COUPON_HAS_EXPIRED });
         }
 
         if (subtotal < coupon.minimumPrice) {
@@ -138,13 +141,13 @@ const applyCoupon = async (req, res) => {
         }
 
         if (coupon.userId.includes(userId)) {
-            return res.json({ success: false, message: 'You have already used this coupon' });
+            return res.json({ success: false, message: MESSAGES.YOU_HAVE_ALREADY_USED_THIS_COUPON });
         }
 
         res.json({ success: true, coupon: coupon });
     } catch (error) {
-        logger.error('Error applying coupon:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while applying the coupon' });
+        logger.error(MESSAGES.ERROR_APPLYING_COUPON, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_APPLYING_THE_COUPON });
     }
 };
 
@@ -160,7 +163,7 @@ const checkStock = async (req, res) => {
         if (!user || !user.cart.length) {
             return res.json({
                 success: false,
-                message: "Cart is empty"
+                message: MESSAGES.CART_IS_EMPTY
             });
         }
 
@@ -198,10 +201,10 @@ const checkStock = async (req, res) => {
             items: stockChanges
         });
     } catch (error) {
-        logger.error("Error checking stock:", error);
-        res.status(500).json({
+        logger.error(MESSAGES.ERROR_CHECKING_STOCK, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Error checking stock availability"
+            message: MESSAGES.ERROR_CHECKING_STOCK_AVAILABILITY
         });
     }
 };

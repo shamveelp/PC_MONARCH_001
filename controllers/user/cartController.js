@@ -4,6 +4,9 @@ import Product from "../../models/productSchema.js";
 import Category from "../../models/categorySchema.js";
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const removeBlockedOrUnlistedItems = async (user) => {
   const updatedCart = [];
   for (const item of user.cart) {
@@ -31,7 +34,7 @@ const getCartPage = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(STATUS_CODES.NOT_FOUND).send(MESSAGES.USER_NOT_FOUND);
     }
 
     
@@ -69,8 +72,8 @@ const getCartPage = async (req, res) => {
       grandTotal
     });
   } catch (error) {
-    logger.error('Error in getCartPage:', error);
-    res.status(500).send('An error occurred while loading the cart');
+    logger.error(MESSAGES.ERROR_IN_GETCARTPAGE, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send('An error occurred while loading the cart');
   }
 };
 
@@ -83,11 +86,11 @@ const addToCart = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({ status: false, message: "Product not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
     }
 
     if (product.quantity <= 0) {
-      return res.status(400).json({ status: false, message: "Product is out of stock" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ status: false, message: MESSAGES.PRODUCT_IS_OUT_OF_STOCK });
     }
 
     const cartItemIndex = user.cart.findIndex(item => item.productId.toString() === productId);
@@ -97,17 +100,17 @@ const addToCart = async (req, res) => {
       const currentQuantity = user.cart[cartItemIndex].quantity;
 
       if (currentQuantity >= 5) {
-        return res.status(400).json({ 
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ 
           status: false, 
-          message: "Maximum 5 quantity per user reached", 
+          message: MESSAGES.MAXIMUM_5_QUANTITY_PER_USER_REACHED, 
           quantity: currentQuantity 
         });
       }
 
       if (currentQuantity >= product.quantity) {
-        return res.status(400).json({ 
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ 
           status: false, 
-          message: "Cannot add more, product is out of stock", 
+          message: MESSAGES.CANNOT_ADD_MORE_PRODUCT_IS_OUT_OF_STOCK, 
           quantity: currentQuantity 
         });
       }
@@ -122,13 +125,13 @@ const addToCart = async (req, res) => {
     await user.save();
     return res.json({ 
       status: true, 
-      message: "Product added to cart", 
+      message: MESSAGES.PRODUCT_ADDED_TO_CART, 
       quantity: newQuantity, 
       cartLength: user.cart.length 
     });
   } catch (error) {
-    logger.error('Error in addToCart:', error);
-    return res.status(500).json({ status: false, message: "An error occurred while adding to cart" });
+    logger.error(MESSAGES.ERROR_IN_ADDTOCART, error);
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_ADDING_TO_CART });
   }
 };
 
@@ -141,13 +144,13 @@ const changeQuantity = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!user || !product) {
-      return res.status(404).json({ status: false, message: "User or Product not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.USER_OR_PRODUCT_NOT_FOUND });
     }
 
     const cartItemIndex = user.cart.findIndex(item => item.productId.toString() === productId);
 
     if (cartItemIndex === -1) {
-      return res.status(404).json({ status: false, message: "Product not found in cart" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND_IN_CART });
     }
 
     if (product.quantity === 0) {
@@ -155,7 +158,7 @@ const changeQuantity = async (req, res) => {
       await user.save();
       return res.json({
         status: true,
-        message: "Product removed from cart due to zero stock",
+        message: MESSAGES.PRODUCT_REMOVED_FROM_CART_DUE_TO_ZERO_STOCK,
         quantity: 0,
         swal: {
           title: "Out of Stock!",
@@ -170,7 +173,7 @@ const changeQuantity = async (req, res) => {
 
     if (action === 'increase') {
       if (newQuantity >= product.quantity) {
-        return res.status(400).json({ status: false, message: "Cannot add more, product is out of stock" });
+        return res.status(STATUS_CODES.BAD_REQUEST).json({ status: false, message: MESSAGES.CANNOT_ADD_MORE_PRODUCT_IS_OUT_OF_STOCK });
       }
       newQuantity += 1;
     } else if (action === 'decrease') {
@@ -179,10 +182,10 @@ const changeQuantity = async (req, res) => {
       } else {
         user.cart.splice(cartItemIndex, 1);
         await user.save();
-        return res.json({ status: true, message: "Product removed from cart", quantity: 0 });
+        return res.json({ status: true, message: MESSAGES.PRODUCT_REMOVED_FROM_CART, quantity: 0 });
       }
     } else {
-      return res.status(400).json({ status: false, message: "Invalid action" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ status: false, message: MESSAGES.INVALID_ACTION });
     }
 
     if (newQuantity > product.quantity) {
@@ -200,13 +203,13 @@ const changeQuantity = async (req, res) => {
 
     return res.json({ 
       status: true, 
-      message: "Cart updated", 
+      message: MESSAGES.CART_UPDATED, 
       quantity: newQuantity, 
       grandTotal: grandTotal 
     });
   } catch (error) {
-    logger.error('Error in changeQuantity:', error);
-    return res.status(500).json({ status: false, message: "An error occurred while updating the cart" });
+    logger.error(MESSAGES.ERROR_IN_CHANGEQUANTITY, error);
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_UPDATING_THE_CART });
   }
 };
 
@@ -218,22 +221,22 @@ const deleteProduct = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.USER_NOT_FOUND });
     }
 
     const cartItemIndex = user.cart.findIndex(item => item.productId.toString() === productId);
 
     if (cartItemIndex === -1) {
-      return res.status(404).json({ status: false, message: "Product not found in cart" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND_IN_CART });
     }
 
     user.cart.splice(cartItemIndex, 1);
     await user.save();
 
-    return res.json({ status: true, message: "Product removed from cart" });
+    return res.json({ status: true, message: MESSAGES.PRODUCT_REMOVED_FROM_CART });
   } catch (error) {
-    logger.error('Error in deleteProduct:', error);
-    return res.status(500).json({ status: false, message: "An error occurred while removing the product from cart" });
+    logger.error(MESSAGES.ERROR_IN_DELETEPRODUCT, error);
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_REMOVING_THE_PRODUCT_FROM_ });
   }
 };
 

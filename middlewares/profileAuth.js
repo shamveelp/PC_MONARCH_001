@@ -1,6 +1,9 @@
 import logger from '../utils/logger.js';
 import User from "../models/userSchema.js";
 
+import STATUS_CODES from '../enums/statusCodes.js';
+import MESSAGES from '../enums/constants.js';
+
 const resetPasswordMiddleware = (req, res, next) => {
     if (req.session.resetAllowed) {
         return next();  
@@ -27,8 +30,8 @@ const checkBlockedUser = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        logger.error("Error checking blocked user:", error);
-        res.status(500).send('Server Error');
+        logger.error(MESSAGES.ERROR_CHECKING_BLOCKED_USER, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR);
     }
 };
 

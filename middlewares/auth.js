@@ -2,6 +2,9 @@ import logger from '../utils/logger.js';
 import { userBlockedEmitter } from "../controllers/admin/customerController.js";
 import User from "../models/userSchema.js";
 
+import STATUS_CODES from '../enums/statusCodes.js';
+import MESSAGES from '../enums/constants.js';
+
 const userAuth = (req, res, next) => {
     if (req.session.user) {
       User.findById(req.session.user)
@@ -14,8 +17,8 @@ const userAuth = (req, res, next) => {
           }
         })
         .catch((error) => {
-          logger.info("User Auth Error", error)
-          res.status(500).send("Internal Server Error")
+          logger.info(MESSAGES.USER_AUTH_ERROR, error)
+          res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
         })
     } else {
       res.redirect("/login")
@@ -47,7 +50,7 @@ const adminAuth = (req, res, next) => {
             }
         })
         .catch(error => {
-            logger.error("Admin Auth Error", error);
+            logger.error(MESSAGES.ADMIN_AUTH_ERROR, error);
             res.redirect('/admin/login');
         });
     } else {
@@ -60,7 +63,7 @@ const checkUserAuthWish = (req, res, next) => {
   if (req.session.user) {
       next(); // User is logged in, proceed to next function
   } else {
-      return res.status(401).json({ status: false, message: "User not logged in" });
+      return res.status(STATUS_CODES.UNAUTHORIZED).json({ status: false, message: MESSAGES.USER_NOT_LOGGED_IN });
   }
 };
 
@@ -73,23 +76,23 @@ const ajaxAuth = (req, res, next) => {
           next();
         } else {
           delete req.session.user;
-          res.status(401).json({ 
+          res.status(STATUS_CODES.UNAUTHORIZED).json({ 
             status: false, 
-            message: "User is blocked or not found" 
+            message: MESSAGES.USER_IS_BLOCKED_OR_NOT_FOUND 
           });
         }
       })
       .catch((error) => {
-        logger.info("Ajax Auth Error", error);
-        res.status(500).json({ 
+        logger.info(MESSAGES.AJAX_AUTH_ERROR, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ 
           status: false, 
-          message: "Internal server error" 
+          message: MESSAGES.INTERNAL_SERVER_ERROR_1 
         });
       });
   } else {
-    res.status(401).json({ 
+    res.status(STATUS_CODES.UNAUTHORIZED).json({ 
       status: false, 
-      message: "User not logged in" 
+      message: MESSAGES.USER_NOT_LOGGED_IN 
     });
   }
 };

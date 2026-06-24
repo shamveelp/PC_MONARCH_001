@@ -4,6 +4,11 @@ import User from "../../models/userSchema.js";
 import Product from "../../models/productSchema.js";
 import { processRefund } from "../user/orderController.js";
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
+import ORDER_STATUS from '../../enums/orderStatus.js';
+
 const getOrders = async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdOn: -1 })
@@ -13,8 +18,8 @@ const getOrders = async (req, res) => {
       title: "Order Management",
     })
   } catch (error) {
-    logger.error("Error fetching orders:", error)
-    res.status(500).send("Internal Server Error")
+    logger.error(MESSAGES.ERROR_FETCHING_ORDERS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -24,7 +29,7 @@ const getOrderDetails = async (req, res) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      return res.status(404).send("Order not found")
+      return res.status(STATUS_CODES.NOT_FOUND).send(MESSAGES.ORDER_NOT_FOUND)
     }
 
     res.render("admin-order-details", {
@@ -32,8 +37,8 @@ const getOrderDetails = async (req, res) => {
       title: "Order Details",
     })
   } catch (error) {
-    logger.error("Error fetching order details:", error)
-    res.status(500).send("Internal Server Error")
+    logger.error(MESSAGES.ERROR_FETCHING_ORDER_DETAILS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -43,19 +48,19 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.ORDER_NOT_FOUND })
     }
 
-    if (order.status === "cancelled") {
-      return res.status(400).json({ success: false, message: "Cannot update cancelled order" })
+    if (order.status === ORDER_STATUS.CANCELLED) {
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.CANNOT_UPDATE_CANCELLED_ORDER })
     }
 
-    const statuses = ['pending', 'confirmed', 'shipped', 'delivered'];
+    const statuses = [ORDER_STATUS.PENDING, ORDER_STATUS.CONFIRMED, ORDER_STATUS.SHIPPED, ORDER_STATUS.DELIVERED];
     const currentIndex = statuses.indexOf(order.status);
     const newIndex = statuses.indexOf(status);
 
     if (newIndex !== -1 && currentIndex !== -1 && newIndex < currentIndex) {
-      return res.status(400).json({ success: false, message: "Cannot revert order to a previous status" })
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.CANNOT_REVERT_ORDER_TO_A_PREVIOUS_STATUS })
     }
 
     order.status = status
@@ -63,15 +68,15 @@ const updateOrderStatus = async (req, res) => {
 
     order.updatedOn = new Date()
 
-    if (status === "delivered") {
+    if (status === ORDER_STATUS.DELIVERED) {
       order.deliveredOn = new Date()
     }
 
     await order.save()
-    res.json({ success: true, message: "Order status updated successfully" })
+    res.json({ success: true, message: MESSAGES.ORDER_STATUS_UPDATED_SUCCESSFULLY })
   } catch (error) {
-    logger.error("Error updating order status:", error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    logger.error(MESSAGES.ERROR_UPDATING_ORDER_STATUS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 })
   }
 }
 
@@ -81,12 +86,12 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" })
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.ORDER_NOT_FOUND })
     }
 
-    if (order.status !== "cancelled" && order.status !== "delivered") {
-      order.status = "cancelled"
-      order.orderedItems[0].status = "cancelled"
+    if (order.status !== ORDER_STATUS.CANCELLED && order.status !== ORDER_STATUS.DELIVERED) {
+      order.status = ORDER_STATUS.CANCELLED
+      order.orderedItems[0].status = ORDER_STATUS.CANCELLED
 
       order.updatedOn = new Date()
 
@@ -97,21 +102,21 @@ const cancelOrder = async (req, res) => {
       if (order.paymentMethod === "online" || order.paymentMethod === "wallet") {
         const refundSuccess = await processRefund(order.userId, order)
         if (!refundSuccess) {
-          return res.status(500).json({
+          return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Failed to process refund",
+            message: MESSAGES.FAILED_TO_PROCESS_REFUND,
           })
         }
       }
 
       await order.save()
-      res.json({ success: true, message: "Order cancelled and refund processed successfully" })
+      res.json({ success: true, message: MESSAGES.ORDER_CANCELLED_AND_REFUND_PROCESSED_SUCCESSFULLY })
     } else {
-      res.status(400).json({ success: false, message: "Order cannot be cancelled" })
+      res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.ORDER_CANNOT_BE_CANCELLED })
     }
   } catch (error) {
-    logger.error("Error cancelling order:", error)
-    res.status(500).json({ success: false, message: "Internal server error" })
+    logger.error(MESSAGES.ERROR_CANCELLING_ORDER, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 })
   }
 }
 
@@ -121,17 +126,17 @@ const handleReturnRequest = async (req, res) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
-        message: "Order not found",
+        message: MESSAGES.ORDER_NOT_FOUND,
       })
     }
 
     if (action === "approve") {
-      order.status = "returning"
+      order.status = ORDER_STATUS.RETURNING
       order.requestStatus = "approved"
     } else if (action === "reject") {
-      order.status = "delivered"
+      order.status = ORDER_STATUS.DELIVERED
       order.requestStatus = "rejected"
       order.rejectionCategory = category
       order.rejectionReason = message
@@ -145,10 +150,10 @@ const handleReturnRequest = async (req, res) => {
       message: `Return request ${action}d successfully`,
     })
   } catch (error) {
-    logger.error("Error handling return request:", error)
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_HANDLING_RETURN_REQUEST, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1,
     })
   }
 }
@@ -159,16 +164,16 @@ const updateReturnStatus = async (req, res) => {
     const order = await Order.findById(orderId)
 
     if (!order) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         success: false,
-        message: "Order not found",
+        message: MESSAGES.ORDER_NOT_FOUND,
       })
     }
 
-    if (order.status !== "returning" && status === "returned") {
-      return res.status(400).json({
+    if (order.status !== ORDER_STATUS.RETURNING && status === ORDER_STATUS.RETURNED) {
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         success: false,
-        message: "Order must be in returning status first",
+        message: MESSAGES.ORDER_MUST_BE_IN_RETURNING_STATUS_FIRST,
       })
     }
 
@@ -176,12 +181,12 @@ const updateReturnStatus = async (req, res) => {
     
     order.updatedOn = new Date()
 
-    if (status === "returned") {
+    if (status === ORDER_STATUS.RETURNED) {
       const refundSuccess = await processRefund(order.userId, order)
       if (!refundSuccess) {
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
           success: false,
-          message: "Failed to process refund",
+          message: MESSAGES.FAILED_TO_PROCESS_REFUND,
         })
       }
     }
@@ -189,13 +194,13 @@ const updateReturnStatus = async (req, res) => {
     await order.save()
     res.json({
       success: true,
-      message: "Return status updated successfully",
+      message: MESSAGES.RETURN_STATUS_UPDATED_SUCCESSFULLY,
     })
   } catch (error) {
-    logger.error("Error updating return status:", error)
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_UPDATING_RETURN_STATUS, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1,
     })
   }
 }

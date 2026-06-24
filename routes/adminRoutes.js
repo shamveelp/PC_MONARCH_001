@@ -13,6 +13,9 @@ import transactionController from '../controllers/admin/transactionController.js
 
 import { adminAuth } from '../middlewares/auth.js';
 import multer from "multer";
+import STATUS_CODES from '../enums/statusCodes.js';
+import MESSAGES from '../enums/constants.js';
+
 const upload = multer();
 
 router.get('/pageerror', adminController.pageError);
@@ -125,7 +128,7 @@ router.post('/comments/:commentId/unblock', adminAuth, commentController.unblock
 
 
 router.use((req, res) => {
-    res.status(404).redirect("/admin/pageerror");
+    res.status(STATUS_CODES.NOT_FOUND).redirect("/admin/pageerror");
 });
 
 

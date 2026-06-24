@@ -1,22 +1,25 @@
 import logger from '../../utils/logger.js';
 import Comment from '../../models/commentSchema.js';
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const addComment = async (req, res) => {
   try {
     const { productId, comment } = req.body;
     const userId = req.session.user;
 
     if (!comment || comment.trim().length === 0) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         status: false,
-        message: 'Comment cannot be empty'
+        message: MESSAGES.COMMENT_CANNOT_BE_EMPTY
       });
     }
 
     if (comment.length > 500) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         status: false,
-        message: 'Comment is too long (maximum 500 characters)'
+        message: MESSAGES.COMMENT_IS_TOO_LONG_MAXIMUM_500_CHARACTERS
       });
     }
 
@@ -34,9 +37,9 @@ const addComment = async (req, res) => {
     });
 
     if (commentCount >= 3) {
-      return res.status(400).json({
+      return res.status(STATUS_CODES.BAD_REQUEST).json({
         status: false,
-        message: 'You have reached the maximum limit of 3 comments per day'
+        message: MESSAGES.YOU_HAVE_REACHED_THE_MAXIMUM_LIMIT_OF_3_COMMENTS_P
       });
     }
 
@@ -48,15 +51,15 @@ const addComment = async (req, res) => {
 
     await newComment.save();
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       status: true,
-      message: 'Comment added successfully'
+      message: MESSAGES.COMMENT_ADDED_SUCCESSFULLY
     });
   } catch (error) {
-    logger.error('Error in addComment:', error);
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_IN_ADDCOMMENT, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: false,
-      message: 'Internal server error'
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1
     });
   }
 };
@@ -84,7 +87,7 @@ const getProductComments = async (req, res) => {
 
     const totalPages = Math.ceil(total / limit);
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       status: true,
       data: comments,
       pagination: {
@@ -94,10 +97,10 @@ const getProductComments = async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error('Error in getProductComments:', error);
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_IN_GETPRODUCTCOMMENTS, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: false,
-      message: 'Internal server error'
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1
     });
   }
 };
@@ -110,23 +113,23 @@ const deleteComment = async (req, res) => {
     const comment = await Comment.findOne({ _id: commentId, userId });
 
     if (!comment) {
-      return res.status(404).json({
+      return res.status(STATUS_CODES.NOT_FOUND).json({
         status: false,
-        message: 'Comment not found or you are not authorized to delete this comment'
+        message: MESSAGES.COMMENT_NOT_FOUND_OR_YOU_ARE_NOT_AUTHORIZED_TO_DEL
       });
     }
 
     await Comment.deleteOne({ _id: commentId });
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
       status: true,
-      message: 'Comment deleted successfully'
+      message: MESSAGES.COMMENT_DELETED_SUCCESSFULLY
     });
   } catch (error) {
-    logger.error('Error in deleteComment:', error);
-    res.status(500).json({
+    logger.error(MESSAGES.ERROR_IN_DELETECOMMENT, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
       status: false,
-      message: 'Internal server error'
+      message: MESSAGES.INTERNAL_SERVER_ERROR_1
     });
   }
 };

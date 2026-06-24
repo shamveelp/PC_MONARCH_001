@@ -3,6 +3,9 @@ import Coupon from "../../models/couponSchema.js";
 import mongoose from "mongoose";
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const loadCoupon = async (req,res) => {
     try {
 
@@ -70,14 +73,14 @@ const updateCoupon = async (req, res) => {
     try {
         const couponId = req.query.couponId;
         if (!mongoose.Types.ObjectId.isValid(couponId)) {
-            return res.status(400).json({ message: "Invalid coupon ID" });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ message: MESSAGES.INVALID_COUPON_ID });
         }
 
         const oid = new mongoose.Types.ObjectId(couponId);
         const selectedCoupon = await Coupon.findOne({ _id: oid });
 
         if (!selectedCoupon) {
-            return res.status(404).json({ message: "Coupon not found" });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ message: MESSAGES.COUPON_NOT_FOUND });
         }
 
         const startDate = new Date(req.body.startDate + "T00:00:00");
@@ -98,13 +101,13 @@ const updateCoupon = async (req, res) => {
         );
 
         if (!updatedCoupon) {
-            return res.status(500).json({ message: "Error updating coupon" });
+            return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.ERROR_UPDATING_COUPON });
         }
 
-        res.json({ message: "Coupon updated successfully", coupon: updatedCoupon });
+        res.json({ message: MESSAGES.COUPON_UPDATED_SUCCESSFULLY, coupon: updatedCoupon });
     } catch (error) {
-        logger.error("Error updating coupon:", error);
-        res.status(500).json({ message: "Internal server error" });
+        logger.error(MESSAGES.ERROR_UPDATING_COUPON_1, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.INTERNAL_SERVER_ERROR_1 });
     }
 };
 
@@ -113,11 +116,11 @@ const deleteCoupon = async (req,res) => {
         
         const id = req.query.id;
         await Coupon.deleteOne({_id:id})
-        res.status(200).send({success:true,message:"Coupon deleted successfully"})
+        res.status(STATUS_CODES.OK).send({success:true,message: MESSAGES.COUPON_DELETED_SUCCESSFULLY})
 
     } catch (error) {
-        logger.error("Error Deleting Coupon",error)
-        res.status(500).send({success:false,message:"Internal Server Error"})
+        logger.error(MESSAGES.ERROR_DELETING_COUPON,error)
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send({success:false,message: MESSAGES.INTERNAL_SERVER_ERROR})
     }
 }
 

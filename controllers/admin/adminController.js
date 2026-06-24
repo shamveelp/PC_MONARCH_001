@@ -6,6 +6,12 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
+import ORDER_STATUS from '../../enums/orderStatus.js';
+import PAYMENT_STATUS from '../../enums/paymentStatus.js';
+
 const pageError = async (req, res) => {
     res.render('admin-error')
 }
@@ -36,7 +42,7 @@ const login = async (req, res) => {
             return res.redirect('/admin/login');
         }
     } catch (error) {
-        logger.info("Login Error", error);
+        logger.info(MESSAGES.LOGIN_ERROR, error);
         return res.redirect('/pageerror');
     }
 };
@@ -49,7 +55,7 @@ const loadDashboard = async (req, res) => {
       const userCount = await User.countDocuments({ isAdmin: false })
       const orderCount = await Order.countDocuments()
 
-      const orders = await Order.find({ status: "delivered" })
+      const orders = await Order.find({ status: ORDER_STATUS.DELIVERED })
       const totalRevenue = orders.reduce((total, order) => total + order.finalAmount, 0)
 
       const topProducts = await getTopSellingProducts()
@@ -75,7 +81,7 @@ const loadDashboard = async (req, res) => {
 
       res.render("dashboard", { dashboardData })
     } catch (error) {
-      logger.error("Dashboard Error:", error)
+      logger.error(MESSAGES.DASHBOARD_ERROR, error)
       res.redirect("/pageerror")
     }
   } else {
@@ -86,7 +92,7 @@ const loadDashboard = async (req, res) => {
 const getTopSellingProducts = async (limit = 5) => {
   try {
     const topProducts = await Order.aggregate([
-      { $match: { status: "delivered" } },
+      { $match: { status: ORDER_STATUS.DELIVERED } },
       { $unwind: "$orderedItems" },
       {
         $group: {
@@ -117,7 +123,7 @@ const getTopSellingProducts = async (limit = 5) => {
 
     return enrichedProducts
   } catch (error) {
-    logger.error("Error getting top products:", error)
+    logger.error(MESSAGES.ERROR_GETTING_TOP_PRODUCTS, error)
     return []
   }
 }
@@ -140,7 +146,7 @@ const getRecentOrders = async (limit = 5) => {
 
     return ordersWithCustomers
   } catch (error) {
-    logger.error("Error getting recent orders:", error)
+    logger.error(MESSAGES.ERROR_GETTING_RECENT_ORDERS, error)
     return []
   }
 }
@@ -163,7 +169,7 @@ const getSalesDataHelper = async (period = "yearly") => {
 
         const dayOrders = await Order.find({
           createdOn: { $gte: dayStart, $lte: dayEnd },
-          status: "delivered",
+          status: ORDER_STATUS.DELIVERED,
         })
 
         const daySales = dayOrders.reduce((total, order) => total + order.finalAmount, 0)
@@ -182,7 +188,7 @@ const getSalesDataHelper = async (period = "yearly") => {
 
         const monthOrders = await Order.find({
           createdOn: { $gte: monthStart, $lte: monthEnd },
-          status: "delivered",
+          status: ORDER_STATUS.DELIVERED,
         })
 
         const monthSales = monthOrders.reduce((total, order) => total + order.finalAmount, 0)
@@ -200,7 +206,7 @@ const getSalesDataHelper = async (period = "yearly") => {
 
         const yearOrders = await Order.find({
           createdOn: { $gte: yearStart, $lte: yearEnd },
-          status: "delivered",
+          status: ORDER_STATUS.DELIVERED,
         })
 
         const yearSales = yearOrders.reduce((total, order) => total + order.finalAmount, 0)
@@ -212,7 +218,7 @@ const getSalesDataHelper = async (period = "yearly") => {
 
     return { labels, data }
   } catch (error) {
-    logger.error("Error getting sales data:", error)
+    logger.error(MESSAGES.ERROR_GETTING_SALES_DATA, error)
     return { labels: [], data: [] }
   }
 }
@@ -231,16 +237,16 @@ const getOrderStatusCounts = async () => {
     const orders = await Order.find()
 
     orders.forEach((order) => {
-      if (order.status === "delivered") statusCounts["Delivered"]++
-      else if (order.status === "pending") statusCounts["Pending"]++
-      else if (order.status === "shipped") statusCounts["Shipped"]++
-      else if (order.status === "cancelled") statusCounts["Cancelled"]++
+      if (order.status === ORDER_STATUS.DELIVERED) statusCounts["Delivered"]++
+      else if (order.status === ORDER_STATUS.PENDING) statusCounts[PAYMENT_STATUS.PENDING]++
+      else if (order.status === ORDER_STATUS.SHIPPED) statusCounts["Shipped"]++
+      else if (order.status === ORDER_STATUS.CANCELLED) statusCounts["Cancelled"]++
       else if (order.status.includes("return")) statusCounts["Returned"]++
     })
 
     return statusCounts
   } catch (error) {
-    logger.error("Error getting order status counts:", error)
+    logger.error(MESSAGES.ERROR_GETTING_ORDER_STATUS_COUNTS, error)
     return { Delivered: 0, Pending: 0, Shipped: 0, Cancelled: 0, Returned: 0 }
   }
 }
@@ -254,7 +260,7 @@ const logout = async (req, res) => {
         }
         res.redirect('/admin/login'); 
     } catch (error) {
-        logger.info('Logout Error', error);
+        logger.info(MESSAGES.LOGOUT_ERROR, error);
         res.redirect('/pageerror');
     }
 };
@@ -266,7 +272,7 @@ const getTopSelling = async (req, res) => {
     if (type === "categories") {
       
       const topCategories = await Order.aggregate([
-        { $match: { status: "delivered" } },
+        { $match: { status: ORDER_STATUS.DELIVERED } },
         { $unwind: "$orderedItems" },
         {
           $lookup: {
@@ -312,7 +318,7 @@ const getTopSelling = async (req, res) => {
     } else {
      
       const topProducts = await Order.aggregate([
-        { $match: { status: "delivered" } },
+        { $match: { status: ORDER_STATUS.DELIVERED } },
         { $unwind: "$orderedItems" },
         {
           $group: {
@@ -344,8 +350,8 @@ const getTopSelling = async (req, res) => {
       res.json({ products: enrichedProducts })
     }
   } catch (error) {
-    logger.error("Error in getTopSelling API:", error)
-    res.status(500).json({ error: "Internal server error" })
+    logger.error(MESSAGES.ERROR_IN_GETTOPSELLING_API, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" })
   }
 }
 
@@ -356,8 +362,8 @@ const getSalesData = async (req, res) => {
     const salesData = await getSalesDataHelper(period)
     res.json(salesData)
   } catch (error) {
-    logger.error("Error in getSalesData API:", error)
-    res.status(500).json({ error: "Internal server error" })
+    logger.error(MESSAGES.ERROR_IN_GETSALESDATA_API, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" })
   }
 }
 

@@ -12,6 +12,9 @@ import path from "path";
 import { uploadBuffer, cloudinary } from "../../config/cloudinary.js";
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 function generateOtp(){
     const digits = "1234567890"
     let otp = "";
@@ -45,13 +48,13 @@ const sendVerificationEmail = async (email,otp) => {
         }
 
         const info = await transporter.sendMail(mailOption);
-        logger.info("Email sent:",info.messageId)
+        logger.info(MESSAGES.EMAIL_SENT,info.messageId)
 
         return true;
 
     } catch (error) {
 
-        logger.error("error sending email",error);
+        logger.error(MESSAGES.ERROR_SENDING_EMAIL,error);
         return false
         
     }
@@ -97,14 +100,14 @@ const forgotEmailValid = async (req,res) => {
                 req.session.email = email;
                 res.render("forgotPass-otp");
                 
-                logger.info("OTP: ",otp)
+                logger.info(MESSAGES.OTP,otp)
             } else{
-                res.json({success:false,message:"Failed to send OTP. PLease try again"})
+                res.json({success:false,message: MESSAGES.FAILED_TO_SEND_OTP_PLEASE_TRY_AGAIN})
             }
 
         } else{
             res.render("forgot-password",{
-                message:"User with this email does not exist"
+                message: MESSAGES.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST
             })
         }
 
@@ -123,12 +126,12 @@ const verifyForgotPassOtp = async (req,res) => {
             req.session.resetAllowed = true;
             res.json({success:true,redirectUrl:"/reset-password"})
         } else{
-            res.json({success:false,message:"OTP not matching"})
+            res.json({success:false,message: MESSAGES.OTP_NOT_MATCHING_2})
         }
 
     } catch (error) {
 
-        res.status(500).json({success:false,message:"An error occured please try again"})
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message: MESSAGES.AN_ERROR_OCCURED_PLEASE_TRY_AGAIN})
         
     }
 }
@@ -151,19 +154,19 @@ const resendOtp = async (req,res) => {
         const otp = generateOtp();
         req.session.userOtp = otp;
         const email = req.session.email;
-        logger.info("Resending otp to email",email);
+        logger.info(MESSAGES.RESENDING_OTP_TO_EMAIL,email);
         const emailSent = await sendVerificationEmail(email,otp);
         if(emailSent){
-            logger.info("Resend Otp: ",otp);
-            res.status(200).json({success:true,message:"Resend OTP Successful"})
+            logger.info(MESSAGES.RESEND_OTP,otp);
+            res.status(STATUS_CODES.OK).json({success:true,message: MESSAGES.RESEND_OTP_SUCCESSFUL})
 
             
         }
 
     } catch (error) {
 
-        logger.error("Error in rend otp",error);
-        res.status(500).json({success:false,message:"Internal server errro"})
+        logger.error(MESSAGES.ERROR_IN_REND_OTP,error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message: MESSAGES.INTERNAL_SERVER_ERRRO})
         
     }
 }
@@ -188,7 +191,7 @@ const postNewPassword = async (req,res) => {
             
             res.redirect("/login")
         } else{
-            res.render("reset-password",{message:"Password do not match"})
+            res.render("reset-password",{message: MESSAGES.PASSWORD_DO_NOT_MATCH})
         }
 
     } catch (error) {
@@ -214,7 +217,7 @@ const userProfile = async (req,res) => {
 
     } catch (error) {
 
-        logger.error('Error:',error)
+        logger.error(MESSAGES.ERROR,error)
         res.redirect("/pageNotFound")
         
     }
@@ -255,7 +258,7 @@ const changeEmailValid = async (req,res) => {
             }
         }else{
             res.render("change-email",{
-                message: "User with email not exist"
+                message: MESSAGES.USER_WITH_EMAIL_NOT_EXIST
             })
         }
 
@@ -277,7 +280,7 @@ const verifyEmailOtp = async (req,res) => {
             })
         }else{
             res.render("change-email-otp",{
-                message:"OTP not Matching",
+                message: MESSAGES.OTP_NOT_MATCHING,
                 userData: req.session.userData,
             })
         }
@@ -315,9 +318,9 @@ const updateEmail = async (req,res) => {
         // Validate phone number
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(phone)) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: 'Please enter a valid 10-digit phone number'
+                message: MESSAGES.PLEASE_ENTER_A_VALID_10_DIGIT_PHONE_NUMBER
             });
         }
 
@@ -328,9 +331,9 @@ const updateEmail = async (req,res) => {
                 _id: { $ne: userId }
             });
             if (existingUser) {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     success: false,
-                    message: 'Username is already taken. Please choose a different one.'
+                    message: MESSAGES.USERNAME_IS_ALREADY_TAKEN_PLEASE_CHOOSE_A_DIFFEREN
                 });
             }
         }
@@ -343,21 +346,21 @@ const updateEmail = async (req,res) => {
         );
 
         if (!updatedUser) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 success: false,
-                message: 'User not found'
+                message: MESSAGES.USER_NOT_FOUND
             });
         }
 
         res.json({
             success: true,
-            message: 'Profile updated successfully'
+            message: MESSAGES.PROFILE_UPDATED_SUCCESSFULLY
         });
     } catch (error) {
-        logger.error('Error updating profile:', error);
-        res.status(500).json({
+        logger.error(MESSAGES.ERROR_UPDATING_PROFILE, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: 'An error occurred while updating your profile'
+            message: MESSAGES.AN_ERROR_OCCURRED_WHILE_UPDATING_YOUR_PROFILE
         });
     }
 };
@@ -372,23 +375,23 @@ const changePassword = async (req, res) => {
 
         
         if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-            return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long and contain both letters and numbers.' });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.PASSWORD_MUST_BE_AT_LEAST_8_CHARACTERS_LONG_AND_CO });
         }
 
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ success: false, message: 'Passwords do not match.' });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.PASSWORDS_DO_NOT_MATCH });
         }
 
         
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found.' });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.USER_NOT_FOUND_4 });
         }
 
         // Check if the current password is correct
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res.status(400).json({ success: false, error: 'current_password_incorrect', message: 'Current password is incorrect.' });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, error: 'current_password_incorrect', message: MESSAGES.CURRENT_PASSWORD_IS_INCORRECT });
         }
 
         // Hash the new password
@@ -398,10 +401,10 @@ const changePassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        res.json({ success: true, message: 'Password changed successfully.' });
+        res.json({ success: true, message: MESSAGES.PASSWORD_CHANGED_SUCCESSFULLY });
     } catch (error) {
-        logger.error('Error changing password:', error);
-        res.status(500).json({ success: false, message: 'An error occurred while changing the password.' });
+        logger.error(MESSAGES.ERROR_CHANGING_PASSWORD, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_CHANGING_THE_PASSWORD });
     }
 };
   
@@ -422,7 +425,7 @@ const loadAddressPage = async (req,res) => {
 
     } catch (error) {
 
-        logger.error("Error in Address loading",error);
+        logger.error(MESSAGES.ERROR_IN_ADDRESS_LOADING,error);
         res.redirect("/pageNotFound");
         
     }
@@ -471,7 +474,7 @@ const postAddAddress = async (req,res) => {
 
     } catch (error) {
 
-        logger.error("Error adding address",error)
+        logger.error(MESSAGES.ERROR_ADDING_ADDRESS,error)
 
         res.redirect("/pageNotFound")
         
@@ -508,7 +511,7 @@ const editAddress = async (req,res) => {
 
     } catch (error) {
 
-        logger.error("Error in edit Address",error)
+        logger.error(MESSAGES.ERROR_IN_EDIT_ADDRESS,error)
         res.redirect("/pageNotFound")
         
     }
@@ -551,7 +554,7 @@ const postEditAddress = async (req,res) => {
         
     } catch (error) {
 
-        logger.error("Error in editing address",error)
+        logger.error(MESSAGES.ERROR_IN_EDITING_ADDRESS,error)
         res.redirect("/pageNotFound")
         
     }
@@ -564,7 +567,7 @@ const deleteAddress = async (req,res) => {
         const findAddress = await Address.findOne({"address._id":addressId})
 
         if(!findAddress){
-            return res.status(404).send("Address Not Found")
+            return res.status(STATUS_CODES.NOT_FOUND).send("Address Not Found")
         }
 
         await Address.updateOne(
@@ -583,7 +586,7 @@ const deleteAddress = async (req,res) => {
 
     } catch (error) {
 
-        logger.error("Error in deleting in address",error)
+        logger.error(MESSAGES.ERROR_IN_DELETING_IN_ADDRESS,error)
         res.redirect("/pageNotFound")
         
     }
@@ -596,12 +599,12 @@ const updateProfileImage = async (req, res) => {
         const file = req.file;
 
         if (!file) {
-            return res.status(400).json({ success: false, message: 'No image provided' });
+            return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.NO_IMAGE_PROVIDED });
         }
 
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.USER_NOT_FOUND });
         }
 
         // Process image with sharp
@@ -619,7 +622,7 @@ const updateProfileImage = async (req, res) => {
                 const publicId = user.profilePicture.split('/').pop().split('.')[0];
                 await cloudinary.uploader.destroy(`profile-pictures/${publicId}`);
             } catch (err) {
-                logger.error('Error deleting old profile image:', err);
+                logger.error(MESSAGES.ERROR_DELETING_OLD_PROFILE_IMAGE, err);
             }
         }
 
@@ -629,14 +632,14 @@ const updateProfileImage = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Profile image updated successfully',
+            message: MESSAGES.PROFILE_IMAGE_UPDATED_SUCCESSFULLY,
             imageUrl: uploadResult.secure_url
         });
     } catch (error) {
-        logger.error('Error updating profile image:', error);
-        res.status(500).json({
+        logger.error(MESSAGES.ERROR_UPDATING_PROFILE_IMAGE, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: 'An error occurred while updating your profile image'
+            message: MESSAGES.AN_ERROR_OCCURRED_WHILE_UPDATING_YOUR_PROFILE_IMAG
         });
     }
 };

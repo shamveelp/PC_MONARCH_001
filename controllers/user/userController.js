@@ -8,6 +8,9 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const pageNotFound = async (req, res) => {
     try {
         res.render('page404')
@@ -43,8 +46,8 @@ const loadHomePage = async (req, res) => {
             
         
     } catch (error) {
-        logger.info('Home Page Not Found')
-        res.status(500).send('Server Error')
+        logger.info(MESSAGES.HOME_PAGE_NOT_FOUND)
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -52,8 +55,8 @@ const loadSignUpPage = async (req, res) => {
     try {
         res.render('signup')
     } catch (error) {
-        logger.info('Sign Up Page Not Found')
-        res.status(500).send('Server Error')
+        logger.info(MESSAGES.SIGN_UP_PAGE_NOT_FOUND)
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.SERVER_ERROR)
     }
 }
 
@@ -90,7 +93,7 @@ async function sendVerificationEmail(email,otp){
 
 
     } catch (error) {
-        logger.error("Error for sending email",error)
+        logger.error(MESSAGES.ERROR_FOR_SENDING_EMAIL,error)
         return false
     }
 }
@@ -103,13 +106,13 @@ const signUp = async (req, res) => {
         const { name, email, phone, password, cPassword } = req.body
         
         if(password !== cPassword){
-            return res.render('signup',{message:'Password not matched'})
+            return res.render('signup',{message: MESSAGES.PASSWORD_NOT_MATCHED})
         }
 
         const findUser = await User.findOne({email:email})
 
         if(findUser){
-            return res.render('signup',{message:'User already exists'})
+            return res.render('signup',{message: MESSAGES.USER_ALREADY_EXISTS})
         }
 
         const otp = generateOTP()
@@ -124,11 +127,11 @@ const signUp = async (req, res) => {
         req.session.userData = {name,phone,email,password};
 
         res.render('verify-otp');
-        logger.info("OTP Send",otp);
+        logger.info(MESSAGES.OTP_SEND,otp);
         
 
     } catch (error) {
-        logger.error('signup error',error)
+        logger.error(MESSAGES.SIGNUP_ERROR,error)
         res.redirect('/pagenotfound')
     }
 }
@@ -150,7 +153,7 @@ const verifyOtp = async (req, res) => {
     try{
         const {otp} = req.body;
 
-        logger.info('OTP',otp)
+        logger.info(MESSAGES.OTP_1,otp)
 
         if(otp===req.session.userOtp){
             const user = req.session.userData;
@@ -170,12 +173,12 @@ const verifyOtp = async (req, res) => {
             res.json({success:true,redirectUrl:'/'})
 
         } else{
-            res.status(400).json({success:false,message:'Invalid OTP Please try again'})
+            res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message: MESSAGES.INVALID_OTP_PLEASE_TRY_AGAIN})
         }
 
     } catch (error) {
-        logger.error('Error verifying OTP',error)
-        res.status(500).json({success:false,message:'Server Error'})
+        logger.error(MESSAGES.ERROR_VERIFYING_OTP,error)
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message: MESSAGES.SERVER_ERROR})
     }
 }
 
@@ -185,7 +188,7 @@ const resendOtp = async (req, res) => {
         
         const {email} = req.session.userData;
         if(!email){
-            return res.status(400).json({success:false,message:'Email not found in session'})
+            return res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message: MESSAGES.EMAIL_NOT_FOUND_IN_SESSION})
         }
 
         const otp = generateOTP();
@@ -194,20 +197,20 @@ const resendOtp = async (req, res) => {
 
         const emailSent = await sendVerificationEmail(email,otp);
 
-        logger.info("Resended OTP:",otp)
+        logger.info(MESSAGES.RESENDED_OTP,otp)
 
         if(!emailSent){
-            logger.info("Resend OTP",otp);
-            res.status(200).json({success:true,message:'OTP Resend Successfully'})
+            logger.info(MESSAGES.RESEND_OTP_1,otp);
+            res.status(STATUS_CODES.OK).json({success:true,message: MESSAGES.OTP_RESEND_SUCCESSFULLY})
             
         } else{
-            res.status(500).json({success:false,message:'Failed to resend OTP Please try again'})
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message: MESSAGES.FAILED_TO_RESEND_OTP_PLEASE_TRY_AGAIN})
         }
 
     } catch (error) {
 
-        logger.error('Error Resending OTP',error)
-        res.status(500).json({success:false,message:'INternal Server Error, Please try again'})
+        logger.error(MESSAGES.ERROR_RESENDING_OTP,error)
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false,message: MESSAGES.INTERNAL_SERVER_ERROR_PLEASE_TRY_AGAIN})
         
     }
 }
@@ -233,16 +236,16 @@ const login = async (req, res) => {
         const findUser = await User.findOne({isAdmin:0,email:email});
 
         if(!findUser){
-            return res.render('login',{message:'User not found'})
+            return res.render('login',{message: MESSAGES.USER_NOT_FOUND})
         }
         if(findUser.isBlocked){
-            return res.render('login',{message:'User is Blocked by Admin'})
+            return res.render('login',{message: MESSAGES.USER_IS_BLOCKED_BY_ADMIN})
         }
 
         const passwordMatch = await bcrypt.compare(password,findUser.password);
 
         if(!passwordMatch){
-            return res.render('login',{message:'Invalid Password'})
+            return res.render('login',{message: MESSAGES.INVALID_PASSWORD})
         }
 
         req.session.user = findUser._id;
@@ -250,8 +253,8 @@ const login = async (req, res) => {
 
     } catch (error) {
 
-        logger.error('Login Error',error);
-        res.render('login',{message:'Login Failed Try again'})
+        logger.error(MESSAGES.LOGIN_ERROR,error);
+        res.render('login',{message: MESSAGES.LOGIN_FAILED_TRY_AGAIN})
         
         
     }
@@ -265,7 +268,7 @@ const logout = async (req, res) => {
         }
         res.redirect('/login'); 
     } catch (error) {
-        logger.info('Logout Error', error);
+        logger.info(MESSAGES.LOGOUT_ERROR, error);
         res.redirect('/pagenotfound');
     }
 };
@@ -388,8 +391,8 @@ const loadShoppingPage = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error("Error loading shopping page:", error);
-        res.status(500).redirect("/pageNotFound");
+        logger.error(MESSAGES.ERROR_LOADING_SHOPPING_PAGE, error);
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).redirect("/pageNotFound");
     }
 };
 
@@ -476,7 +479,7 @@ const filterProduct = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error("Error while filtering products:", error);
+        logger.error(MESSAGES.ERROR_WHILE_FILTERING_PRODUCTS, error);
         res.redirect("/pageNotFound");
     }
 };
@@ -532,7 +535,7 @@ const searchProducts = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error("Error searching products:", error);
+        logger.error(MESSAGES.ERROR_SEARCHING_PRODUCTS, error);
         res.redirect("/pageNotFound");
     }
 };

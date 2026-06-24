@@ -6,6 +6,11 @@ import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
+import ORDER_STATUS from '../../enums/orderStatus.js';
+
 const loadSalesPage = async (req, res) => {
   try {
       const { reportType, startDate, endDate, format } = req.query;
@@ -42,7 +47,7 @@ const loadSalesPage = async (req, res) => {
               break;
       }
   
-      query.status = 'delivered';
+      query.status = ORDER_STATUS.DELIVERED;
   
       // Fetch orders with populated product details
       const orders = await Order.find(query)
@@ -105,9 +110,9 @@ const loadSalesPage = async (req, res) => {
   
       res.render('sales-report', { salesData });
   } catch (error) {
-      logger.error('Error in loadSalesPage:', error);
-      res.status(500).render('admin/pageerror', { 
-          message: 'Error loading sales report', 
+      logger.error(MESSAGES.ERROR_IN_LOADSALESPAGE, error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('admin/pageerror', { 
+          message: MESSAGES.ERROR_LOADING_SALES_REPORT, 
           error: error.message 
       });
   }
@@ -228,7 +233,7 @@ const createSaleRecord = async (order) => {
     await sale.save();
     return sale;
   } catch (error) {
-    logger.error('Error creating sale record:', error);
+    logger.error(MESSAGES.ERROR_CREATING_SALE_RECORD, error);
     throw error;
   }
 };

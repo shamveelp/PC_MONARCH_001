@@ -7,6 +7,9 @@ import fs from "fs";
 import { fileURLToPath } from 'url';
 import { uploadBuffer, uploadBase64, cloudinary } from "../../config/cloudinary.js";
 
+import STATUS_CODES from '../../enums/statusCodes.js';
+import MESSAGES from '../../enums/constants.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -31,8 +34,8 @@ const getProductAddPage = async (req, res) => {
       cat: category,
     })
   } catch (error) {
-    logger.error("Error loading product add page:", error)
-    res.status(500).json({ success: false, message: "Error loading product add page" })
+    logger.error(MESSAGES.ERROR_LOADING_PRODUCT_ADD_PAGE_1, error)
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.ERROR_LOADING_PRODUCT_ADD_PAGE })
   }
 }
 
@@ -40,7 +43,7 @@ const saveImage = async (req, res) => {
   try {
     const file = req.file;
     if (!file) {
-      return res.status(400).json({ success: false, message: "No image file provided" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.NO_IMAGE_FILE_PROVIDED });
     }
 
     // Resize & convert to WebP before uploading to Cloudinary
@@ -51,10 +54,10 @@ const saveImage = async (req, res) => {
 
     const uploadResult = await uploadBuffer(processedBuffer, "product-images");
 
-    return res.status(200).json({ success: true, message: "Image saved successfully", filename: uploadResult.secure_url });
+    return res.status(STATUS_CODES.OK).json({ success: true, message: MESSAGES.IMAGE_SAVED_SUCCESSFULLY, filename: uploadResult.secure_url });
   } catch (error) {
-    logger.error("Error saving image:", error);
-    return res.status(500).json({ success: false, message: "Error saving image" });
+    logger.error(MESSAGES.ERROR_SAVING_IMAGE_1, error);
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.ERROR_SAVING_IMAGE });
   }
 };
 
@@ -66,7 +69,7 @@ const addProducts = async (req, res) => {
   
     const productExists = await Product.findOne({ productName });
     if (productExists) {
-      return res.status(400).json({ success: false, message: "Product already exists, try another name" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.PRODUCT_ALREADY_EXISTS_TRY_ANOTHER_NAME });
     }
 
    
@@ -92,13 +95,13 @@ const addProducts = async (req, res) => {
     }
 
     if (imageURLs.length < 4) {
-      return res.status(400).json({ success: false, message: "Please upload all 4 product images" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.PLEASE_UPLOAD_ALL_4_PRODUCT_IMAGES });
     }
 
     
     const foundCategory = await Category.findOne({ name: category });
     if (!foundCategory) {
-      return res.status(400).json({ success: false, message: "Category not found" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: MESSAGES.CATEGORY_NOT_FOUND });
     }
 
     
@@ -123,10 +126,10 @@ const addProducts = async (req, res) => {
     });
 
     await newProduct.save();
-    return res.status(200).json({ success: true, message: "Product added successfully" });
+    return res.status(STATUS_CODES.OK).json({ success: true, message: MESSAGES.PRODUCT_ADDED_SUCCESSFULLY });
   } catch (error) {
-    logger.error("Error saving product:", error);
-    return res.status(500).json({ success: false, message: "Error saving product" });
+    logger.error(MESSAGES.ERROR_SAVING_PRODUCT_1, error);
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.ERROR_SAVING_PRODUCT });
   }
 };
 
@@ -172,7 +175,7 @@ const getAllProducts = async (req, res) => {
       res.render("admin-error");
     }
   } catch (error) {
-    logger.error("Error fetching products:", error);
+    logger.error(MESSAGES.ERROR_FETCHING_PRODUCTS, error);
     res.render("admin-error");
   }
 };
@@ -185,17 +188,17 @@ const addProductOffer = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({ status: false, message: "Product not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
     }
 
     product.productOffer = parseInt(percentage);
     product.salePrice = await calculateEffectivePrice(product);
     await product.save();
 
-    res.json({ status: true, message: "Offer added successfully" });
+    res.json({ status: true, message: MESSAGES.OFFER_ADDED_SUCCESSFULLY });
   } catch (error) {
-    logger.error("Error in addProductOffer:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
+    logger.error(MESSAGES.ERROR_IN_ADDPRODUCTOFFER, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 });
   }
 };
 
@@ -205,17 +208,17 @@ const removeProductOffer = async (req, res) => {
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({ status: false, message: "Product not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
     }
 
     product.productOffer = 0;
     product.salePrice = await calculateEffectivePrice(product);
     await product.save();
 
-    res.json({ status: true, message: "Offer removed successfully" });
+    res.json({ status: true, message: MESSAGES.OFFER_REMOVED_SUCCESSFULLY });
   } catch (error) {
-    logger.error("Error in removeProductOffer:", error);
-    res.status(500).json({ status: false, message: "Internal server error" });
+    logger.error(MESSAGES.ERROR_IN_REMOVEPRODUCTOFFER, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.INTERNAL_SERVER_ERROR_1 });
   }
 };
 
@@ -253,7 +256,7 @@ const getEditProduct = async (req, res) => {
     const categories = await Category.find({})
 
     if (!product) {
-      return res.status(404).send("Product not found")
+      return res.status(STATUS_CODES.NOT_FOUND).send(MESSAGES.PRODUCT_NOT_FOUND)
     }
 
     res.render("product-edit", {
@@ -261,7 +264,7 @@ const getEditProduct = async (req, res) => {
       cat: categories,
     })
   } catch (error) {
-    logger.error("Error in getEditProduct:", error)
+    logger.error(MESSAGES.ERROR_IN_GETEDITPRODUCT, error)
     res.redirect("/pageerror")
   }
 }
@@ -295,7 +298,7 @@ const editProduct = async (req, res) => {
     if (existingProduct) {
       return res
         .status(400)
-        .json({ success: false, message: "Product with this name already exists. Please try another name." })
+        .json({ success: false, message: MESSAGES.PRODUCT_WITH_THIS_NAME_ALREADY_EXISTS_PLEASE_TRY_A })
     }
 
     const updateFields = {
@@ -318,7 +321,7 @@ const editProduct = async (req, res) => {
 
     const product = await Product.findById(id)
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" })
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: MESSAGES.PRODUCT_NOT_FOUND })
     }
 
     
@@ -359,7 +362,7 @@ const editProduct = async (req, res) => {
                   const fullPath = path.join(process.cwd(), 'public', oldImage);
                   if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
                 } catch (e) {
-                  logger.error('Local unlink error:', e);
+                  logger.error(MESSAGES.LOCAL_UNLINK_ERROR, e);
                 }
               }
               product.productImage[i - 1] = imageURL;
@@ -372,10 +375,10 @@ const editProduct = async (req, res) => {
     Object.assign(product, updateFields);
     await product.save();
 
-    res.json({ success: true, message: "Product updated successfully" });
+    res.json({ success: true, message: MESSAGES.PRODUCT_UPDATED_SUCCESSFULLY });
   } catch (error) {
-    logger.error("Error in editProduct:", error);
-    res.status(500).json({ success: false, message: "An error occurred while updating the product" });
+    logger.error(MESSAGES.ERROR_IN_EDITPRODUCT, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_UPDATING_THE_PRODUCT });
   }
 };
 
@@ -387,7 +390,7 @@ const deleteSingleImage = async (req, res) => {
     const product = await Product.findById(productIdToServer);
 
     if (!product) {
-      return res.status(404).json({ status: false, message: "Product not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
     }
 
     
@@ -401,10 +404,10 @@ const deleteSingleImage = async (req, res) => {
       logger.info(`Image ${publicId} deleted from Cloudinary successfully`);
     }
 
-    res.json({ status: true, message: "Image deleted successfully" });
+    res.json({ status: true, message: MESSAGES.IMAGE_DELETED_SUCCESSFULLY });
   } catch (error) {
-    logger.error("Error in deleteSingleImage:", error);
-    res.status(500).json({ status: false, message: "An error occurred while deleting the image" });
+    logger.error(MESSAGES.ERROR_IN_DELETESINGLEIMAGE, error);
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.AN_ERROR_OCCURRED_WHILE_DELETING_THE_IMAGE });
   }
 };
 
@@ -414,7 +417,7 @@ const deleteProduct = async (req, res) => {
   const productId = req.query.id;
   
   if (!productId) {
-      return res.status(400).json({ status: false, message: 'Product ID is required' });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ status: false, message: MESSAGES.PRODUCT_ID_IS_REQUIRED });
   }
   
   try {
@@ -422,13 +425,13 @@ const deleteProduct = async (req, res) => {
       const product = await Product.findByIdAndDelete(productId);
 
       if (!product) {
-          return res.status(404).json({ status: false, message: 'Product not found' });
+          return res.status(STATUS_CODES.NOT_FOUND).json({ status: false, message: MESSAGES.PRODUCT_NOT_FOUND });
       }
 
       res.redirect('/admin/products'); 
   } catch (err) {
       logger.error(err);
-      res.status(500).json({ status: false, message: 'Server Error' });
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ status: false, message: MESSAGES.SERVER_ERROR });
   }
 }
 

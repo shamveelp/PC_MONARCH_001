@@ -23,6 +23,9 @@ import { userAuth, addCartWishlist, checkUserAuthWish, ajaxAuth } from '../middl
 import { resetPasswordMiddleware, blockLoggedInUsers, checkBlockedUser, checkLoggedIn, forgotPassLogout } from "../middlewares/profileAuth.js";
 
 
+import STATUS_CODES from '../enums/statusCodes.js';
+import MESSAGES from '../enums/constants.js';
+
 router.get('/pagenotfound', userController.pageNotFound);
 
 
@@ -42,7 +45,7 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
         req.session.user = req.user._id;
         res.redirect('/');
     } catch (error) {
-        logger.info("Google login error:", error);
+        logger.info(MESSAGES.GOOGLE_LOGIN_ERROR, error);
         res.redirect('/signup');
     }
 });
@@ -170,7 +173,7 @@ router.get('/api/products/:productId/comments', commentController.getProductComm
 router.delete('/api/comments/:commentId', userAuth, commentController.deleteComment);
 
 router.use((req, res) => {
-    res.status(404).redirect("/pageNotFound");
+    res.status(STATUS_CODES.NOT_FOUND).redirect("/pageNotFound");
 });
 
 export default router;

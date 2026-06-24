@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 import { v4 as uuidv4 } from 'uuid';
 
+import TRANSACTION_STATUS from '../enums/transactionStatus.js';
+
 const transactionSchema = new Schema({
     transactionId: {
         type: String,
@@ -38,8 +40,8 @@ const transactionSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'completed', 'failed', 'refunded'],
-        default: 'completed'
+        enum: [TRANSACTION_STATUS.PENDING, TRANSACTION_STATUS.COMPLETED, TRANSACTION_STATUS.FAILED, TRANSACTION_STATUS.REFUNDED],
+        default: TRANSACTION_STATUS.COMPLETED
     },
     purpose: {
         type: String,
