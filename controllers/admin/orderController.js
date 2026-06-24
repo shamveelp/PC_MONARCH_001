@@ -8,6 +8,7 @@ import STATUS_CODES from '../../enums/statusCodes.js';
 import MESSAGES from '../../enums/constants.js';
 
 import ORDER_STATUS from '../../enums/orderStatus.js';
+import PAYMENT_STATUS from '../../enums/paymentStatus.js';
 
 const getOrders = async (req, res) => {
   try {
@@ -99,7 +100,10 @@ const cancelOrder = async (req, res) => {
         $inc: { quantity: order.orderedItems[0].quantity },
       })
 
-      if (order.paymentMethod === "online" || order.paymentMethod === "wallet") {
+      const isOnlineSuccess = order.paymentMethod === "online" && order.paymentStatus === PAYMENT_STATUS.SUCCESS;
+      const isWallet = order.paymentMethod === "wallet";
+
+      if (isOnlineSuccess || isWallet) {
         const refundSuccess = await processRefund(order.userId, order)
         if (!refundSuccess) {
           return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({

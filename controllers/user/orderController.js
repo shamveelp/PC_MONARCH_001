@@ -292,7 +292,10 @@ const cancelOrder = async (req, res) => {
         $inc: { quantity: order.orderedItems[0].quantity },
       })
 
-      if (order.paymentMethod === "online" || order.paymentMethod === "wallet") {
+      const isOnlineSuccess = order.paymentMethod === "online" && order.paymentStatus === PAYMENT_STATUS.SUCCESS;
+      const isWallet = order.paymentMethod === "wallet";
+
+      if (isOnlineSuccess || isWallet) {
         const refundSuccess = await processRefund(userId, order)
         if (!refundSuccess) {
           return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
@@ -669,9 +672,18 @@ const verifyPayment = async (req, res) => {
 
     // Update orders to confirmed and paymentStatus to Success
     for (const order of orders) {
+      const wasCancelled = order.status === ORDER_STATUS.CANCELLED;
+
       order.status = ORDER_STATUS.CONFIRMED;
       order.paymentStatus = PAYMENT_STATUS.SUCCESS;
       order.orderedItems[0].status = ORDER_STATUS.CONFIRMED;
+
+      if (wasCancelled) {
+        await Product.findByIdAndUpdate(order.orderedItems[0].product, {
+          $inc: { quantity: -order.orderedItems[0].quantity }
+        });
+      }
+
       await order.save();
     }
 
@@ -714,11 +726,18 @@ const verifyPayment = async (req, res) => {
 const paymentFailure = async (req, res) => {
   try {
       const { dbOrderIds } = req.body;
+      const userId = req.session.user;
+      
       if (dbOrderIds && dbOrderIds.length > 0) {
-        await Order.updateMany(
-          { _id: { $in: dbOrderIds } },
-          { $set: { paymentStatus: PAYMENT_STATUS.FAILED } }
-        )
+        const orders = await Order.find({ _id: { $in: dbOrderIds } });
+        
+        for (const order of orders) {
+           order.paymentStatus = PAYMENT_STATUS.FAILED;
+           order.status = ORDER_STATUS.PENDING;
+           order.orderedItems[0].status = ORDER_STATUS.PENDING;
+           
+           await order.save();
+        }
       }
       res.json({ success: true, message: MESSAGES.UPDATED_PAYMENT_STATUS_TO_FAILED });
   } catch (error) {

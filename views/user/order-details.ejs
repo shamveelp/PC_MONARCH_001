@@ -283,6 +283,17 @@
                                     Cancel Return Request
                                 </button>
                             <% } else if (!['delivered', 'cancelled', 'return_requested', 'returning', 'returned'].includes(order.status)) { %>
+                                <% 
+                                    const isPendingPmt = order.status === 'pending' && order.paymentMethod === 'online' && order.paymentStatus !== 'Success';
+                                    const timePassedMin = (Date.now() - new Date(order.createdOn).getTime()) / (1000 * 60);
+                                %>
+                                <% if (isPendingPmt && timePassedMin <= 15) { %>
+                                    <button onclick="repayOrder('<%= order._id %>')" class="btn btn-success me-2">
+                                        Pay Now
+                                    </button>
+                                <% } else if (isPendingPmt && timePassedMin > 15) { %>
+                                    <span class="badge bg-danger me-2">Payment Timeout</span>
+                                <% } %>
                                 <button onclick="cancelOrder('<%= order._id %>')" class="btn btn-danger">
                                     Cancel Order
                                 </button>
@@ -346,6 +357,7 @@
     </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 async function cancelOrder(orderId) {
@@ -536,6 +548,100 @@ async function cancelReturn(orderId) {
             text: error.message || 'Failed to cancel return request'
         });
     }
+}
+
+async function repayOrder(orderId) {
+    try {
+        const response = await fetch('/repay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            const options = {
+                key: data.razorpayKeyId,
+                amount: data.amount,
+                currency: data.currency,
+                name: 'PC Monarch',
+                image: 'img/pc-logo.png',
+                description: 'Order Payment',
+                order_id: data.razorpayOrderId,
+                handler: function (response) {
+                    verifyPayment(response, [data.dbOrderId]);
+                },
+                prefill: {
+                    name: data.customerName,
+                    email: data.customerEmail,
+                    contact: data.customerPhone
+                },
+                theme: { color: '#F37254' }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                fetch('/payment-failed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dbOrderIds: [data.dbOrderId] })
+                }).then(() => {
+                    window.location.href = '/payment-failed';
+                });
+            });
+
+            options.modal = {
+                ondismiss: function() {
+                    fetch('/payment-failed', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dbOrderIds: [data.dbOrderId] })
+                    }).then(() => {
+                        window.location.href = '/payment-failed';
+                    });
+                }
+            };
+            rzp.open();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Could not initiate payment'
+            }).then(() => {
+                location.reload();
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        Swal.fire('Error', 'Failed to initiate payment', 'error');
+    }
+}
+
+function verifyPayment(paymentResponse, dbOrderIds) {
+    fetch('/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            paymentResponse,
+            dbOrderIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/payment-success';
+        } else {
+            Swal.fire('Error', data.message || 'Payment verification failed', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error', 'An error occurred while verifying the payment', 'error');
+    });
 }
 </script>
 
